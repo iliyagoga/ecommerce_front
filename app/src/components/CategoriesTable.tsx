@@ -14,14 +14,15 @@ import {
   IconButton,
 } from '@mui/material';
 import { Category } from '../types';
-import { getCategories, deleteCategory } from '../api';
+import { deleteCategory } from '../api';
 
 interface CategoriesTableProps {
   onEdit: (category: Category) => void;
   onDeleteSuccess: () => void;
+  onSuccess: () => Promise<Category[]>;
 }
 
-const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSuccess }) => {
+const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSuccess, onSuccess }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSucce
     setLoading(true);
     setError(null);
     try {
-      const data = await getCategories();
+      const data = await onSuccess();
       setCategories(data);
     } catch (err) {
       setError('Не удалось загрузить категории.');
@@ -45,19 +46,16 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSucce
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Вы уверены, что хотите удалить эту категорию?')) {
       setLoading(true);
       try {
         await deleteCategory(id);
         onDeleteSuccess();
-        setCategories(prev => prev.filter(c => c.id !== id));
       } catch (err) {
         setError('Не удалось удалить категорию.');
         console.error(err);
       } finally {
         setLoading(false);
       }
-    }
   };
 
   if (loading) {
@@ -92,7 +90,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSucce
         <TableBody>
           {categories.map((category) => (
             <TableRow
-              key={category.id}
+              key={category.category_id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
@@ -102,7 +100,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSucce
                 <IconButton color="primary" onClick={() => onEdit(category)}>
                   Ред
                 </IconButton>
-                <IconButton color="error" onClick={() => handleDelete(category.id!)} disabled={loading}>
+                <IconButton color="error" onClick={() => handleDelete(category.category_id!)} disabled={loading}>
                   -
                 </IconButton>
               </TableCell>

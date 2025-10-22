@@ -25,7 +25,7 @@ interface RoomEditSidebarProps {
   open: boolean;
   onClose: () => void;
   room: Room | null;
-  onSaveSuccess: () => void; // Callback для обновления таблицы после сохранения
+  onSaveSuccess: () => void;
 }
 
 const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, onSaveSuccess }) => {

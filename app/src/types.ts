@@ -28,7 +28,7 @@ export interface Product {
 }
 
 export interface Category {
-  id?: number;
+  category_id: number;
   name: string;
   products?: Product[]; // Для получения товаров по категориям
 }

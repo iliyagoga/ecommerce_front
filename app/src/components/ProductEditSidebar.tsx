@@ -170,7 +170,7 @@ const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, 
             onChange={handleCategoryChange}
           >
             {categories.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
+              <MenuItem key={category.category_id} value={category.category_id}>
                 {category.name}
               </MenuItem>
             ))}

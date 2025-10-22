@@ -77,8 +77,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSave
     try {
       const productToCreate: Omit<Product, 'id'> = {
         ...newProduct,
-        category_id: newProduct.category_id || null, // Ensure category_id is set or null
-      } as Omit<Product, 'id'>; // Cast to satisfy type checker
+        category_id: newProduct.category_id || null,
+      } as Omit<Product, 'id'>;
 
       await createProduct(productToCreate);
       setSuccess('Товар успешно добавлен!');
@@ -180,7 +180,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSave
               onChange={handleCategoryChange}
             >
               {categories.map((category) => (
-                <MenuItem key={category.id} value={category.id}>
+                <MenuItem key={category.category_id} value={category.category_id}>
                   {category.name}
                 </MenuItem>
               ))}

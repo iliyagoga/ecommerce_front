@@ -40,12 +40,12 @@ const CategoryEditModal: React.FC<CategoryEditModalProps> = ({ open, onClose, ca
   };
 
   const handleSave = async () => {
-    if (!editedCategory || editedCategory.id === undefined) return;
+    if (!editedCategory || editedCategory.category_id === undefined) return;
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
-      await updateCategory(editedCategory.id, editedCategory);
+      await updateCategory(editedCategory.category_id, editedCategory);
       setSuccess('Категория успешно обновлена!');
       onSaveSuccess();
       onClose();

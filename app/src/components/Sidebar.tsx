@@ -43,7 +43,7 @@ const Sidebar: React.FC = () => {
           <Link href={item.path} key={item.text} passHref>
             <ListItem disablePadding>
               <ListItemButton>
-                <ListItemText primary={item.text} />
+                <ListItemText primary={item.text} sx={{color: "white"}}/>
               </ListItemButton>
             </ListItem>
           </Link>

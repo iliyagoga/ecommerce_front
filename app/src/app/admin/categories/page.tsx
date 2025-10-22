@@ -6,12 +6,12 @@ import CategoriesTable from '../../../components/CategoriesTable';
 import AddCategoryModal from '../../../components/AddCategoryModal';
 import CategoryEditModal from '../../../components/CategoryEditModal'; // Будет создан далее
 import { Category } from '../../../types';
+import { getCategories } from '@/api';
 
 const CategoriesPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const categoriesTableRef = useRef<{ fetchCategories: () => void }>(null);
 
   const handleAddCategory = () => {
     setIsAddModalOpen(true);
@@ -20,12 +20,6 @@ const CategoriesPage: React.FC = () => {
   const handleEditCategory = (category: Category) => {
     setSelectedCategory(category);
     setIsEditModalOpen(true);
-  };
-
-  const handleSaveSuccess = () => {
-    if (categoriesTableRef.current) {
-      categoriesTableRef.current.fetchCategories();
-    }
   };
 
   return (
@@ -39,10 +33,23 @@ const CategoriesPage: React.FC = () => {
             Добавить Категорию
           </Button>
         </Box>
-        <CategoriesTable ref={categoriesTableRef} onEdit={handleEditCategory} onDeleteSuccess={handleSaveSuccess} />
+        <CategoriesTable
+          onEdit={handleEditCategory}
+          onDeleteSuccess={() => getCategories()}
+          onSuccess={() => getCategories()}
+        />
 
-        <AddCategoryModal open={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSaveSuccess={handleSaveSuccess} />
-        <CategoryEditModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} category={selectedCategory} onSaveSuccess={handleSaveSuccess} />
+        <AddCategoryModal
+          open={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSaveSuccess={() => getCategories()}
+        />
+        <CategoryEditModal
+          open={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          category={selectedCategory}
+          onSaveSuccess={() => getCategories()}
+          />
       </Box>
     </Layout>
   );

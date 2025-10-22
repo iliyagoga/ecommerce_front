@@ -22,7 +22,7 @@ import { createRoom } from '../api';
 interface AddRoomModalProps {
   open: boolean;
   onClose: () => void;
-  onSaveSuccess: () => void; // Callback для обновления таблицы после сохранения
+  onSaveSuccess: () => void;
 }
 
 const initialNewRoomState: Omit<Room, 'type_id'> = {

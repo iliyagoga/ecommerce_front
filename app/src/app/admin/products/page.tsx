@@ -13,7 +13,6 @@ const ProductsPage: React.FC = () => {
   const [isViewOpen, setIsViewOpen] = useState<boolean>(false);
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [isAddOpen, setIsAddOpen] = useState<boolean>(false);
-  const productsTableRef = useRef<{ fetchProducts: () => void }>(null);
 
   const handleViewProduct = (product: Product) => {
     setSelectedProduct(product);
@@ -30,9 +29,6 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleSaveSuccess = () => {
-    if (productsTableRef.current) {
-      productsTableRef.current.fetchProducts();
-    }
   };
 
   return (
@@ -46,7 +42,7 @@ const ProductsPage: React.FC = () => {
             Добавить Товар
           </Button>
         </Box>
-        <ProductsTable ref={productsTableRef} onView={handleViewProduct} onEdit={handleEditProduct} />
+        <ProductsTable onView={handleViewProduct} onEdit={handleEditProduct} />
 
         <ProductViewSidebar open={isViewOpen} onClose={() => setIsViewOpen(false)} product={selectedProduct} />
         <ProductEditSidebar open={isEditOpen} onClose={() => setIsEditOpen(false)} product={selectedProduct} onSaveSuccess={handleSaveSuccess} />

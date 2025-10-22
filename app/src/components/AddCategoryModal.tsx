@@ -19,12 +19,12 @@ interface AddCategoryModalProps {
   onSaveSuccess: () => void;
 }
 
-const initialNewCategoryState: Omit<Category, 'id'> = {
+const initialNewCategoryState: Omit<Category, 'category_id'> = {
   name: '',
 };
 
 const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onClose, onSaveSuccess }) => {
-  const [newCategory, setNewCategory] = useState<Omit<Category, 'id'> & { id?: number }>(initialNewCategoryState);
+  const [newCategory, setNewCategory] = useState<Omit<Category, 'category_id'> & { category_id?: number }>(initialNewCategoryState);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -43,7 +43,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onClose, onSa
       setSuccess('Категория успешно добавлена!');
       onSaveSuccess();
       onClose();
-      setNewCategory(initialNewCategoryState); // Сброс формы
+      setNewCategory(initialNewCategoryState);
     } catch (err) {
       setError('Не удалось добавить категорию.');
       console.error(err);
