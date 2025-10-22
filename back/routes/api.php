@@ -1,3 +1,4 @@
+<?php
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\MenuItemController;
@@ -9,9 +10,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Route::apiResource('products', ProductController::class);
 Route::apiResource('rooms', RoomController::class);
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('menuitems', MenuItemController::class);
 Route::apiResource('orders', OrderController::class);
 Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+
+?>
