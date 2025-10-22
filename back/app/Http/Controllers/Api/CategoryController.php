@@ -21,20 +21,32 @@ class CategoryController extends Controller
         return response()->json($category, Response::HTTP_CREATED);
     }
 
-    public function show(Category $category)
+    /**
+     * Display the specified resource.
+     */
+    public function show(int $id)
     {
+        $category = Category::where('category_id', $id)->firstOrFail();
         return response()->json($category);
     }
 
-    public function update(Request $request, Category $category)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, int $id)
     {
+        $category = Category::where('category_id', $id)->firstOrFail();
         $category->update($request->all());
         return response()->json($category);
     }
 
-    public function destroy(Category $category)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(int $id)
     {
-        $category->delete();
-        return response()->json(null, Response::HTTP_NO_CONTENT);
+        $category = Category::where('category_id', $id)->firstOrFail();
+        $category->forceDelete();
+        return response()->json($category, Response::HTTP_NO_CONTENT);
     }
 }

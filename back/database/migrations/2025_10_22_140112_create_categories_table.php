@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id('category_id');
             $table->string('name', 100);
-            $table->enum('type', ['product', 'service']);
             $table->timestamps();
             
             // Индексы

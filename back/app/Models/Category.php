@@ -11,19 +11,14 @@ class Category extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'type'
+        'name'
     ];
 
-    protected $casts = [
-        'type' => 'string'
-    ];
 
     public static function rules(): array
     {
         return [
             'name' => 'required|string|max:100',
-            'type' => 'required|in:product,service'
         ];
     }
 

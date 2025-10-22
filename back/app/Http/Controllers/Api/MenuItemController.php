@@ -20,19 +20,31 @@ class MenuItemController extends Controller
         return response()->json($menuItem, Response::HTTP_CREATED);
     }
 
-    public function show(MenuItem $menuItem)
+    /**
+     * Display the specified resource.
+     */
+    public function show(int $id)
     {
+        $menuItem = MenuItem::where('item_id', $id)->firstOrFail();
         return response()->json($menuItem);
     }
 
-    public function update(Request $request, MenuItem $menuItem)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, int $id)
     {
+        $menuItem = MenuItem::where('item_id', $id)->firstOrFail();
         $menuItem->update($request->all());
         return response()->json($menuItem);
     }
 
-    public function destroy(MenuItem $menuItem)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(int $id)
     {
+        $menuItem = MenuItem::where('item_id', $id)->firstOrFail();
         $menuItem->delete();
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }

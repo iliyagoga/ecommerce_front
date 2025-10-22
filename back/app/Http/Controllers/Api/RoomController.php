@@ -20,19 +20,31 @@ class RoomController extends Controller
         return response()->json($room, Response::HTTP_CREATED);
     }
 
-    public function show(Room $room)
+    /**
+     * Display the specified resource.
+     */
+    public function show(int $id)
     {
+        $room = Room::where('room_id', $id)->firstOrFail();
         return response()->json($room);
     }
 
-    public function update(Request $request, Room $room)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, int $id)
     {
+        $room = Room::where('room_id', $id)->firstOrFail();
         $room->update($request->all());
         return response()->json($room);
     }
 
-    public function destroy(Room $room)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(int $id)
     {
+        $room = Room::where('room_id', $id)->firstOrFail();
         $room->delete();
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }

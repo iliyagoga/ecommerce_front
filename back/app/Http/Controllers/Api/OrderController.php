@@ -20,29 +20,45 @@ class OrderController extends Controller
         return response()->json($order, Response::HTTP_CREATED);
     }
 
-    public function show(Order $order)
+    /**
+     * Display the specified resource.
+     */
+    public function show(int $id)
     {
+        $order = Order::where('order_id', $id)->firstOrFail();
         return response()->json($order);
     }
 
-    public function update(Request $request, Order $order)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, int $id)
     {
+        $order = Order::where('order_id', $id)->firstOrFail();
         $order->update($request->all());
         return response()->json($order);
     }
 
-    public function destroy(Order $order)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(int $id)
     {
+        $order = Order::where('order_id', $id)->firstOrFail();
         $order->delete();
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 
-    public function updateStatus(Request $request, Order $order)
+    /**
+     * Update the status of the specified order.
+     */
+    public function updateStatus(Request $request, int $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,confirmed,cancelled,completed',
+            'status' => 'required|in:pending,confirmed,active,completed,cancelled',
         ]);
 
+        $order = Order::where('order_id', $id)->firstOrFail();
         $order->status = $request->input('status');
         $order->save();
 
