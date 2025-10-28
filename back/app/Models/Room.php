@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\RoomType;
+
 class Room extends Model
 {
     use HasFactory;
@@ -13,25 +13,34 @@ class Room extends Model
     protected $fillable = [
         'type',
         'name',
-        'is_blocked',
         'is_active',
-        'preview_img'
+        'preview_img',
+        'base_hourly_rate',
+        'initial_fee',
+        'max_people',
+        'description',
+        'is_available',
     ];
 
     protected $casts = [
-        'is_blocked' => 'boolean',
         'is_active' => 'boolean',
-        'type' => RoomType::class
+        'is_available' => 'boolean',
+        'base_hourly_rate' => 'float',
+        'initial_fee' => 'float',
+        'max_people' => 'integer',
     ];
 
     public static function rules(): array
     {
         return [
-            'type' => 'required|in:standard,vip,cinema',
-            'name' => 'required|string|max:50',
-            'is_blocked' => 'boolean',
-            'is_active' => 'boolean',
-            'preview_img' => 'nullable|string|max:500'
+            'type' => 'required|in:обычная,вип,кино',
+            'name' => 'required|string|max:255',
+            'base_hourly_rate' => 'required|numeric|min:0',
+            'initial_fee' => 'required|numeric|min:0',
+            'max_people' => 'required|integer|min:1',
+            'description' => 'nullable|string',
+            'preview_img' => 'nullable|string',
+            'is_available' => 'boolean',
         ];
     }
 

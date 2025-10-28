@@ -21,6 +21,7 @@ const RoomsPage: React.FC = () => {
   };
 
   const handleEditRoom = (room: Room) => {
+    console.log(room)
     setSelectedRoom(room);
     setIsEditOpen(true);
   };
@@ -46,7 +47,7 @@ const RoomsPage: React.FC = () => {
             Добавить Комнату
           </Button>
         </Box>
-        <RoomsTable ref={roomsTableRef} onView={handleViewRoom} onEdit={handleEditRoom} />
+        <RoomsTable onView={handleViewRoom} onEdit={handleEditRoom} />
 
         <RoomViewSidebar open={isViewOpen} onClose={() => setIsViewOpen(false)} room={selectedRoom} />
         <RoomEditSidebar open={isEditOpen} onClose={() => setIsEditOpen(false)} room={selectedRoom} onSaveSuccess={handleSaveSuccess} />

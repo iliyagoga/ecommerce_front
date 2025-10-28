@@ -15,6 +15,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import DescriptionIcon from '@mui/icons-material/Description';
 import FastfoodIcon from '@mui/icons-material/Fastfood';*/
 import { Product } from '../types';
+import { HOST_URL } from '@/api';
 
 interface ProductViewSidebarProps {
   open: boolean;
@@ -51,7 +52,7 @@ const ProductViewSidebar: React.FC<ProductViewSidebarProps> = ({ open, onClose, 
       <Box sx={{ p: 2 }}>
         {product.image_url && (
           <Box sx={{ mb: 2 }}>
-            <img src={product.image_url} alt={product.name} style={{ width: '100%', borderRadius: '8px' }} />
+            <img src={`${HOST_URL}${product.image_url}`} alt={product.name} style={{ width: '100%', borderRadius: '8px' }} />
           </Box>
         )}
 
@@ -68,7 +69,7 @@ const ProductViewSidebar: React.FC<ProductViewSidebarProps> = ({ open, onClose, 
           )}
           <ListItem>
             <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-            <ListItemText primary={`Доступен: ${product.available ? 'Да' : 'Нет'}`} />
+            <ListItemText primary={`Доступен: ${product.is_available ? 'Да' : 'Нет'}`} />
           </ListItem>
         </List>
       </Box>

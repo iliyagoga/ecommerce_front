@@ -11,7 +11,6 @@ import {
   FormControlLabel,
   Switch,
   Divider,
-  Chip,
   InputAdornment,
   Select, MenuItem, InputLabel, FormControl
 } from '@mui/material';
@@ -19,7 +18,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';*/
 import { Room, RoomImage } from '../types';
-import { updateRoom } from '../api';
+import { HOST_URL, updateRoom } from '../api';
 
 interface RoomEditSidebarProps {
   open: boolean;
@@ -33,18 +32,36 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectedPreviewImage, setSelectedPreviewImage] = useState<File | null>(null);
+  const [previewImageURL, setPreviewImageURL] = useState<string | null>(null);
 
   useEffect(() => {
     if (room) {
-      setEditedRoom({ ...room, amenities: room.amenities ? [...room.amenities] : [] });
+      setEditedRoom({ ...room });
+      setPreviewImageURL(`${HOST_URL}${room.preview_img}` || null);
     } else {
       setEditedRoom(null);
+      setPreviewImageURL(null);
     }
   }, [room]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditedRoom(prev => (prev ? { ...prev, [name]: value } : null));
+  };
+
+  const handlePreviewFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { files } = e.target;
+    if (files && files.length > 0) {
+      const file = files[0];
+      setSelectedPreviewImage(file);
+      setPreviewImageURL(URL.createObjectURL(file));
+      setEditedRoom(prev => (prev ? { ...prev, preview_img: file as any } : null));
+    } else {
+      setSelectedPreviewImage(null);
+      setPreviewImageURL(editedRoom?.preview_img || null); // Revert to original image if no new file selected
+      setEditedRoom(prev => (prev ? { ...prev, preview_img: editedRoom?.preview_img || "" } : null));
+    }
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -55,24 +72,6 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
   const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setEditedRoom(prev => (prev ? { ...prev, [name]: checked } : null));
-  };
-
-  const handleAmenityAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const newAmenity = e.currentTarget.value.trim();
-      if (newAmenity && editedRoom && !editedRoom.amenities?.includes(newAmenity)) {
-        setEditedRoom(prev => (
-          prev ? { ...prev, amenities: [...(prev.amenities || []), newAmenity] } : null
-        ));
-        e.currentTarget.value = '';
-      }
-    }
-  };
-
-  const handleAmenityDelete = (amenityToDelete: string) => {
-    setEditedRoom(prev => (
-      prev ? { ...prev, amenities: prev.amenities?.filter(a => a !== amenityToDelete) } : null
-    ));
   };
 
   const handleGalleryImageChange = (index: number, value: string) => {
@@ -99,14 +98,29 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
   };
 
   const handleSave = async () => {
-    if (!editedRoom || editedRoom.type_id === undefined) return;
+    if (!editedRoom || editedRoom.room_id === undefined) return;
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
-      await updateRoom(editedRoom.type_id, editedRoom);
+      let roomToUpdate: Partial<Room> | FormData = editedRoom;
+      let config: { headers?: { 'Content-Type': string } } = {};
+
+      if (selectedPreviewImage) {
+        const formData = new FormData();
+        for (const key in editedRoom) {
+          if (Object.prototype.hasOwnProperty.call(editedRoom, key) && key !== 'preview_img') {
+            formData.append(key, (editedRoom as any)[key]);
+          }
+        }
+        formData.append('preview_img', selectedPreviewImage);
+        roomToUpdate = formData;
+        config.headers = { 'Content-Type': 'multipart/form-data' };
+      }
+
+      await updateRoom(editedRoom.room_id, roomToUpdate, config);
       setSuccess('Комната успешно обновлена!');
-      onSaveSuccess(); // Обновить данные в таблице
+      onSaveSuccess();
       onClose();
     } catch (err) {
       setError('Не удалось обновить комнату.');
@@ -159,13 +173,13 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
           <Select
             labelId="room-type-label"
             id="room-type-select"
-            value={editedRoom.type || 'обычная'}
+            value={editedRoom.type || 'standard'}
             label="Тип комнаты"
-            onChange={(e) => setEditedRoom(prev => (prev ? { ...prev, type: e.target.value as 'обычная' | 'вип' | 'кино' } : null))}
+            onChange={(e) => setEditedRoom(prev => (prev ? { ...prev, type: e.target.value } : null))}
           >
-            <MenuItem value="обычная">Обычная</MenuItem>
-            <MenuItem value="вип">VIP</MenuItem>
-            <MenuItem value="кино">Кинотеатр</MenuItem>
+            <MenuItem value="standard">Обычная</MenuItem>
+            <MenuItem value="vip">VIP</MenuItem>
+            <MenuItem value="cinema">Кинотеатр</MenuItem>
           </Select>
         </FormControl>
         <TextField
@@ -215,44 +229,28 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
           rows={4}
           InputLabelProps={{ shrink: true }}
         />
-        <TextField
-          label="URL превью изображения"
-          name="preview_img"
-          value={editedRoom.preview_img || ''}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
-        />
-
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1" gutterBottom>Удобства:</Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
-            {(editedRoom.amenities || []).map((amenity, index) => (
-              <Chip
-                key={index}
-                label={amenity}
-                onDelete={() => handleAmenityDelete(amenity)}
-                color="primary"
-                variant="outlined"
-              />
-            ))}
-          </Box>
-          <TextField
-            label="Добавить удобство"
-            onKeyPress={handleAmenityAdd}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton>
-                    +
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
+        <Box sx={{ mt: 2, mb: 2 }}>
+          <Button
+            variant="contained"
+            component="label"
+            sx={{ mr: 2 }}
+          >
+            Загрузить превью
+            <input
+              type="file"
+              hidden
+              name="preview_img"
+              onChange={handlePreviewFileChange}
+              accept="image/*"
+            />
+          </Button>
+          {previewImageURL && (
+            <img
+              src={previewImageURL}
+              alt="Превью комнаты"
+              style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
+            />
+          )}
         </Box>
 
         <Box sx={{ mt: 3 }}>
@@ -278,9 +276,9 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
         <FormControlLabel
           control={
             <Switch
-              checked={editedRoom.available || false}
+              checked={editedRoom.is_available || false}
               onChange={handleSwitchChange}
-              name="available"
+              name="is_available"
               color="primary"
             />
           }

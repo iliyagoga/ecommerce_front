@@ -15,7 +15,7 @@ import {
   Select, MenuItem, InputLabel, FormControl
 } from '@mui/material';
 import { Product, Category } from '../types';
-import { updateProduct, getCategories } from '../api';
+import { updateProduct, getCategories, HOST_URL } from '../api';
 
 interface ProductEditSidebarProps {
   open: boolean;
@@ -25,17 +25,21 @@ interface ProductEditSidebarProps {
 }
 
 const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, product, onSaveSuccess }) => {
-  const [editedProduct, setEditedProduct] = useState<Product | null>(null);
+  const [editedProduct, setEditedProduct] = useState<any | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (product) {
       setEditedProduct({ ...product });
+      setImagePreview(`${HOST_URL}${product.image_url}` || null);
     } else {
       setEditedProduct(null);
+      setImagePreview(null);
     }
   }, [product]);
 
@@ -56,6 +60,19 @@ const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, 
     setEditedProduct(prev => (prev ? { ...prev, [name]: value } : null));
   };
 
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { files } = e.target;
+    if (!files || files.length === 0) {
+      setSelectedImage(null);
+      setImagePreview(editedProduct?.image_url || null); // Revert to original image if no new file selected
+      return;
+    }
+    const file = files[0];
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+    setEditedProduct(prev => (prev ? { ...prev, image_url: file as any } : null));
+  };
+
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditedProduct(prev => (prev ? { ...prev, [name]: Number(value) } : null));
@@ -71,12 +88,27 @@ const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, 
   };
 
   const handleSave = async () => {
-    if (!editedProduct || editedProduct.id === undefined) return;
+    if (!editedProduct || editedProduct.item_id === undefined) return;
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
-      await updateProduct(editedProduct.id, editedProduct);
+      let productToUpdate: Partial<any> | FormData = editedProduct;
+      let config: { headers?: { 'Content-Type': string } } = {};
+
+      if (selectedImage) {
+        const formData = new FormData();
+        for (const key in editedProduct) {
+          if (Object.prototype.hasOwnProperty.call(editedProduct, key) && key !== 'image_url') {
+            formData.append(key, (editedProduct as any)[key]);
+          }
+        }
+        formData.append('image_url', selectedImage);
+        productToUpdate = formData;
+        config.headers = { 'Content-Type': 'multipart/form-data' };
+      }
+      
+      await updateProduct(editedProduct.item_id, productToUpdate, config);
       setSuccess('Товар успешно обновлен!');
       onSaveSuccess();
       onClose();
@@ -150,15 +182,29 @@ const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, 
             startAdornment: <InputAdornment position="start">₽</InputAdornment>,
           }}
         />
-        <TextField
-          label="URL изображения"
-          name="image_url"
-          value={editedProduct.image_url || ''}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
-        />
+        <Box sx={{ mt: 2, mb: 2 }}>
+          <Button
+            variant="contained"
+            component="label"
+            sx={{ mr: 2 }}
+          >
+            Загрузить изображение
+            <input
+              type="file"
+              hidden
+              name="image_url"
+              onChange={handleFile}
+              accept="image/*"
+            />
+          </Button>
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Предварительный просмотр"
+              style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
+            />
+          )}
+        </Box>
 
         <FormControl fullWidth margin="normal">
           <InputLabel id="category-select-label">Категория</InputLabel>
@@ -180,9 +226,9 @@ const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, 
         <FormControlLabel
           control={
             <Switch
-              checked={editedProduct.available || false}
+              checked={editedProduct.is_available || false}
               onChange={handleSwitchChange}
-              name="available"
+              name="is_available"
               color="primary"
             />
           }

@@ -14,7 +14,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/rooms', [RoomController::class, 'index']);
 Route::post('/rooms', [RoomController::class, 'store']);
 Route::get('/rooms/{id}', [RoomController::class, 'show']);
-Route::put('/rooms/{id}', [RoomController::class, 'update']);
+Route::post('/rooms/{id}', [RoomController::class, 'update']);
 Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
 
 // Маршруты для Categories
@@ -28,7 +28,7 @@ Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 Route::get('/menuitems', [MenuItemController::class, 'index']);
 Route::post('/menuitems', [MenuItemController::class, 'store']);
 Route::get('/menuitems/{id}', [MenuItemController::class, 'show']);
-Route::put('/menuitems/{id}', [MenuItemController::class, 'update']);
+Route::post('/menuitems/{id}', [MenuItemController::class, 'update']);
 Route::delete('/menuitems/{id}', [MenuItemController::class, 'destroy']);
 
 // Маршруты для Orders

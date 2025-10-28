@@ -19,6 +19,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import DescriptionIcon from '@mui/icons-material/Description';
 import InfoIcon from '@mui/icons-material/Info';*/
 import { Room } from '../types';
+import { HOST_URL } from '@/api';
 
 interface RoomViewSidebarProps {
   open: boolean;
@@ -55,7 +56,7 @@ const RoomViewSidebar: React.FC<RoomViewSidebarProps> = ({ open, onClose, room }
       <Box sx={{ p: 2 }}>
         {room.preview_img && (
           <Box sx={{ mb: 2 }}>
-            <img src={room.preview_img} alt={room.name} style={{ width: '100%', borderRadius: '8px' }} />
+            <img src={`${HOST_URL}${room.preview_img}`} alt={room.name} style={{ width: '100%', borderRadius: '8px' }} />
           </Box>
         )}
 
@@ -87,17 +88,6 @@ const RoomViewSidebar: React.FC<RoomViewSidebarProps> = ({ open, onClose, room }
             </ListItem>
           )}
         </List>
-
-        {room.amenities && room.amenities.length > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" gutterBottom>Удобства:</Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {room.amenities.map((amenity, index) => (
-                <Chip key={index} label={amenity} color="primary" variant="outlined" size="small" />
-              ))}
-            </Box>
-          </Box>
-        )}
 
         {room.gallery && room.gallery.length > 0 && (
           <Box sx={{ mt: 2 }}>

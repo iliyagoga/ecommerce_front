@@ -47,7 +47,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ onView, onEdit }) => {
   const handleAvailabilityChange = async (product: Product) => {
     if (product.id === undefined) return;
     try {
-      const updatedProduct = { ...product, available: !product.available };
+      const updatedProduct = { ...product, available: !product.is_available };
       await updateProduct(product.id, updatedProduct);
       setProducts(prevProducts =>
         prevProducts.map(p => (p.id === product.id ? updatedProduct : p))
@@ -101,7 +101,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ onView, onEdit }) => {
               <TableCell align="right">{product.price} руб.</TableCell>
               <TableCell align="right">
                 <Switch
-                  checked={product.available || false}
+                  checked={product.is_available || false}
                   onChange={() => handleAvailabilityChange(product)}
                   inputProps={{ 'aria-label': 'контроль доступности' }}
                 />

@@ -27,15 +27,14 @@ interface AddRoomModalProps {
 
 const initialNewRoomState: Omit<Room, 'type_id'> = {
   name: '',
-  type: 'обычная',
+  type: 'standard',
   base_hourly_rate: 0,
   initial_fee: 0,
   max_people: 1,
   description: '',
-  amenities: [],
-  preview_img: '',
-  gallery: [],
-  available: true,
+  preview_img: "", // Изменено на null для файла
+  gallery: [], // Изменено на пустой массив для файлов
+  is_available: true,
 };
 
 const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSuccess }) => {
@@ -43,10 +42,43 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectedPreviewImage, setSelectedPreviewImage] = useState<File | null>(null);
+  const [previewImageURL, setPreviewImageURL] = useState<string | null>(null);
+  const [selectedGalleryImages, setSelectedGalleryImages] = useState<File[]>([]);
+  const [galleryImageURLs, setGalleryImageURLs] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewRoom(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePreviewFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { files } = e.target;
+    if (files && files.length > 0) {
+      const file = files[0];
+      setSelectedPreviewImage(file);
+      setPreviewImageURL(URL.createObjectURL(file));
+      setNewRoom(prev => ({ ...prev, preview_img: file as any }));
+    } else {
+      setSelectedPreviewImage(null);
+      setPreviewImageURL(null);
+      setNewRoom(prev => ({ ...prev, preview_img: "" }));
+    }
+  };
+
+  const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { files } = e.target;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      setSelectedGalleryImages(newFiles);
+      const newURLs = newFiles.map(file => URL.createObjectURL(file));
+      setGalleryImageURLs(newURLs);
+      setNewRoom(prev => ({ ...prev, gallery: newFiles as any }));
+    } else {
+      setSelectedGalleryImages([]);
+      setGalleryImageURLs([]);
+      setNewRoom(prev => ({ ...prev, gallery: [] }));
+    }
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -59,56 +91,38 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
     setNewRoom(prev => ({ ...prev, [name]: checked }));
   };
 
-  const handleAmenityAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const amenityInput = e.currentTarget;
-      const newAmenity = amenityInput.value.trim();
-      if (newAmenity && !newRoom.amenities?.includes(newAmenity)) {
-        setNewRoom(prev => ({ ...prev, amenities: [...(prev.amenities || []), newAmenity] }));
-        amenityInput.value = '';
-      }
-      e.preventDefault();
-    }
-  };
 
-  const handleAmenityDelete = (amenityToDelete: string) => {
-    setNewRoom(prev => ({ ...prev, amenities: prev.amenities?.filter(a => a !== amenityToDelete) }));
-  };
-
-  const handleGalleryImageChange = (index: number, value: string) => {
-    setNewRoom(prev => {
-      const newGallery = [...(prev.gallery || [])];
-      newGallery[index] = { ...newGallery[index], url: value };
-      return { ...prev, gallery: newGallery };
-    });
-  };
-
-  const handleAddGalleryImage = () => {
-    setNewRoom(prev => ({ ...prev, gallery: [...(prev.gallery || []), { url: '' }] }));
-  };
-
-  const handleDeleteGalleryImage = (index: number) => {
-    setNewRoom(prev => {
-      const newGallery = (prev.gallery || []).filter((_, i) => i !== index);
-      return { ...prev, gallery: newGallery };
-    });
-  };
+  // Функции для обработки галереи изображений (удалены или изменены)
 
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
-      const roomToCreate: Omit<Room, 'type_id'> = {
-        ...newRoom,
-        amenities: newRoom.amenities || [],
-        gallery: newRoom.gallery || [],
-      };
-      await createRoom(roomToCreate);
+      const formData = new FormData();
+      for (const key in newRoom) {
+        if (Object.prototype.hasOwnProperty.call(newRoom, key)) {
+          if (key === 'preview_img' && selectedPreviewImage) {
+            formData.append('preview_img', selectedPreviewImage);
+          } else if (key === 'gallery' && selectedGalleryImages.length > 0) {
+            selectedGalleryImages.forEach((file, index) => {
+              formData.append(`gallery[${index}]`, file);
+            });
+          } else if (key !== 'gallery' && key !== 'preview_img') {
+            formData.append(key, (newRoom as any)[key]);
+          }
+        }
+      }
+
+      await createRoom(formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       setSuccess('Комната успешно добавлена!');
       onSaveSuccess();
       onClose();
       setNewRoom(initialNewRoomState);
+      setSelectedPreviewImage(null);
+      setPreviewImageURL(null);
+      setSelectedGalleryImages([]);
+      setGalleryImageURLs([]);
     } catch (err) {
       setError('Не удалось добавить комнату.');
       console.error(err);
@@ -165,13 +179,13 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
             <Select
               labelId="new-room-type-label"
               id="new-room-type-select"
-              value={newRoom.type || 'обычная'}
+              value={newRoom.type || 'standard'}
               label="Тип комнаты"
-              onChange={(e) => setNewRoom(prev => ({ ...prev, type: e.target.value as 'обычная' | 'вип' | 'кино' }))}
+              onChange={(e) => setNewRoom(prev => ({ ...prev, type: e.target.value as 'standard' | 'vip' | 'cinema' }))}
             >
-              <MenuItem value="обычная">Обычная</MenuItem>
-              <MenuItem value="вип">VIP</MenuItem>
-              <MenuItem value="кино">Кинотеатр</MenuItem>
+              <MenuItem value="standard">Обычная</MenuItem>
+              <MenuItem value="vip">VIP</MenuItem>
+              <MenuItem value="cinema">Кинотеатр</MenuItem>
             </Select>
           </FormControl>
           <TextField
@@ -221,72 +235,64 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
             rows={4}
             InputLabelProps={{ shrink: true }}
           />
-          <TextField
-            label="URL превью изображения"
-            name="preview_img"
-            value={newRoom.preview_img}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-          />
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <Button
+              variant="contained"
+              component="label"
+              sx={{ mr: 2 }}
+            >
+              Загрузить превью
+              <input
+                type="file"
+                hidden
+                name="preview_img"
+                onChange={handlePreviewFileChange}
+                accept="image/*"
+              />
+            </Button>
+            {previewImageURL && (
+              <img
+                src={previewImageURL}
+                alt="Превью комнаты"
+                style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
+              />
+            )}
+          </Box>
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" gutterBottom>Удобства:</Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
-              {(newRoom.amenities || []).map((amenity, index) => (
-                <Chip
+          {/*<Box sx={{ mt: 2, mb: 2 }}>
+            <Button
+              variant="contained"
+              component="label"
+              sx={{ mr: 2 }}
+            >
+              Загрузить изображения галереи
+              <input
+                type="file"
+                hidden
+                multiple
+                name="gallery"
+                onChange={handleGalleryFileChange}
+                accept="image/*"
+              />
+            </Button>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+              {galleryImageURLs.map((url, index) => (
+                <img
                   key={index}
-                  label={amenity}
-                  onDelete={() => handleAmenityDelete(amenity)}
-                  color="primary"
-                  variant="outlined"
+                  src={url}
+                  alt={`Изображение галереи ${index + 1}`}
+                  style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
                 />
               ))}
             </Box>
-            <TextField
-              label="Добавить удобство"
-              onKeyPress={handleAmenityAdd}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton>
-                      +
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="subtitle1" gutterBottom>Галерея изображений:</Typography>
-            {(newRoom.gallery || []).map((img, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <TextField
-                  label={`URL изображения ${index + 1}`}
-                  value={img.url}
-                  onChange={(e) => handleGalleryImageChange(index, e.target.value)}
-                  fullWidth
-                  margin="dense"
-                  InputLabelProps={{ shrink: true }}
-                />
-                <IconButton onClick={() => handleDeleteGalleryImage(index)} color="error">
-                  -
-                </IconButton>
-              </Box>
-            ))}
-            <Button onClick={handleAddGalleryImage}>Добавить изображение</Button>
-          </Box>
+          </Box>*/}
 
           <FormControlLabel
             control={
               <Switch
-                checked={newRoom.available || false}
+                checked={newRoom.is_available || false}
                 onChange={handleSwitchChange}
-                name="available"
+                name="is_available"
                 color="primary"
               />
             }

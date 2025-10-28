@@ -35,7 +35,7 @@ class CategoryController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $category = Category::where('category_id', $id)->firstOrFail();
+        $category = Category::where('category_id', "=", $id);
         $category->update($request->all());
         return response()->json($category);
     }
@@ -45,8 +45,8 @@ class CategoryController extends Controller
      */
     public function destroy(int $id)
     {
-        $category = Category::where('category_id', $id)->firstOrFail();
-        $category->forceDelete();
+        $category = Category::where('category_id', "=", $id);
+        $category->delete();
         return response()->json($category, Response::HTTP_NO_CONTENT);
     }
 }

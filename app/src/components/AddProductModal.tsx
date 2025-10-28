@@ -29,15 +29,17 @@ const initialNewProductState: Omit<Product, 'id'> = {
   price: 0,
   image_url: '',
   category_id: undefined,
-  available: true,
+  is_available: true,
 };
 
 const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSaveSuccess }) => {
-  const [newProduct, setNewProduct] = useState<Omit<Product, 'id'> & { category_id?: number }>(initialNewProductState);
+  const [newProduct, setNewProduct] = useState<Omit<any, 'id'> & { category_id?: number }>(initialNewProductState);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -54,6 +56,19 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSave
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewProduct(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files} = e.target;
+    if (!files || files.length === 0) {
+      setSelectedImage(null);
+      setImagePreview(null);
+      return;
+    }
+    const file = files[0];
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+    setNewProduct(prev => ({ ...prev, [name]: file }));
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -75,16 +90,18 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSave
     setError(null);
     setSuccess(null);
     try {
-      const productToCreate: Omit<Product, 'id'> = {
+      const productToCreate: Omit<any, 'id'> = {
         ...newProduct,
         category_id: newProduct.category_id || null,
-      } as Omit<Product, 'id'>;
+      } as Omit<any, 'id'>;
 
       await createProduct(productToCreate);
       setSuccess('Товар успешно добавлен!');
       onSaveSuccess();
       onClose();
       setNewProduct(initialNewProductState);
+      setSelectedImage(null);
+      setImagePreview(null);
     } catch (err) {
       setError('Не удалось добавить товар.');
       console.error(err);
@@ -160,15 +177,29 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSave
               startAdornment: <InputAdornment position="start">₽</InputAdornment>,
             }}
           />
-          <TextField
-            label="URL изображения"
-            name="image_url"
-            value={newProduct.image_url}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-          />
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <Button
+              variant="contained"
+              component="label"
+              sx={{ mr: 2 }}
+            >
+              Загрузить изображение
+              <input
+                type="file"
+                hidden
+                name="image_url"
+                onChange={handleFile}
+                accept="image/*"
+              />
+            </Button>
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Предварительный просмотр"
+                style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
+              />
+            )}
+          </Box>
 
           <FormControl fullWidth margin="normal">
             <InputLabel id="new-product-category-label">Категория</InputLabel>
@@ -190,9 +221,9 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSave
           <FormControlLabel
             control={
               <Switch
-                checked={newProduct.available || false}
+                checked={newProduct.is_available || false}
                 onChange={handleSwitchChange}
-                name="available"
+                name="is_available"
                 color="primary"
               />
             }

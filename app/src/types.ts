@@ -4,17 +4,16 @@ export interface RoomImage {
 }
 
 export interface Room {
-  type_id?: number;
+  room_id?: number;
   base_hourly_rate: number;
   initial_fee?: number;
   description?: string;
   max_people: number;
-  amenities?: string[]; // Можно использовать string[] для JSON
   name: string;
   preview_img?: string;
   gallery?: RoomImage[];
-  type?: 'обычная' | 'вип' | 'кино'; // Добавлено для создания комнаты
-  available?: boolean; // Добавлено для админ-панели
+  type?: 'standard' | 'vip' | 'cinema'; // Добавлено для создания комнаты
+  is_available?: boolean; // Добавлено для админ-панели
 }
 
 export interface Product {
@@ -24,7 +23,7 @@ export interface Product {
   price: number;
   image_url?: string;
   category_id?: number; // Для создания товара
-  available?: boolean; // Добавлено для админ-панели
+  is_available?: boolean; // Добавлено для админ-панели
 }
 
 export interface Category {

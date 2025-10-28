@@ -1,0 +1,18 @@
+services:
+  postgresql:
+    image: docker.io/bitnami/postgresql:16.3.0-debian-12-r9
+    container_name: postgresql-php
+    hostname: ${POSTGRES_HOSTNAME:-postgresql-php}
+    ports:
+      - "5555:5432"
+    environment:
+      POSTGRESQL_DATABASE: ${POSTGRES_DB:-php}
+      POSTGRESQL_USERNAME: ${POSTGRES_USER:-user}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-php}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data

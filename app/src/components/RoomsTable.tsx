@@ -45,12 +45,12 @@ const RoomsTable: React.FC<RoomsTableProps> = ({ onView, onEdit }) => {
   }, []);
 
   const handleAvailabilityChange = async (room: Room) => {
-    if (room.type_id === undefined) return;
+    if (room.room_id === undefined) return;
     try {
-      const updatedRoom = { ...room, available: !room.available };
-      await updateRoom(room.type_id, updatedRoom);
+      const updatedRoom = { ...room, available: !room.is_available };
+      await updateRoom(room.room_id, updatedRoom);
       setRooms(prevRooms =>
-        prevRooms.map(r => (r.type_id === room.type_id ? updatedRoom : r))
+        prevRooms.map(r => (r.room_id === room.room_id ? updatedRoom : r))
       );
     } catch (err) {
       setError('Не удалось обновить доступность комнаты.');
@@ -93,7 +93,7 @@ const RoomsTable: React.FC<RoomsTableProps> = ({ onView, onEdit }) => {
         <TableBody>
           {rooms.map((room) => (
             <TableRow
-              key={room.type_id}
+              key={room.room_id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
@@ -102,7 +102,7 @@ const RoomsTable: React.FC<RoomsTableProps> = ({ onView, onEdit }) => {
               <TableCell align="right">{room.base_hourly_rate} руб/час</TableCell>
               <TableCell align="right">
                 <Switch
-                  checked={room.available || false}
+                  checked={room.is_available || false}
                   onChange={() => handleAvailabilityChange(room)}
                   inputProps={{ 'aria-label': 'контроль доступности' }}
                 />
