@@ -3,7 +3,10 @@ import { HeaderStyled} from "./Header.styled";
 import { ItemStyled, LinkStyled, TextStyled } from "./Items/Item.styled";
 import logo from "@/assets/image.png";
 import Link from "next/link";
+import { useEffect, useState } from 'react';
+
 const Header = () => {
+
     return <HeaderStyled>
         <ItemStyled>
             <Link href={"/"}><Image src={logo} alt={""} height={50} ></Image></Link>

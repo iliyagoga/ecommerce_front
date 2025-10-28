@@ -1,42 +1,55 @@
 <?php
+
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Public routes (accessible to all)
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/users/{id}/role', [AuthController::class, 'updateUserRole']);
 
-// Маршруты для Rooms
+// All GET requests are public
 Route::get('/rooms', [RoomController::class, 'index']);
-Route::post('/rooms', [RoomController::class, 'store']);
 Route::get('/rooms/{id}', [RoomController::class, 'show']);
-Route::post('/rooms/{id}', [RoomController::class, 'update']);
-Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
-
-// Маршруты для Categories
 Route::get('/categories', [CategoryController::class, 'index']);
-Route::post('/categories', [CategoryController::class, 'store']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
-Route::put('/categories/{id}', [CategoryController::class, 'update']);
-Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
-
-// Маршруты для MenuItems
 Route::get('/menuitems', [MenuItemController::class, 'index']);
-Route::post('/menuitems', [MenuItemController::class, 'store']);
 Route::get('/menuitems/{id}', [MenuItemController::class, 'show']);
-Route::post('/menuitems/{id}', [MenuItemController::class, 'update']);
-Route::delete('/menuitems/{id}', [MenuItemController::class, 'destroy']);
 
-// Маршруты для Orders
-Route::get('/orders', [OrderController::class, 'index']);
-Route::post('/orders', [OrderController::class, 'store']);
-Route::get('/orders/{id}', [OrderController::class, 'show']);
-Route::put('/orders/{id}', [OrderController::class, 'update']);
-Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
-Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    // Order routes (accessible to all authenticated users)
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
+    Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+
+    Route::middleware('admin')->group(function () {
+        // Admin-only routes for Rooms (POST, PUT, DELETE)
+        Route::post('/rooms', [RoomController::class, 'store']);
+        Route::post('/rooms/{id}', [RoomController::class, 'update']); // Using POST for update based on previous code
+        Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
+
+        // Admin-only routes for Categories (POST, PUT, DELETE)
+        Route::post('/categories', [CategoryController::class, 'store']);
+        Route::put('/categories/{id}', [CategoryController::class, 'update']);
+        Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+        // Admin-only routes for MenuItems (POST, PUT, DELETE)
+        Route::post('/menuitems', [MenuItemController::class, 'store']);
+        Route::post('/menuitems/{id}', [MenuItemController::class, 'update']); // Using POST for update based on previous code
+        Route::delete('/menuitems/{id}', [MenuItemController::class, 'destroy']);
+    });
+});
 
 ?>

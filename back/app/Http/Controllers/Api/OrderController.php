@@ -6,17 +6,32 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-
+use Illuminate\Support\Facades\Auth;
 class OrderController extends Controller
 {
     public function index()
     {
-        return response()->json(Order::all());
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return response()->json(Order::all());
+        } elseif (Auth::check()) {
+            return response()->json(Order::where('user_id', Auth::id())->get());
+        }
+
+        return response()->json(['message' => 'Unauthorized'], 403); // Или пустой массив, в зависимости от желаемого поведения
     }
 
     public function store(Request $request)
     {
-        $order = Order::create($request->all());
+        $request->validate([
+            'user_id' => 'sometimes|exists:users,id', // Опционально, но полезно для валидации, если передается
+            'status' => 'required|string|in:pending,confirmed,active,completed,cancelled',
+            // Добавьте здесь валидацию для других полей заказа, если необходимо
+        ]);
+
+        $data = $request->all();
+        $data['user_id'] = Auth::id(); // Привязываем заказ к текущему аутентифицированному пользователю
+
+        $order = Order::create($data);
         return response()->json($order, Response::HTTP_CREATED);
     }
 
@@ -26,7 +41,14 @@ class OrderController extends Controller
     public function show(int $id)
     {
         $order = Order::where('order_id', $id)->firstOrFail();
-        return response()->json($order);
+
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return response()->json($order);
+        } elseif (Auth::check() && $order->user_id === Auth::id()) {
+            return response()->json($order);
+        }
+
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
 
     /**

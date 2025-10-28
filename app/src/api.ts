@@ -10,6 +10,47 @@ const api = axios.create({
   }
 });
 
+  // Добавляем интерцептор для добавления токена авторизации
+  api.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+  
+  // Функции для регистрации и входа
+export const registerUser = async (userData: any): Promise<any> => {
+  const response =await api.post('/register', userData);
+  if (response.data.token) {
+    localStorage.setItem('authToken', response.data.token);
+  }
+  return response.data;
+};
+
+export const loginUser = async (credentials: any): Promise<any> => {
+  const response = await api.post('/login', credentials);
+  if (response.data.token) {
+    localStorage.setItem('authToken', response.data.token);
+  }
+  return response.data;
+};
+
+export const logoutUser = (): void => {
+  localStorage.removeItem('authToken');
+  // Возможно, здесь потребуется также отправить запрос на бэкенд для аннулирования токена, 
+  // но для простой реализации пока ограничимся удалением из localStorage.
+};
+
+export const getAuthUser = async (): Promise<any> => {
+  return (await api.get('/user')).data;
+};
+
 export const getRooms = async (): Promise<Room[]> => {
   return (await api.get('/rooms')).data;
 };
@@ -150,4 +191,8 @@ export const getOrderById = async (id: number): Promise<Order | undefined> => {
 
 export const updateOrderStatus = async (id: number, status: Order['status']): Promise<Order> => {
   return (await api.put(`/orders/${id}/status`, { status })).data;
+};
+
+export const createOrder = async (orderData: Omit<Order, 'order_id' | 'user_id' | 'status' | 'created_at' | 'updated_at'>): Promise<Order> => {
+  return (await api.post('/orders', orderData)).data;
 };

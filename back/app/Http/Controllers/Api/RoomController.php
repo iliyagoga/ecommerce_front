@@ -64,9 +64,7 @@ class RoomController extends Controller
             'initial_fee' => 'required|numeric|min:0',
             'max_people' => 'required|integer|min:1',
             'description' => 'nullable|string',
-            'preview_img' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'gallery' => 'nullable|array',
-            'gallery.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
         ]);
 
         if ($request->hasFile('preview_img')) {
