@@ -49,14 +49,14 @@ class Order extends Model
 
     public function orderRooms(): HasMany
     {
-        return $this->hasMany(OrderRoom::class, 'order_id');
+        return $this->hasMany(OrderRooms::class, 'order_id');
     }
 
     public function rooms(): HasManyThrough
     {
         return $this->hasManyThrough(
             Room::class,
-            OrderRoom::class,
+            OrderRooms::class,
             'order_id',
             'room_id',
             'order_id',

@@ -190,9 +190,10 @@ export const getOrderById = async (id: number): Promise<Order | undefined> => {
 };
 
 export const updateOrderStatus = async (id: number, status: Order['status']): Promise<Order> => {
-  return (await api.put(`/orders/${id}/status`, { status })).data;
+  return (await api.post(`/orders/${id}/status`, { status })).data;
 };
 
-export const createOrder = async (orderData: Omit<Order, 'order_id' | 'user_id' | 'status' | 'created_at' | 'updated_at'>): Promise<Order> => {
-  return (await api.post('/orders', orderData)).data;
+export const createOrder = async (orderData: any) => {
+  return (await api.post('/orders', orderData));
 };
+

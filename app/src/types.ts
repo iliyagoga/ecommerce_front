@@ -33,14 +33,14 @@ export interface Category {
 }
 
 export interface Order {
-  id?: number;
+  order_id?: number;
   client_name: string;
-  client_phone: string;
+  client_email: string;
+  total_price: string;
   room_id: number;
   products: { productId: number; quantity: number }[];
-  comments?: string;
+  client_comment?: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  order_date: string; // Пример
-  start_time: string; // Пример
-  end_time: string; // Пример
+  start_time: string;
+  end_time: string;
 }

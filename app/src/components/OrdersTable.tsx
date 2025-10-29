@@ -44,11 +44,11 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ onView }) => {
   }, []);
 
   const handleStatusChange = async (order: Order, newStatus: Order['status']) => {
-    if (order.id === undefined) return;
+    if (order.order_id === undefined) return;
     try {
-      await updateOrderStatus(order.id, newStatus);
+      await updateOrderStatus(order.order_id, newStatus);
       setOrders(prevOrders =>
-        prevOrders.map(o => (o.id === order.id ? { ...o, status: newStatus } : o))
+        prevOrders.map(o => (o.order_id === order.order_id ? { ...o, status: newStatus } : o))
       );
     } catch (err) {
       setError('Не удалось обновить статус заказа.');
@@ -97,7 +97,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ onView }) => {
         <TableHead>
           <TableRow>
             <TableCell>Имя Клиента</TableCell>
-            <TableCell align="right">Телефон</TableCell>
+            <TableCell align="right">Почта</TableCell>
             <TableCell align="right">Комментарий</TableCell>
             <TableCell align="right">Статус</TableCell>
             <TableCell align="right">Действия</TableCell>
@@ -106,19 +106,19 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ onView }) => {
         <TableBody>
           {orders.map((order) => (
             <TableRow
-              key={order.id}
+              key={order.order_id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
                 {order.client_name}
               </TableCell>
-              <TableCell align="right">{order.client_phone}</TableCell>
-              <TableCell align="right">{order.comments ? order.comments.substring(0, 20) + '...' : ''}</TableCell>
+              <TableCell align="right">{order.client_email}</TableCell>
+              <TableCell align="right">{order.client_comment ? order.client_comment.substring(0, 20) + '...' : ''}</TableCell>
               <TableCell align="right">
                 <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                  <InputLabel id={`status-label-${order.id}`}>Статус</InputLabel>
+                  <InputLabel id={`status-label-${order.order_id}`}>Статус</InputLabel>
                   <Select
-                    labelId={`status-label-${order.id}`}
+                    labelId={`status-label-${order.order_id}`}
                     value={order.status}
                     onChange={(e) => handleStatusChange(order, e.target.value as Order['status'])}
                     label="Статус"

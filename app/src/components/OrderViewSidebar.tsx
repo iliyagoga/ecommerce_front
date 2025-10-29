@@ -30,7 +30,8 @@ import {
 } from '../types';
 import {
   getRoomById,
-  getProducts
+  getProducts,
+  getOrderById
 } from '../api';
 
 interface OrderViewSidebarProps {
@@ -44,14 +45,27 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
   const [productsMap, setProductsMap] = useState<Map<number, Product>>(new Map());
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [fullOrder, setFullOrder] = useState<any>(null);
 
   useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        if (!order || !order.order_id) return;
+        const full = await getOrderById(order?.order_id);
+        console.log(full)
+      } catch (error) {
+        
+      }
+    }
+    fetchOrder()
+  },[])
+  useEffect(() => {
     const fetchData = async () => {
-      if (!order) return;
+      if (!order || !order.order_id) return;
       setLoading(true);
       setError(null);
       try {
-        const fetchedRoom = await getRoomById(order.room_id);
+        const fetchedRoom = await getRoomById(order.order_id);
         setRoom(fetchedRoom || null);
 
         const allProducts = await getProducts();
@@ -87,7 +101,7 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
       }}
     >
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Детали Заказа: #{order.id}</Typography>
+        <Typography variant="h6">Детали Заказа: #{order.order_id}</Typography>
         <IconButton onClick={onClose} sx={{ color: '#ffffff' }}>
           X
         </IconButton>
@@ -108,25 +122,61 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
             </ListItem>
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Телефон: ${order.client_phone}`} />
+              <ListItemText primary={`Телефон: ${order.client_email}`} />
             </ListItem>
-            {order.comments && (
+            {order.client_comment && (
               <ListItem>
                 <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-                <ListItemText primary={`Комментарий: ${order.comments}`} />
+                <ListItemText primary={`Комментарий: ${order.client_comment}`} />
               </ListItem>
             )}
+
+            <ListItem>
+              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
+              <ListItemText primary={`Итоговая цена: ${order.total_price}`} />
+            </ListItem>
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
               <ListItemText primary={`Статус: ${order.status}`} />
             </ListItem>
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Дата: ${order.order_date}`} />
+              <ListItemText
+                primary={`Дата начала: ${
+                  order.start_time
+                    ? new Date(order.start_time).toLocaleDateString('ru-RU')
+                    : '-'
+                }`}
+              />
             </ListItem>
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Время: ${order.start_time} - ${order.end_time}`} />
+              <ListItemText
+                primary={`Дата окончания: ${
+                  order.end_time
+                    ? new Date(order.end_time).toLocaleDateString('ru-RU')
+                    : '-'
+                }`}
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
+              <ListItemText
+                primary={`Общее количество часов: ${
+                  (() => {
+                    if (!order.start_time || !order.end_time) return '-';
+                    // Ensure both are in ISO format
+                    const start = new Date(order.start_time);
+                    const end = new Date(order.end_time);
+
+                    if (isNaN(start.getTime()) || isNaN(end.getTime())) return '-';
+
+                    const diffMs = end.getTime() - start.getTime();
+                    const diffHrs = diffMs / (1000 * 60 * 60);
+                    return diffHrs > 0 ? diffHrs.toFixed(2) : '0';
+                  })()
+                } ч.`}
+              />
             </ListItem>
 
             <Divider sx={{ my: 2, borderColor: '#444' }} />
@@ -144,22 +194,7 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
             )}
 
             <Divider sx={{ my: 2, borderColor: '#444' }} />
-
-            <Typography variant="subtitle1" gutterBottom>Заказанные товары:</Typography>
-            <List disablePadding>
-              {order.products.map((item, index) => {
-                const productDetail = productsMap.get(item.productId);
-                return (
-                  <ListItem key={index} sx={{ pl: 4 }}>
-                    <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-                    <ListItemText
-                      primary={`${productDetail ? productDetail.name : `Товар #${item.productId}`} x ${item.quantity}`}
-                      secondary={productDetail ? `Цена: ${productDetail.price * item.quantity} руб.` : ''}
-                    />
-                  </ListItem>
-                );
-              })}
-            </List>
+  
           </List>
         )}
       </Box>
