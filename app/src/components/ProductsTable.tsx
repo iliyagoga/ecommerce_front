@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -22,6 +23,7 @@ interface ProductsTableProps {
 }
 
 const ProductsTable: React.FC<ProductsTableProps> = ({ onView, onEdit }) => {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ onView, onEdit }) => {
       setProducts(prevProducts =>
         prevProducts.map(p => (p.id === product.id ? updatedProduct : p))
       );
+      router.refresh();
     } catch (err) {
       setError('Не удалось обновить доступность товара.');
       console.error(err);

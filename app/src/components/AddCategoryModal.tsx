@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Modal,
   Box,
@@ -24,6 +25,7 @@ const initialNewCategoryState: Omit<Category, 'category_id'> = {
 };
 
 const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onClose, onSaveSuccess }) => {
+  const router = useRouter();
   const [newCategory, setNewCategory] = useState<Omit<Category, 'category_id'> & { category_id?: number }>(initialNewCategoryState);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +44,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onClose, onSa
       await createCategory(newCategory);
       setSuccess('Категория успешно добавлена!');
       onSaveSuccess();
+      router.refresh();
       onClose();
       setNewCategory(initialNewCategoryState);
     } catch (err) {
@@ -81,7 +84,6 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onClose, onSa
         </Box>
         <Divider sx={{ borderColor: '#444' }} />
         <Box id="add-category-modal-description" sx={{ mt: 2 }}>
-          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <TextField

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogTitle,
@@ -15,6 +16,7 @@ import {
   InputLabel,
   Grid,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import { createOrder, getRooms } from '@/api';
 import { Room } from '@/types';
@@ -35,6 +37,7 @@ interface RoomForm {
 }
 
 const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderCreated }) => {
+  const router = useRouter();
   const [totalPrice, setTotalPrice] = useState<string>('');
   const [clientComment, setClientComment] = useState<string>('');
   const [adminComment, setAdminComment] = useState<string>('');
@@ -53,8 +56,11 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     if (open) {
+      setError(null);
       const fetchRooms = async () => {
         try {
           setLoadingRooms(true);
@@ -96,8 +102,7 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
     if (field === 'room_id') {
       const selectedRoom = availableRooms.find(room => room.room_id === parseInt(value));
       if (selectedRoom) {
-        console.log(selectedRoom)
-        newRooms[index].base_hourly_rate = selectedRoom.base_hourly_rate+"";
+        newRooms[index].base_hourly_rate = selectedRoom.base_hourly_rate + "";
       }
     }
     setRooms(newRooms);
@@ -121,12 +126,13 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
         booked_time_end: room.booked_time_end,
         room_price_per_hour: parseFloat(room.base_hourly_rate),
       })),
-      // Здесь также можно добавить items, если потребуется
     };
 
     try {
+      setError(null);
       await createOrder(orderData);
       onOrderCreated();
+      router.refresh();
       onClose();
       setTotalPrice('');
       setClientComment('');
@@ -144,174 +150,176 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
         },
       ]);
     } catch (error) {
-      console.error('Ошибка при создании заказа:', error);
-      // Здесь можно добавить обработку ошибок, например, показать сообщение пользователю
+      setError('Не удалось создать заказ. Пожалуйста, попробуйте еще раз.');
     }
   };
 
   return (
-    <><Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Создать Заказ</Typography>
-          <IconButton onClick={onClose}>
-           -
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      <DialogContent dividers>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Общая Цена"
-                fullWidth
-                value={totalPrice}
-                onChange={(e) => setTotalPrice(e.target.value)}
-                margin="normal"
-                type="number"
-                inputProps={{ step: '0.01' }}
-                required />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Комментарий Клиента"
-                fullWidth
-                value={clientComment}
-                onChange={(e) => setClientComment(e.target.value)}
-                margin="normal"
-                multiline
-                rows={2} />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Время начала"
-                fullWidth
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                margin="normal"
-                type="datetime-local"
-                InputLabelProps={{ shrink: true }}
-                required />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Время окончания"
-                fullWidth
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                margin="normal"
-                type="datetime-local"
-                InputLabelProps={{ shrink: true }}
-                required />
-            </Grid>
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">Создать Заказ</Typography>
+            <IconButton onClick={onClose}>
+              -
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent dividers>
+          {error && (
+            <Box sx={{ mb: 2 }}>
+              <Alert severity="error">{error}</Alert>
+            </Box>
+          )}
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Общая Цена"
+                  fullWidth
+                  value={totalPrice}
+                  onChange={(e) => setTotalPrice(e.target.value)}
+                  margin="normal"
+                  type="number"
+                  inputProps={{ step: '0.01' }}
+                  required />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Комментарий Клиента"
+                  fullWidth
+                  value={clientComment}
+                  onChange={(e) => setClientComment(e.target.value)}
+                  margin="normal"
+                  multiline
+                  rows={2} />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Время начала"
+                  fullWidth
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  margin="normal"
+                  type="datetime-local"
+                  InputLabelProps={{ shrink: true }}
+                  required />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Время окончания"
+                  fullWidth
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  margin="normal"
+                  type="datetime-local"
+                  InputLabelProps={{ shrink: true }}
+                  required />
+              </Grid>
 
-            <Grid item xs={12}>
-              <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>Комнаты</Typography>
-              {loadingRooms ? (
-                <CircularProgress />
-              ) : (
-                rooms.map((room, index) => (
-                  <Box key={index} sx={{ border: '1px solid #ccc', p: 2, mb: 2, borderRadius: '4px' }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
-                        <FormControl fullWidth margin="normal" required>
-                          <InputLabel id={`room-select-label-${index}`}>Комната</InputLabel>
-                          <Select
-                            labelId={`room-select-label-${index}`}
-                            id={`room-select-${index}`}
-                            value={room.room_id}
-                            label="Комната"
-                            onChange={(e) => handleRoomChange(index, 'room_id', e.target.value as string)}
-                          >
-                            {availableRooms.map((r) => (
-                              <MenuItem key={r.room_id} value={r.room_id}>
-                                {r.name} (ID: {r.room_id}, Price: {r.base_hourly_rate})
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>Комнаты</Typography>
+                {loadingRooms ? (
+                  <CircularProgress />
+                ) : (
+                  rooms.map((room, index) => (
+                    <Box key={index} sx={{ border: '1px solid #ccc', p: 2, mb: 2, borderRadius: '4px' }}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                          <FormControl fullWidth margin="normal" required>
+                            <InputLabel id={`room-select-label-${index}`}>Комната</InputLabel>
+                            <Select
+                              labelId={`room-select-label-${index}`}
+                              id={`room-select-${index}`}
+                              value={room.room_id}
+                              label="Комната"
+                              onChange={(e) => handleRoomChange(index, 'room_id', e.target.value as string)}
+                            >
+                              {availableRooms.map((r) => (
+                                <MenuItem key={r.room_id} value={r.room_id}>
+                                  {r.name} (ID: {r.room_id}, Price: {r.base_hourly_rate})
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="Забронировано Часов"
+                            fullWidth
+                            value={room.booked_hours}
+                            onChange={(e) => handleRoomChange(index, 'booked_hours', e.target.value)}
+                            margin="normal"
+                            type="number"
+                            required />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="Дата Бронирования"
+                            fullWidth
+                            value={room.booked_date}
+                            onChange={(e) => handleRoomChange(index, 'booked_date', e.target.value)}
+                            margin="normal"
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            required />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="Время начала бронирования"
+                            fullWidth
+                            value={room.booked_time_start}
+                            onChange={(e) => handleRoomChange(index, 'booked_time_start', e.target.value)}
+                            margin="normal"
+                            type="time"
+                            InputLabelProps={{ shrink: true }}
+                            required />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="Время окончания бронирования"
+                            fullWidth
+                            value={room.booked_time_end}
+                            onChange={(e) => handleRoomChange(index, 'booked_time_end', e.target.value)}
+                            margin="normal"
+                            type="time"
+                            InputLabelProps={{ shrink: true }}
+                            required />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField
+                            label="Цена за час"
+                            fullWidth
+                            value={room.base_hourly_rate}
+                            onChange={(e) => handleRoomChange(index, 'base_hourly_rate', e.target.value)}
+                            margin="normal"
+                            type="number"
+                            inputProps={{ step: '0.01' }}
+                            required
+                            disabled
+                          />
+                        </Grid>
+                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <IconButton color="error" onClick={() => handleRemoveRoom(index)}>
+                            -
+                          </IconButton>
+                        </Grid>
                       </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Забронировано Часов"
-                          fullWidth
-                          value={room.booked_hours}
-                          onChange={(e) => handleRoomChange(index, 'booked_hours', e.target.value)}
-                          margin="normal"
-                          type="number"
-                          required />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Дата Бронирования"
-                          fullWidth
-                          value={room.booked_date}
-                          onChange={(e) => handleRoomChange(index, 'booked_date', e.target.value)}
-                          margin="normal"
-                          type="date"
-                          InputLabelProps={{ shrink: true }}
-                          required />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Время начала бронирования"
-                          fullWidth
-                          value={room.booked_time_start}
-                          onChange={(e) => handleRoomChange(index, 'booked_time_start', e.target.value)}
-                          margin="normal"
-                          type="time"
-                          InputLabelProps={{ shrink: true }}
-                          required />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Время окончания бронирования"
-                          fullWidth
-                          value={room.booked_time_end}
-                          onChange={(e) => handleRoomChange(index, 'booked_time_end', e.target.value)}
-                          margin="normal"
-                          type="time"
-                          InputLabelProps={{ shrink: true }}
-                          required />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Цена за час"
-                          fullWidth
-                          value={room.base_hourly_rate}
-                          onChange={(e) => handleRoomChange(index, 'base_hourly_rate', e.target.value)}
-                          margin="normal"
-                          type="number"
-                          inputProps={{ step: '0.01' }}
-                          required
-                          disabled // Автоматически заполняемое поле
-                        />
-                      </Grid>
-                      <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <IconButton color="error" onClick={() => handleRemoveRoom(index)}>
-                        -
-                        </IconButton>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                )))}
+                    </Box>
+                  )))}
+              </Grid>
             </Grid>
-            <Button  onClick={handleAddRoom} sx={{ mt: 2 }}>
-              Добавить Комнату
-            </Button>
-        </Grid>
-      </form>
-    </DialogContent>
-    <DialogActions>
-        <Button onClick={onClose} color="secondary">
-          Отмена
-        </Button>
-        <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
-          Создать Заказ
-        </Button>
-      </DialogActions>
-    </Dialog>
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose} color="secondary">
+            Отмена
+          </Button>
+          <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
+            Создать Заказ
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

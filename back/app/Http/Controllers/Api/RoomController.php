@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Room; // Убедитесь, что модель Room существует
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 

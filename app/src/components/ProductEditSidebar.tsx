@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Drawer,
   Box,
@@ -25,6 +26,7 @@ interface ProductEditSidebarProps {
 }
 
 const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, product, onSaveSuccess }) => {
+  const router = useRouter();
   const [editedProduct, setEditedProduct] = useState<any | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -111,6 +113,7 @@ const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, 
       await updateProduct(editedProduct.item_id, productToUpdate, config);
       setSuccess('Товар успешно обновлен!');
       onSaveSuccess();
+      router.refresh();
       onClose();
     } catch (err) {
       setError('Не удалось обновить товар.');
@@ -146,7 +149,6 @@ const ProductEditSidebar: React.FC<ProductEditSidebarProps> = ({ open, onClose, 
       </Box>
       <Divider sx={{ borderColor: '#444' }} />
       <Box sx={{ p: 2 }}>
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         <TextField

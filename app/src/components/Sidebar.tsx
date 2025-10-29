@@ -11,7 +11,6 @@ const drawerWidth = 240;
 
 const Sidebar: React.FC = () => {
   const menuItems = [
-    { text: 'Дашборд', path: '/admin/dashboard' },
     { text: 'Комнаты', path: '/admin/rooms' },
     { text: 'Товары', path: '/admin/products' },
     { text: 'Категории', path: '/admin/categories' },

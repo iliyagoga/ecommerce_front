@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Drawer,
   Box,
@@ -28,6 +29,7 @@ interface RoomEditSidebarProps {
 }
 
 const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, onSaveSuccess }) => {
+  const router = useRouter();
   const [editedRoom, setEditedRoom] = useState<Room | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +123,7 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
       await updateRoom(editedRoom.room_id, roomToUpdate, config);
       setSuccess('Комната успешно обновлена!');
       onSaveSuccess();
+      router.refresh();
       onClose();
     } catch (err) {
       setError('Не удалось обновить комнату.');
@@ -156,7 +159,6 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
       </Box>
       <Divider sx={{ borderColor: '#444' }} />
       <Box sx={{ p: 2 }}>
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         <TextField

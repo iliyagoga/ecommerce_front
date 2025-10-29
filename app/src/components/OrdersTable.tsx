@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -21,6 +22,7 @@ interface OrdersTableProps {
 }
 
 const OrdersTable: React.FC<OrdersTableProps> = ({ onView }) => {
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ onView }) => {
       setOrders(prevOrders =>
         prevOrders.map(o => (o.order_id === order.order_id ? { ...o, status: newStatus } : o))
       );
+      router.refresh();
     } catch (err) {
       setError('Не удалось обновить статус заказа.');
       console.error(err);

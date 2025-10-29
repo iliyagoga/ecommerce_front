@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Modal,
   Box,
@@ -21,6 +22,7 @@ interface CategoryEditModalProps {
 }
 
 const CategoryEditModal: React.FC<CategoryEditModalProps> = ({ open, onClose, category, onSaveSuccess }) => {
+  const router = useRouter();
   const [editedCategory, setEditedCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +50,7 @@ const CategoryEditModal: React.FC<CategoryEditModalProps> = ({ open, onClose, ca
       await updateCategory(editedCategory.category_id, editedCategory);
       setSuccess('Категория успешно обновлена!');
       onSaveSuccess();
+      router.refresh();
       onClose();
     } catch (err) {
       setError('Не удалось обновить категорию.');
@@ -88,7 +91,6 @@ const CategoryEditModal: React.FC<CategoryEditModalProps> = ({ open, onClose, ca
         </Box>
         <Divider sx={{ borderColor: '#444' }} />
         <Box id="edit-category-modal-description" sx={{ mt: 2 }}>
-          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <TextField

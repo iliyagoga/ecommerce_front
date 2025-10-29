@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Modal,
   Box,
@@ -38,6 +39,7 @@ const initialNewRoomState: Omit<Room, 'type_id'> = {
 };
 
 const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSuccess }) => {
+  const router = useRouter();
   const [newRoom, setNewRoom] = useState<Omit<Room, 'type_id'> & {type?: Room['type']}>(initialNewRoomState);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,6 +119,7 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
       await createRoom(formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       setSuccess('Комната успешно добавлена!');
       onSaveSuccess();
+      router.refresh();
       onClose();
       setNewRoom(initialNewRoomState);
       setSelectedPreviewImage(null);
@@ -162,7 +165,6 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
         </Box>
         <Divider sx={{ borderColor: '#444' }} />
         <Box id="add-room-modal-description" sx={{ mt: 2 }}>
-          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <TextField

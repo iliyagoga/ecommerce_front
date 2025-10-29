@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Layout from '../../../components/Layout';
 import { Typography, Box, Button } from '@mui/material';
 import CategoriesTable from '../../../components/CategoriesTable';
@@ -9,6 +10,7 @@ import { Category } from '../../../types';
 import { getCategories } from '@/api';
 
 const CategoriesPage: React.FC = () => {
+  const router = useRouter();
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -35,20 +37,20 @@ const CategoriesPage: React.FC = () => {
         </Box>
         <CategoriesTable
           onEdit={handleEditCategory}
-          onDeleteSuccess={() => getCategories()}
+          onDeleteSuccess={() => router.refresh()}
           onSuccess={() => getCategories()}
         />
 
         <AddCategoryModal
           open={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onSaveSuccess={() => getCategories()}
+          onSaveSuccess={() => router.refresh()}
         />
         <CategoryEditModal
           open={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           category={selectedCategory}
-          onSaveSuccess={() => getCategories()}
+          onSaveSuccess={() => router.refresh()}
           />
       </Box>
     </Layout>

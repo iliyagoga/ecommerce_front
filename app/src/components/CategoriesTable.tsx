@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -23,6 +24,7 @@ interface CategoriesTableProps {
 }
 
 const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSuccess, onSuccess }) => {
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSucce
       try {
         await deleteCategory(id);
         onDeleteSuccess();
+        router.refresh();
       } catch (err) {
         setError('Не удалось удалить категорию.');
         console.error(err);

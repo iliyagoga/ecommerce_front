@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Modal,
   Box,
@@ -33,6 +34,7 @@ const initialNewProductState: Omit<Product, 'id'> = {
 };
 
 const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSaveSuccess }) => {
+  const router = useRouter();
   const [newProduct, setNewProduct] = useState<Omit<any, 'id'> & { category_id?: number }>(initialNewProductState);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -98,6 +100,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSave
       await createProduct(productToCreate);
       setSuccess('Товар успешно добавлен!');
       onSaveSuccess();
+      router.refresh();
       onClose();
       setNewProduct(initialNewProductState);
       setSelectedImage(null);
@@ -141,7 +144,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onClose, onSave
         </Box>
         <Divider sx={{ borderColor: '#444' }} />
         <Box id="add-product-modal-description" sx={{ mt: 2 }}>
-          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <TextField

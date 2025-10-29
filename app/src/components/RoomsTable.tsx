@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -22,6 +23,7 @@ interface RoomsTableProps {
 }
 
 const RoomsTable: React.FC<RoomsTableProps> = ({ onView, onEdit }) => {
+  const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,7 @@ const RoomsTable: React.FC<RoomsTableProps> = ({ onView, onEdit }) => {
       setRooms(prevRooms =>
         prevRooms.map(r => (r.room_id === room.room_id ? updatedRoom : r))
       );
+      router.refresh();
     } catch (err) {
       setError('Не удалось обновить доступность комнаты.');
       console.error(err);

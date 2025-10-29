@@ -25,7 +25,7 @@ class OrderController extends Controller
             return response()->json($orders->where("user_id", Auth::id())->values()->all());
         }
 
-        return response()->json(['message' => 'Unauthorized'], 403); // Или пустой массив, в зависимости от желаемого поведения
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
 
     public function store(Request $request)
@@ -45,11 +45,11 @@ class OrderController extends Controller
             'rooms.*.booked_time_end' => ['required', 'date_format:H:i', 'after:rooms.*.booked_time_start'],
             'rooms.*.room_price_per_hour' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
 
-            'items' => ['array'],
+            /*'items' => ['array'],
             'items.*.item_id' => ['required', 'integer', 'exists:menu_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:1000'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'items.*.total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'items.*.total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],*/
         ]);
 
         $order = null;
@@ -59,15 +59,20 @@ class OrderController extends Controller
 
             if (isset($validatedData['rooms'])) {
                 foreach ($validatedData['rooms'] as $roomData) {
+                    // Проверяем доступность комнаты по is_available
+                    $room = \App\Models\Room::where("room_id",$roomData['room_id']);
+                    if (!$room || !$room->firstOrFail()->is_available) {
+                        throw new \Exception("Одна из выбранных комнат недоступна для бронирования", 422);
+                    }
                     $order->orderRooms()->create($roomData);
                 }
             }
 
-            if (isset($validatedData['items'])) {
+            /*if (isset($validatedData['items'])) {
                 foreach ($validatedData['items'] as $itemData) {
                     $order->orderItems()->create($itemData);
                 }
-            }
+            }*/
         });
 
         return response()->json($order, Response::HTTP_CREATED);
