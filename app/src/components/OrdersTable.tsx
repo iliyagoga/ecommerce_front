@@ -85,7 +85,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ onView }) => {
       case 'cancelled':
         return 'red';
       case 'completed':
-        return 'blue';
+        return 'yellow';
       default:
         return 'grey';
     }

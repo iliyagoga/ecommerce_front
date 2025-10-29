@@ -22,7 +22,7 @@ class OrderController extends Controller
         if (Auth::check() && Auth::user()->role === 'admin') {
             return response()->json($orders);
         } elseif (Auth::check()) {
-            return response()->json($orders);
+            return response()->json($orders->where("user_id", Auth::id())->values()->all());
         }
 
         return response()->json(['message' => 'Unauthorized'], 403); // Или пустой массив, в зависимости от желаемого поведения
@@ -31,11 +31,9 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'user_id' => ['required', 'integer', 'exists:users,id'],
             'status' => ['required', 'string', 'in:pending,confirmed,active,completed,cancelled'],
             'total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'client_comment' => ['nullable', 'string', 'max:1000'],
-            'admin_comment' => ['nullable', 'string', 'max:1000'],
             'start_time' => ['required', 'date', 'after_or_equal:now'],
             'end_time' => ['required', 'date', 'after:start_time'],
 
@@ -56,6 +54,7 @@ class OrderController extends Controller
 
         $order = null;
         DB::transaction(function () use ($validatedData, & $order) {
+            $validatedData["user_id"] = Auth::id();
             $order = Order::create($validatedData);
 
             if (isset($validatedData['rooms'])) {

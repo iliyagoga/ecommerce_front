@@ -45,7 +45,7 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
   const [productsMap, setProductsMap] = useState<Map<number, Product>>(new Map());
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [fullOrder, setFullOrder] = useState<any>(null);
+
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -165,7 +165,7 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
                 primary={`Общее количество часов: ${
                   (() => {
                     if (!order.start_time || !order.end_time) return '-';
-                    // Ensure both are in ISO format
+
                     const start = new Date(order.start_time);
                     const end = new Date(order.end_time);
 

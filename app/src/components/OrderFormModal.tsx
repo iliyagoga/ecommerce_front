@@ -35,8 +35,6 @@ interface RoomForm {
 }
 
 const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderCreated }) => {
-  const [userId, setUserId] = useState<string>('');
-  const [status, setStatus] = useState<string>('pending');
   const [totalPrice, setTotalPrice] = useState<string>('');
   const [clientComment, setClientComment] = useState<string>('');
   const [adminComment, setAdminComment] = useState<string>('');
@@ -109,8 +107,7 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
     event.preventDefault();
 
     const orderData = {
-      user_id: parseInt(userId),
-      status,
+      status: "pending",
       total_price: parseFloat(totalPrice),
       client_comment: clientComment,
       admin_comment: adminComment,
@@ -131,9 +128,6 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
       await createOrder(orderData);
       onOrderCreated();
       onClose();
-      // Очистка формы после успешного создания
-      setUserId('');
-      setStatus('pending');
       setTotalPrice('');
       setClientComment('');
       setAdminComment('');
@@ -168,34 +162,6 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
       <DialogContent dividers>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="ID Пользователя"
-                fullWidth
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                margin="normal"
-                type="number"
-                required />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="status-select-label">Статус</InputLabel>
-                <Select
-                  labelId="status-select-label"
-                  id="status-select"
-                  value={status}
-                  label="Статус"
-                  onChange={(e) => setStatus(e.target.value as string)}
-                >
-                  <MenuItem value="pending">Ожидает</MenuItem>
-                  <MenuItem value="confirmed">Подтвержден</MenuItem>
-                  <MenuItem value="active">Активен</MenuItem>
-                  <MenuItem value="completed">Завершен</MenuItem>
-                  <MenuItem value="cancelled">Отменен</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
             <Grid item xs={12}>
               <TextField
                 label="Общая Цена"
