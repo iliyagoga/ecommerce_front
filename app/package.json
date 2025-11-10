@@ -13,12 +13,17 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^5.18.0",
     "axios": "^1.12.2",
+    "d3": "^7.9.0",
+    "d3-react-d3": "^1.0.0",
+    "fabric": "^6.9.0",
+    "fabricjs-react": "^1.2.2",
     "next": "14.2.3",
-    "react": "^18",
-    "react-dom": "^18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "styled-components": "^6.1.19"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/node": "24.9.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.3"
