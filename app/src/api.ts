@@ -112,6 +112,11 @@ export const getProducts = async (): Promise<any[]> => {
   return (await api.get('/menuitems')).data;
 };
 
+export const getProductsByCategory = async (categoryId?: string): Promise<any> => {
+  const url = categoryId ? `/menuitems/category/${categoryId}` : '/menuitems';
+  return (await api.get(url)).data;
+};
+
 export const getProductById = async (id: number): Promise<any | undefined> => {
   return (await api.get(`/menuitems/${id}`)).data;
 };

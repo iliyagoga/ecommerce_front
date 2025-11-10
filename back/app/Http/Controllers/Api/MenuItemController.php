@@ -14,6 +14,18 @@ class MenuItemController extends Controller
         return response()->json(MenuItem::all());
     }
 
+    public function getProductsByCategory(?int $category_id = null)
+    {
+        $query = MenuItem::with('category');
+
+        if ($category_id) {
+            $query->where('category_id', $category_id);
+        }
+
+        $menuItems = $query->get();
+        return response()->json($menuItems);
+    }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([

@@ -17,7 +17,7 @@ export interface Room {
 }
 
 export interface Product {
-  id?: number;
+  item_id?: number;
   name: string;
   description?: string;
   price: number;

@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Room, Product } from '@/types'; // Импортируем интерфейсы Room и Product
+import { Room, Product, Category } from '@/types'; 
 import Image from 'next/image';
-import { getRooms, getProducts, HOST_URL } from '@/api'; // Импортируем getRooms и getProducts из API
+import { getRooms, getProductsByCategory, getCategories, HOST_URL } from '@/api';
 import Header from '@/components/Header/Header';
-import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs'; // Импортируем компонент Breadcrumbs
+import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs';
 import { useRouter } from 'next/navigation';
 
 const PageContainer = styled.div`
@@ -61,9 +61,7 @@ const RoomName = styled.h2`
   color: white;
 `;
 
-const ProductCardContainer = styled(RoomCardContainer)`
-  /* Можно добавить специфичные стили для карточки товара, если нужно */
-`;
+const ProductCardContainer = styled(RoomCardContainer)``;
 
 const ProductImage = styled(Image)`
   width: 100%;
@@ -71,16 +69,44 @@ const ProductImage = styled(Image)`
   object-fit: cover;
 `;
 
+const ProductInfo = styled.div`
+  gap: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 const ProductName = styled.h2`
   font-size: 1.5rem;
-  margin-bottom: 0.5rem;
   color: white;
 `;
 
 const ProductPrice = styled.p`
   font-size: 1.2rem;
   color: #FCD25E;
-  margin-top: 0.5rem;
+`;
+
+const CategoryFilter = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+`;
+
+const CategoryButton = styled.button<{ $isActive: boolean }>`
+  background-color: ${(props) => (props.$isActive ? '#FCD25E' : '#2C2C2C')};
+  color: ${(props) => (props.$isActive ? '#2C2C2C' : 'white')};
+  border: 1px solid #FCD25E;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #FCD25E;
+    color: #2C2C2C;
+  }
 `;
 
 const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
@@ -99,15 +125,16 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
 };
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+    const router = useRouter();
     return (
-        <ProductCardContainer>
+        <ProductCardContainer onClick={() => router.push(`/product/${product.item_id}`)}>
             {product.image_url && (
                 <ProductImage src={`${HOST_URL}${product.image_url}`} alt={product.name} width={300} height={200} />
             )}
-            <RoomInfo>
+            <ProductInfo>
                 <ProductName>{product.name}</ProductName>
                 <ProductPrice>{product.price} руб.</ProductPrice>
-            </RoomInfo>
+            </ProductInfo>
         </ProductCardContainer>
     );
 };
@@ -115,34 +142,61 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 const CatalogPage = () => {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null); // Изменяем тип на number | null
+    const [loadingRooms, setLoadingRooms] = useState(true); // Отдельное состояние загрузки для комнат
+    const [loadingProducts, setLoadingProducts] = useState(true); // Отдельное состояние загрузки для продуктов
+    const [errorRooms, setErrorRooms] = useState<string | null>(null); // Отдельное состояние ошибки для комнат
+    const [errorProducts, setErrorProducts] = useState<string | null>(null); // Отдельное состояние ошибки для продуктов
 
     useEffect(() => {
-        const getCatalogData = async () => {
+        const getRoomsAndCategories = async () => {
             try {
-                const [roomsData, productsData] = await Promise.all([
+                setLoadingRooms(true);
+                const [roomsData, categoriesData] = await Promise.all([
                     getRooms(),
-                    getProducts(),
+                    getCategories(),
                 ]);
                 setRooms(roomsData);
-                setProducts(productsData);
+                setCategories(categoriesData);
+
+                const productsData = await getProductsByCategory(selectedCategory ? String(selectedCategory) : undefined);
+                setProducts(productsData.flat());
             } catch (err) {
-                setError('Не удалось загрузить данные каталога.');
+                setErrorRooms('Не удалось загрузить комнаты или категории.');
                 console.error(err);
             } finally {
-                setLoading(false);
+                setLoadingRooms(false);
             }
         };
-        getCatalogData();
-    }, []);
+        getRoomsAndCategories();
+    }, []); // Загружаем комнаты и категории только при первом рендеринге
 
-    if (loading) {
-        return <PageContainer><Title>Загрузка комнат...</Title></PageContainer>;
+    useEffect(() => {
+        const getProductsData = async () => {
+            try {
+                setLoadingProducts(true);
+                const productsData = await getProductsByCategory(selectedCategory ? String(selectedCategory) : undefined);
+                setProducts(productsData.flat());
+            } catch (err) {
+                setErrorProducts('Не удалось загрузить товары.');
+                console.error(err);
+            } finally {
+                setLoadingProducts(false);
+            }
+        };
+        getProductsData();
+    }, [selectedCategory]); // Загружаем товары при изменении выбранной категории
+
+    const overallLoading = loadingRooms || loadingProducts;
+    const overallError = errorRooms || errorProducts;
+
+    if (overallLoading) {
+        return <PageContainer><Title>Загрузка каталога...</Title></PageContainer>;
     }
 
-    if (error) {
-        return <PageContainer><Title style={{ color: '#dc3545' }}>{error}</Title></PageContainer>;
+    if (overallError) {
+        return <PageContainer><Title style={{ color: '#dc3545' }}>{overallError}</Title></PageContainer>;
     }
 
     return (<>
@@ -155,10 +209,28 @@ const CatalogPage = () => {
                     <RoomCard key={room.room_id} room={room} />
                 ))}
             </RoomsGrid>
+
             <Title>Каталог товаров</Title>
+            <CategoryFilter>
+                <CategoryButton
+                    $isActive={selectedCategory === null}
+                    onClick={() => setSelectedCategory(null)}
+                >
+                    Все товары
+                </CategoryButton>
+                {categories.map(category => (
+                    <CategoryButton
+                        key={category.category_id}
+                        $isActive={selectedCategory === category.category_id}
+                        onClick={() => setSelectedCategory(category.category_id)}
+                    >
+                        {category.name}
+                    </CategoryButton>
+                ))}
+            </CategoryFilter>
             <RoomsGrid>
                 {products.map(product => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard key={product.item_id} product={product} />
                 ))}
             </RoomsGrid>
         </PageContainer>

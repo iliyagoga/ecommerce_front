@@ -10,6 +10,8 @@ class Category extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'category_id';
+
     protected $fillable = [
         'name'
     ];
@@ -24,6 +26,6 @@ class Category extends Model
 
     public function menuItems(): HasMany
     {
-        return $this->hasMany(MenuItem::class, 'category_id');
+        return $this->hasMany(MenuItem::class, 'category_id', 'category_id');
     }
 }

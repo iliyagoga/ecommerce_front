@@ -17,6 +17,7 @@ Route::get('/rooms/{id}', [RoomController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
 Route::get('/menuitems', [MenuItemController::class, 'index']);
+Route::get('/menuitems/category/{category_id}', [MenuItemController::class, 'getProductsByCategory']);
 Route::get('/menuitems/{id}', [MenuItemController::class, 'show']);
 
 
