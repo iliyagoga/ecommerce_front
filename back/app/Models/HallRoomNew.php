@@ -21,7 +21,7 @@ class HallRoomNew extends Model
         'height',
         'color',
         'metadata',
-        'room_id', // Add room_id to fillable fields
+        'room_id',
     ];
 
     protected $casts = [

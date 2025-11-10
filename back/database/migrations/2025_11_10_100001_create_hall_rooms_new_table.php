@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('height');
             $table->string('color')->default('#e0e0ff');
             $table->json('metadata')->nullable(); // Доп. данные
-            $table->foreignId('room_id')->nullable()->constrained('rooms')->onDelete('set null'); // Связь с основной таблицей rooms
+            $table->foreignId('room_id')->nullable()->constrained('rooms', 'room_id')->onDelete('set null'); // Связь с основной таблицей rooms, явно указываем столбец room_id
             $table->timestamps();
         });
     }

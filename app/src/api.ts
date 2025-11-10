@@ -227,10 +227,13 @@ export const getHallRoomsNew = async (hallId: number): Promise<HallRoomNew[]> =>
 };
 
 export const createHallRoomNew = async (hallId: number, room: Omit<HallRoomNew, 'id' | 'hall_id'>): Promise<HallRoomNew> => {
+  room.metadata = JSON.stringify(room.metadata);
+  console.log(room)
   return (await api.post(`/halls_new/${hallId}/hall_rooms_new`, room)).data;
 };
 
 export const updateHallRoomNew = async (hallId: number, roomId: number, room: Partial<HallRoomNew>): Promise<HallRoomNew> => {
+  room.metadata = JSON.stringify(room.metadata);
   return (await api.put(`/halls_new/${hallId}/hall_rooms_new/${roomId}`, room)).data;
 };
 

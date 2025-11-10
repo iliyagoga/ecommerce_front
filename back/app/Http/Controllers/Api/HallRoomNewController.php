@@ -31,6 +31,7 @@ class HallRoomNewController extends Controller
             'height' => 'required|integer',
             'color' => 'required|string|max:7',
             'metadata' => 'nullable|json',
+            'room_id' => 'nullable|exists:rooms,room_id', // Add validation for room_id
         ]);
 
         if ($validator->fails()) {
@@ -62,6 +63,7 @@ class HallRoomNewController extends Controller
             'height' => 'integer',
             'color' => 'string|max:7',
             'metadata' => 'nullable|json',
+            'room_id' => 'nullable|exists:rooms,room_id', // Add validation for room_id
         ]);
 
         if ($validator->fails()) {

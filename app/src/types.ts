@@ -64,5 +64,5 @@ export interface HallRoomNew {
   height: number;
   color: string;
   metadata?: any;
-  room_id?: number; // Add room_id to HallRoomNew interface
+  room_id?: number | null; // Allow null for room_id
 }

@@ -22,8 +22,8 @@ interface RoomData {
   color: string;
   name: string;
   type: 'vip' | 'standard' | 'cinema' | null; // Allow null for initially undefined type
-  hall_room_id?: number; // New field to store the actual ID from the backend
-  dbRoomId?: number; // Add this back to link to the original Room id
+  hall_room_id?: number; // Make hall_room_id optional
+  dbRoomId?: number | null; // Allow null for dbRoomId
 }
 
 interface HallsAdminProps {
@@ -201,39 +201,21 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
 
   }, [hall, rooms, selectedRoomId]);
 
-  const addSquare = async () => {
-    if (rooms.length >= availableDbRooms.length) return; // Disable if all rooms are used
-
-    const newHallRoom: Omit<HallRoomNew, 'id' | 'hall_id'> = {
-      name: 'Квадрат',
+  const addSquare = () => {
+    // Создаем временный квадрат только на фронтенде
+    const newRoom: RoomData = {
+      id: `temp-room-${Date.now()}`,
       x: 50,
       y: 50,
       width: 100,
       height: 100,
-      color: '#888',
-      metadata: null,
-      room_id: undefined, // Initially no room assigned
+      color: '#888', // Default grey color
+      name: 'Новый квадрат',
+      type: null,
+      dbRoomId: null,
+      hall_room_id: undefined, // Нет hall_room_id, пока не будет назначена комната
     };
-    try {
-      const createdRoom = await createHallRoomNew(hallId, newHallRoom);
-      setRooms(prevRooms => [
-        ...prevRooms,
-        {
-          id: `room-${createdRoom.id}`,
-          x: createdRoom.x,
-          y: createdRoom.y,
-          width: createdRoom.width,
-          height: createdRoom.height,
-          color: createdRoom.color,
-          name: createdRoom.name,
-          type: createdRoom.metadata?.type || null,
-          hall_room_id: createdRoom.id,
-          dbRoomId: createdRoom.room_id, // Map the room_id from HallRoomNew to dbRoomId
-        },
-      ]);
-    } catch (error) {
-      console.error("Ошибка при создании комнаты зала:", error);
-    }
+    setRooms(prevRooms => [...prevRooms, newRoom]);
   };
 
   const assignRoomToSelectedSquare = async (selectedRoomIdFromDb: number | null | undefined) => {
@@ -243,35 +225,75 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
     if (!roomToAssign) return;
 
     const currentRoom = rooms.find(room => room.id === selectedRoomId);
-    if (!currentRoom || !currentRoom.hall_room_id) return;
+    if (!currentRoom) return; // Should not happen, but for safety
 
     let color = '#888'; // standard (серый)
     if (roomToAssign.type === 'vip') { color = 'orange'; }
     else if (roomToAssign.type === 'cinema') { color = 'blue'; }
 
-    const updatedProps: Partial<HallRoomNew> = {
+    const updatedRoomData: RoomData = {
+      ...currentRoom,
       name: roomToAssign.name,
       color: color,
-      metadata: { type: roomToAssign.type || null },
-      room_id: roomToAssign.room_id, // Correctly assign room_id here
+      type: roomToAssign.type || null,
+      dbRoomId: roomToAssign.room_id,
     };
 
-    try {
-      const updatedRoomFromDb = await updateHallRoomNew(hallId, currentRoom.hall_room_id, updatedProps);
-      setRooms(prevRooms => prevRooms.map(room =>
-        room.id === selectedRoomId
-          ? {
-              ...room,
-              ...updatedRoomFromDb,
-              id: `room-${updatedRoomFromDb.id}`,
-              type: updatedRoomFromDb.metadata?.type || null,
-              hall_room_id: updatedRoomFromDb.id,
-              dbRoomId: updatedRoomFromDb.room_id,
-            }
-          : room
-      ));
-    } catch (error) {
-      console.error("Ошибка при обновлении комнаты зала:", error);
+    if (!currentRoom.hall_room_id) {
+      // Это временный квадрат, отправляем на сервер для создания
+      const newHallRoom: Omit<HallRoomNew, 'id' | 'hall_id'> & { room_id?: number | null } = {
+        name: updatedRoomData.name,
+        x: updatedRoomData.x,
+        y: updatedRoomData.y,
+        width: updatedRoomData.width,
+        height: updatedRoomData.height,
+        color: updatedRoomData.color,
+        metadata: { type: updatedRoomData.type },
+        room_id: updatedRoomData.dbRoomId, // Теперь это room_id из основной таблицы rooms
+      };
+      try {
+        const createdRoom = await createHallRoomNew(hallId, newHallRoom);
+        setRooms(prevRooms => prevRooms.map(room =>
+          room.id === selectedRoomId
+            ? {
+                ...updatedRoomData,
+                id: `room-${createdRoom.id}`,
+                hall_room_id: createdRoom.id,
+                dbRoomId: createdRoom.room_id, // Убеждаемся, что dbRoomId обновляется из ответа сервера
+              }
+            : room
+        ));
+        setSelectedAssignedDbRoomId(createdRoom.room_id); // Обновляем выбранную комнату в селекте
+      } catch (error) {
+        console.error("Ошибка при создании комнаты зала:", error);
+      }
+    } else {
+      // Это уже существующий квадрат, обновляем на сервере
+      const updatedProps: Partial<HallRoomNew> = {
+        name: updatedRoomData.name,
+        color: updatedRoomData.color,
+        metadata: { type: updatedRoomData.type },
+        room_id: updatedRoomData.dbRoomId,
+      };
+
+      try {
+        const updatedRoomFromDb = await updateHallRoomNew(hallId, currentRoom.hall_room_id, updatedProps);
+        setRooms(prevRooms => prevRooms.map(room =>
+          room.id === selectedRoomId
+            ? {
+                ...room,
+                ...updatedRoomFromDb,
+                id: `room-${updatedRoomFromDb.id}`,
+                type: updatedRoomFromDb.metadata?.type || null,
+                hall_room_id: updatedRoomFromDb.id,
+                dbRoomId: updatedRoomFromDb.room_id, // Убеждаемся, что dbRoomId обновляется из ответа сервера
+              }
+            : room
+        ));
+        setSelectedAssignedDbRoomId(updatedRoomFromDb.room_id); // Обновляем выбранную комнату в селекте
+      } catch (error) {
+        console.error("Ошибка при обновлении комнаты зала:", error);
+      }
     }
   };
 
@@ -279,22 +301,30 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
     if (!selectedRoomId) return;
 
     const roomToDelete = rooms.find(room => room.id === selectedRoomId);
-    if (!roomToDelete || !roomToDelete.hall_room_id) return;
+    if (!roomToDelete) return;
 
-    try {
-      await deleteHallRoomNew(hallId, roomToDelete.hall_room_id);
+    if (roomToDelete.hall_room_id) {
+      // Комната существует на сервере, удаляем
+      try {
+        await deleteHallRoomNew(hallId, roomToDelete.hall_room_id);
+        setRooms(prevRooms => prevRooms.filter(room => room.id !== selectedRoomId));
+        setSelectedRoomId(null);
+        setSelectedAssignedDbRoomId(null);
+      } catch (error) {
+        console.error("Ошибка при удалении комнаты зала:", error);
+      }
+    } else {
+      // Это временная комната, просто удаляем с фронтенда
       setRooms(prevRooms => prevRooms.filter(room => room.id !== selectedRoomId));
       setSelectedRoomId(null);
-      setSelectedAssignedDbRoomId(null); // Clear selected assigned room when square is deleted
-    } catch (error) {
-      console.error("Ошибка при удалении комнаты зала:", error);
+      setSelectedAssignedDbRoomId(null);
     }
   };
 
   const exportToJson = () => {
     const dataToExport = {
       hallId: hallId,
-      rooms: rooms.map(room => ({
+      rooms: rooms.filter(room => room.hall_room_id !== undefined).map(room => ({
         id: room.hall_room_id,
         name: room.name,
         x: room.x,
@@ -303,7 +333,7 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
         height: room.height,
         color: room.color,
         metadata: { type: room.type },
-        room_id: room.dbRoomId, // Include dbRoomId in export
+        room_id: room.dbRoomId,
       })),
     };
     setExportedJson(JSON.stringify(dataToExport, null, 2));
