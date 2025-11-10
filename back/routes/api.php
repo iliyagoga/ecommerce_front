@@ -48,6 +48,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/menuitems/{id}', [MenuItemController::class, 'update']); 
         Route::delete('/menuitems/{id}', [MenuItemController::class, 'destroy']);
     });
+
+    // New routes for Halls and HallRooms
+    Route::get('/halls_new', [\App\Http\Controllers\Api\HallNewController::class, 'index']);
+    Route::post('/halls_new', [\App\Http\Controllers\Api\HallNewController::class, 'store']);
+    Route::get('/halls_new/{hallNew}', [\App\Http\Controllers\Api\HallNewController::class, 'show']);
+    Route::put('/halls_new/{hallNew}', [\App\Http\Controllers\Api\HallNewController::class, 'update']);
+    Route::delete('/halls_new/{hallNew}', [\App\Http\Controllers\Api\HallNewController::class, 'destroy']);
+
+    Route::get('/halls_new/{hallNew}/hall_rooms_new', [\App\Http\Controllers\Api\HallRoomNewController::class, 'index']);
+    Route::post('/halls_new/{hallNew}/hall_rooms_new', [\App\Http\Controllers\Api\HallRoomNewController::class, 'store']);
+    Route::get('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', [\App\Http\Controllers\Api\HallRoomNewController::class, 'show']);
+    Route::put('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', [\App\Http\Controllers\Api\HallRoomNewController::class, 'update']);
+    Route::delete('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', [\App\Http\Controllers\Api\HallRoomNewController::class, 'destroy']);
 });
 
 ?>

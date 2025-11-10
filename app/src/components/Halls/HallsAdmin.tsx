@@ -4,12 +4,13 @@ declare module 'd3';
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
-import { getRooms } from '@/api';
-import { Room } from '@/types';
+import { Room, HallRoomNew } from '@/types'; // Import HallRoomNew, and Room
+import { getHallRoomsNew, createHallRoomNew, updateHallRoomNew, deleteHallRoomNew, getRooms } from '@/api'; // Import new API functions and getRooms
 
 interface HallData {
   width: number;
   height: number;
+  svg_background?: string;
 }
 
 interface RoomData {
@@ -21,7 +22,12 @@ interface RoomData {
   color: string;
   name: string;
   type: 'vip' | 'standard' | 'cinema' | null; // Allow null for initially undefined type
-  dbRoomId: number | undefined; // Changed to number | undefined
+  hall_room_id?: number; // New field to store the actual ID from the backend
+  dbRoomId?: number; // Add this back to link to the original Room id
+}
+
+interface HallsAdminProps {
+  hallId: number;
 }
 
 const ToolbarContainer = styled.div`
@@ -48,23 +54,6 @@ const ToolbarButton = styled.button<{ $color?: string }>`
   &:hover {
     opacity: 0.8;
   }
-`;
-
-const ColorInput = styled.input`
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #FCD25E;
-  background-color: #333;
-  color: white;
-`;
-
-const NumberInput = styled.input`
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #FCD25E;
-  background-color: #333;
-  color: white;
-  width: 80px;
 `;
 
 const JsonOutputContainer = styled.div`
@@ -97,7 +86,7 @@ const JsonPre = styled.pre`
   font-size: 0.85rem;
 `;
 
-const HallsAdmin: React.FC = () => {
+const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hall, setHall] = useState<HallData>({ width: 1000, height: 600 });
   const [rooms, setRooms] = useState<RoomData[]>([]);
@@ -110,16 +99,42 @@ const HallsAdmin: React.FC = () => {
     return rooms.filter(room => room.dbRoomId !== undefined).map(room => room.dbRoomId as number);
   }, [rooms]);
 
+  // Effect to fetch hall rooms (HallRoomNew) from the backend
   useEffect(() => {
-    const fetchRoomTypes = async () => {
+    const fetchHallRooms = async () => {
+      try {
+        const fetchedRooms = await getHallRoomsNew(hallId);
+        setRooms(fetchedRooms.map(room => ({
+          id: `room-${room.id}`,
+          x: room.x,
+          y: room.y,
+          width: room.width,
+          height: room.height,
+          color: room.color,
+          name: room.name,
+          type: JSON.parse(room.metadata) !== null ? JSON.parse(room.metadata).type : null,
+          hall_room_id: room.id,
+          dbRoomId: room.room_id, // Map the room_id from HallRoomNew to dbRoomId
+        })));
+       
+      } catch (error) {
+        console.error("Ошибка при загрузке комнат зала:", error);
+      }
+    };
+    fetchHallRooms();
+  }, [hallId]); // Refetch when hallId changes
+
+  // Effect to fetch all available rooms (Room) from the database
+  useEffect(() => {
+    const fetchAvailableDbRooms = async () => {
       try {
         const roomsFromDb = await getRooms();
         setAvailableDbRooms(roomsFromDb);
       } catch (error) {
-        console.error("Ошибка при загрузке комнат:", error);
+        console.error("Ошибка при загрузке доступных комнат:", error);
       }
     };
-    fetchRoomTypes();
+    fetchAvailableDbRooms();
   }, []);
 
   useEffect(() => {
@@ -144,7 +159,7 @@ const HallsAdmin: React.FC = () => {
             d3.selectAll<SVGRectElement, RoomData>('.room rect').attr('stroke', '#000').attr('stroke-width', 1);
             d3.select(this).select('rect').attr('stroke', '#FCD25E').attr('stroke-width', 3);
             setSelectedRoomId(d.id);
-            setSelectedAssignedDbRoomId(d.dbRoomId);
+            setSelectedAssignedDbRoomId(d.dbRoomId); // Set selected DB room ID when square is selected
           })
           .call(d3.drag<SVGGElement, RoomData>()
             .on('start', function(event, d) {
@@ -155,8 +170,15 @@ const HallsAdmin: React.FC = () => {
                 .attr('transform', `translate(${d.x = event.x}, ${d.y = event.y})`);
               setRooms(prevRooms => prevRooms.map(room => room.id === d.id ? { ...room, x: d.x, y: d.y } : room));
             })
-            .on('end', function() {
+            .on('end', async function(event, d) {
               d3.select(this).attr("stroke", null);
+              if (d.hall_room_id) {
+                try {
+                  await updateHallRoomNew(hallId, d.hall_room_id, { x: d.x, y: d.y });
+                } catch (error) {
+                  console.error("Ошибка при обновлении координат комнаты зала:", error);
+                }
+              }
             })
           ),
         update => update.attr('transform', (d: RoomData) => `translate(${d.x}, ${d.y})`),
@@ -179,57 +201,110 @@ const HallsAdmin: React.FC = () => {
 
   }, [hall, rooms, selectedRoomId]);
 
-  const addSquare = () => {
+  const addSquare = async () => {
     if (rooms.length >= availableDbRooms.length) return; // Disable if all rooms are used
 
-    const newRoom: RoomData = {
-      id: `room-${Date.now()}`,
+    const newHallRoom: Omit<HallRoomNew, 'id' | 'hall_id'> = {
+      name: 'Квадрат',
       x: 50,
       y: 50,
       width: 100,
       height: 100,
-      color: '#888', // Default grey color
-      name: 'Квадрат',
-      type: null,
-      dbRoomId: undefined,
+      color: '#888',
+      metadata: null,
+      room_id: undefined, // Initially no room assigned
     };
-    setRooms(prevRooms => [...prevRooms, newRoom]);
+    try {
+      const createdRoom = await createHallRoomNew(hallId, newHallRoom);
+      setRooms(prevRooms => [
+        ...prevRooms,
+        {
+          id: `room-${createdRoom.id}`,
+          x: createdRoom.x,
+          y: createdRoom.y,
+          width: createdRoom.width,
+          height: createdRoom.height,
+          color: createdRoom.color,
+          name: createdRoom.name,
+          type: createdRoom.metadata?.type || null,
+          hall_room_id: createdRoom.id,
+          dbRoomId: createdRoom.room_id, // Map the room_id from HallRoomNew to dbRoomId
+        },
+      ]);
+    } catch (error) {
+      console.error("Ошибка при создании комнаты зала:", error);
+    }
   };
 
-  const assignRoomToSelectedSquare = (selectedRoomIdFromDb: number | null | undefined) => {
+  const assignRoomToSelectedSquare = async (selectedRoomIdFromDb: number | null | undefined) => {
     if (!selectedRoomId || selectedRoomIdFromDb === null || selectedRoomIdFromDb === undefined) return;
 
     const roomToAssign = availableDbRooms.find(room => room.room_id === selectedRoomIdFromDb);
     if (!roomToAssign) return;
 
-    setRooms(prevRooms => prevRooms.map(room => {
-      if (room.id === selectedRoomId) {
-        let color = '#888'; // standard (серый)
-        if (roomToAssign.type === 'vip') { color = 'orange'; }
-        else if (roomToAssign.type === 'cinema') { color = 'blue'; }
-        
-        return { 
-          ...room, 
-          color: color, 
-          name: roomToAssign.name,
-          type: roomToAssign.type || null,
-          dbRoomId: roomToAssign.room_id
-        };
-      }
-      return room;
-    }));
+    const currentRoom = rooms.find(room => room.id === selectedRoomId);
+    if (!currentRoom || !currentRoom.hall_room_id) return;
+
+    let color = '#888'; // standard (серый)
+    if (roomToAssign.type === 'vip') { color = 'orange'; }
+    else if (roomToAssign.type === 'cinema') { color = 'blue'; }
+
+    const updatedProps: Partial<HallRoomNew> = {
+      name: roomToAssign.name,
+      color: color,
+      metadata: { type: roomToAssign.type || null },
+      room_id: roomToAssign.room_id, // Correctly assign room_id here
+    };
+
+    try {
+      const updatedRoomFromDb = await updateHallRoomNew(hallId, currentRoom.hall_room_id, updatedProps);
+      setRooms(prevRooms => prevRooms.map(room =>
+        room.id === selectedRoomId
+          ? {
+              ...room,
+              ...updatedRoomFromDb,
+              id: `room-${updatedRoomFromDb.id}`,
+              type: updatedRoomFromDb.metadata?.type || null,
+              hall_room_id: updatedRoomFromDb.id,
+              dbRoomId: updatedRoomFromDb.room_id,
+            }
+          : room
+      ));
+    } catch (error) {
+      console.error("Ошибка при обновлении комнаты зала:", error);
+    }
   };
 
-  const deleteSelected = () => {
-    setRooms(prevRooms => prevRooms.filter(room => room.id !== selectedRoomId));
-    setSelectedRoomId(null);
-    setSelectedAssignedDbRoomId(null); // Clear selected assigned room when square is deleted
+  const deleteSelected = async () => {
+    if (!selectedRoomId) return;
+
+    const roomToDelete = rooms.find(room => room.id === selectedRoomId);
+    if (!roomToDelete || !roomToDelete.hall_room_id) return;
+
+    try {
+      await deleteHallRoomNew(hallId, roomToDelete.hall_room_id);
+      setRooms(prevRooms => prevRooms.filter(room => room.id !== selectedRoomId));
+      setSelectedRoomId(null);
+      setSelectedAssignedDbRoomId(null); // Clear selected assigned room when square is deleted
+    } catch (error) {
+      console.error("Ошибка при удалении комнаты зала:", error);
+    }
   };
 
   const exportToJson = () => {
     const dataToExport = {
-      hall: hall,
-      rooms: rooms,
+      hallId: hallId,
+      rooms: rooms.map(room => ({
+        id: room.hall_room_id,
+        name: room.name,
+        x: room.x,
+        y: room.y,
+        width: room.width,
+        height: room.height,
+        color: room.color,
+        metadata: { type: room.type },
+        room_id: room.dbRoomId, // Include dbRoomId in export
+      })),
     };
     setExportedJson(JSON.stringify(dataToExport, null, 2));
   };
@@ -256,7 +331,7 @@ const HallsAdmin: React.FC = () => {
             </option>
           ))}
         </select>
-
+        
         <ToolbarButton onClick={deleteSelected} $color="#dc3545">Удалить</ToolbarButton>
         <ToolbarButton onClick={exportToJson} $color="#FCD25E">Выгрузить JSON</ToolbarButton>
       </ToolbarContainer>

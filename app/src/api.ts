@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Room, Category, Order } from './types';
+import { Room, Category, Order, HallNew, HallRoomNew } from './types';
 export const HOST_URL = "http://localhost:8000";
 const BASE_URL_API = '/api';
 
@@ -198,5 +198,43 @@ export const updateOrderStatus = async (id: number, status: Order['status']): Pr
 
 export const createOrder = async (orderData: any) => {
   return (await api.post('/orders', orderData));
+};
+
+// API functions for HallsNew
+export const getHallsNew = async (): Promise<HallNew[]> => {
+  return (await api.get('/halls_new')).data;
+};
+
+export const getHallNewById = async (id: number): Promise<HallNew | undefined> => {
+  return (await api.get(`/halls_new/${id}`)).data;
+};
+
+export const createHallNew = async (hall: Omit<HallNew, 'id' | 'hall_rooms_new_count'>): Promise<HallNew> => {
+  return (await api.post('/halls_new', hall)).data;
+};
+
+export const updateHallNew = async (id: number, hall: Partial<HallNew>): Promise<HallNew> => {
+  return (await api.put(`/halls_new/${id}`, hall)).data;
+};
+
+export const deleteHallNew = async (id: number): Promise<void> => {
+  await api.delete(`/halls_new/${id}`);
+};
+
+// API functions for HallRoomsNew
+export const getHallRoomsNew = async (hallId: number): Promise<HallRoomNew[]> => {
+  return (await api.get(`/halls_new/${hallId}/hall_rooms_new`)).data;
+};
+
+export const createHallRoomNew = async (hallId: number, room: Omit<HallRoomNew, 'id' | 'hall_id'>): Promise<HallRoomNew> => {
+  return (await api.post(`/halls_new/${hallId}/hall_rooms_new`, room)).data;
+};
+
+export const updateHallRoomNew = async (hallId: number, roomId: number, room: Partial<HallRoomNew>): Promise<HallRoomNew> => {
+  return (await api.put(`/halls_new/${hallId}/hall_rooms_new/${roomId}`, room)).data;
+};
+
+export const deleteHallRoomNew = async (hallId: number, roomId: number): Promise<void> => {
+  await api.delete(`/halls_new/${hallId}/hall_rooms_new/${roomId}`);
 };
 

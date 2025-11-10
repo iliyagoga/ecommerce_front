@@ -44,3 +44,25 @@ export interface Order {
   start_time: string;
   end_time: string;
 }
+
+export interface HallNew {
+  id?: number;
+  name: string;
+  width: number;
+  height: number;
+  svg_background?: string;
+  hall_rooms_new_count?: number; // Added for hall list view
+}
+
+export interface HallRoomNew {
+  id?: number;
+  hall_id: number;
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  metadata?: any;
+  room_id?: number; // Add room_id to HallRoomNew interface
+}
