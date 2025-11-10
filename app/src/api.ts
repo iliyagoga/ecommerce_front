@@ -252,3 +252,24 @@ export const getHallRoomsAvailability = async (hallId: number, date: string, sta
   })).data;
 };
 
+// Cart API functions
+export const getCart = async (): Promise<any> => {
+  return (await api.get('/cart')).data;
+};
+
+export const addRoomToCart = async (roomData: any): Promise<any> => {
+  return (await api.post('/cart/room', roomData)).data;
+};
+
+export const updateCartRoom = async (cartRoomId: number, roomData: any): Promise<any> => {
+  return (await api.put(`/cart/room/${cartRoomId}`, roomData)).data;
+};
+
+export const removeCartRoom = async (cartRoomId: number): Promise<void> => {
+  await api.delete(`/cart/room/${cartRoomId}`);
+};
+
+export const clearUserCart = async (): Promise<void> => {
+  await api.delete('/cart/clear');
+};
+

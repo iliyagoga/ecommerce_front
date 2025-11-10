@@ -61,6 +61,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // New route for getting hall room availability
         Route::get('/halls_new/{hallNew}/hall_rooms_availability', [\App\Http\Controllers\Api\HallRoomNewController::class, 'getHallRoomsAvailability']);
+
+        // Cart routes
+        Route::get('/cart', [\App\Http\Controllers\Api\CartController::class, 'show']);
+        Route::post('/cart/room', [\App\Http\Controllers\Api\CartController::class, 'addRoom']);
+        Route::put('/cart/room/{cartRoom}', [\App\Http\Controllers\Api\CartController::class, 'updateRoom']);
+        Route::delete('/cart/room/{cartRoom}', [\App\Http\Controllers\Api\CartController::class, 'removeRoom']);
+        Route::delete('/cart/clear', [\App\Http\Controllers\Api\CartController::class, 'clearCart']);
     });
 
 

@@ -90,7 +90,7 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
       .attr('width', hall.width)
       .attr('height', hall.height)
       .attr('fill', '#333') // Фон холста
-      .attr('stroke', '#FCD25E');
+      .attr('stroke', '#FFFFFF');
 
     const roomElements = svg.selectAll<SVGGElement, RoomData>('.room')
       .data(rooms, (d: RoomData) => d.id)

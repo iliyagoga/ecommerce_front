@@ -17,7 +17,7 @@ const BookingPage: React.FC = () => {
   return (<>
     <Header></Header>
     <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Бронь', href: '/booking' }]} />
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, backgroundColor: '#202020', minHeight: '100vh', color: 'white' }}>
       <Typography variant="h4" gutterBottom>
         Бронирование Комнат
       </Typography>
@@ -29,6 +29,16 @@ const BookingPage: React.FC = () => {
           onChange={(e) => setSelectedDate(e.target.value)}
           InputLabelProps={{
             shrink: true,
+            sx: { color: 'white' }
+          }}
+          sx={{
+            '& .MuiInputBase-input': { color: 'white' },
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: 'white' },
+              '&:hover fieldset': { borderColor: 'white' },
+              '&.Mui-focused fieldset': { borderColor: 'white' },
+              backgroundColor: '#333',
+            },
           }}
         />
         <TextField
@@ -38,6 +48,16 @@ const BookingPage: React.FC = () => {
           onChange={(e) => setSelectedStartTime(e.target.value)}
           InputLabelProps={{
             shrink: true,
+            sx: { color: 'white' }
+          }}
+          sx={{
+            '& .MuiInputBase-input': { color: 'white' },
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: 'white' },
+              '&:hover fieldset': { borderColor: 'white' },
+              '&.Mui-focused fieldset': { borderColor: 'white' },
+              backgroundColor: '#333',
+            },
           }}
         />
         <TextField
@@ -47,6 +67,16 @@ const BookingPage: React.FC = () => {
           onChange={(e) => setSelectedEndTime(e.target.value)}
           InputLabelProps={{
             shrink: true,
+            sx: { color: 'white' }
+          }}
+          sx={{
+            '& .MuiInputBase-input': { color: 'white' },
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: 'white' },
+              '&:hover fieldset': { borderColor: 'white' },
+              '&.Mui-focused fieldset': { borderColor: 'white' },
+              backgroundColor: '#333',
+            },
           }}
         />
       </Box>

@@ -88,3 +88,42 @@ export interface HallRoomNew {
   room_id?: number | null; // Allow null for room_id
   is_available_for_booking?: boolean; // New field for booking availability
 }
+
+export interface CartRoom {
+  id?: number;
+  cart_id: number;
+  room_id: number;
+  booked_hours: number;
+  booked_date: string;
+  booked_time_start: string;
+  booked_time_end: string;
+  room_price_per_hour: number;
+  created_at?: string;
+  updated_at?: string;
+  room?: Room; // Добавляем отношение room для фронтенда
+}
+
+export interface Cart {
+  id?: number;
+  user_id: number;
+  created_at?: string;
+  updated_at?: string;
+  cartRooms?: CartRoom[];
+  user?: User;
+}
+
+// types/loading.ts
+export interface LoadingIndicatorProps {
+  size?: 'small' | 'medium' | 'large';
+  color?: string;
+  text?: string;
+  fullScreen?: boolean;
+  overlay?: boolean;
+}
+
+export interface SkeletonLoadingProps {
+  count?: number;
+  width?: string;
+  height?: string;
+  fullScreen?: boolean;
+}
