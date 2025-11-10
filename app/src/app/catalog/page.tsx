@@ -5,6 +5,8 @@ import { Room, Product } from '@/types'; // Импортируем интерф�
 import Image from 'next/image';
 import { getRooms, getProducts, HOST_URL } from '@/api'; // Импортируем getRooms и getProducts из API
 import Header from '@/components/Header/Header';
+import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs'; // Импортируем компонент Breadcrumbs
+import { useRouter } from 'next/navigation';
 
 const PageContainer = styled.div`
   padding: 2rem;
@@ -82,8 +84,9 @@ const ProductPrice = styled.p`
 `;
 
 const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
+    const router = useRouter();
     return (
-        <RoomCardContainer>
+        <RoomCardContainer onClick={() => router.push(`/room/${room.room_id}`)}>
             {room.preview_img && (
                 <RoomImage src={`${HOST_URL}${room.preview_img}`} alt={room.name} width={300} height={200} />
             )}
@@ -144,6 +147,7 @@ const CatalogPage = () => {
 
     return (<>
         <Header></Header>
+        <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Каталог', href: '/catalog' }]} />
         <PageContainer>
             <Title>Каталог комнат</Title>
             <RoomsGrid>
