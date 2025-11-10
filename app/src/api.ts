@@ -43,8 +43,6 @@ export const loginUser = async (credentials: any): Promise<any> => {
 
 export const logoutUser = (): void => {
   localStorage.removeItem('authToken');
-  // Возможно, здесь потребуется также отправить запрос на бэкенд для аннулирования токена, 
-  // но для простой реализации пока ограничимся удалением из localStorage.
 };
 
 export const getAuthUser = async (): Promise<any> => {
