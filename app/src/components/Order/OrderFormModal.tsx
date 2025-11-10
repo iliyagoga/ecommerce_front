@@ -33,7 +33,7 @@ interface RoomForm {
   booked_date: string;
   booked_time_start: string;
   booked_time_end: string;
-  base_hourly_rate: string;
+  room_price_per_hour: string; // Changed from base_hourly_rate to room_price_per_hour
 }
 
 const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderCreated }) => {
@@ -41,18 +41,17 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
   const [totalPrice, setTotalPrice] = useState<string>('');
   const [clientComment, setClientComment] = useState<string>('');
   const [adminComment, setAdminComment] = useState<string>('');
-  const [startTime, setStartTime] = useState<string>('');
-  const [endTime, setEndTime] = useState<string>('');
-  const [rooms, setRooms] = useState<RoomForm[]>([
-    {
-      room_id: '',
-      booked_hours: '',
-      booked_date: '',
-      booked_time_start: '',
-      booked_time_end: '',
-      base_hourly_rate: '',
-    },
-  ]);
+  // Убраны startTime и endTime, так как они будут вычисляться на бэкенде
+
+  const [room, setRoom] = useState<RoomForm>({
+    room_id: '',
+    booked_hours: '',
+    booked_date: '',
+    booked_time_start: '',
+    booked_time_end: '',
+    room_price_per_hour: '',
+  });
+
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
 
@@ -76,36 +75,16 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
     }
   }, [open]);
 
-  const handleAddRoom = () => {
-    setRooms([
-      ...rooms,
-      {
-        room_id: '',
-        booked_hours: '',
-        booked_date: '',
-        booked_time_start: '',
-        booked_time_end: '',
-        base_hourly_rate: '',
-      },
-    ]);
-  };
-
-  const handleRemoveRoom = (index: number) => {
-    const newRooms = rooms.filter((_, i) => i !== index);
-    setRooms(newRooms);
-  };
-
-  const handleRoomChange = (index: number, field: keyof RoomForm, value: string) => {
-    const newRooms = [...rooms];
-    newRooms[index][field] = value;
+  const handleRoomChange = (field: keyof RoomForm, value: string) => {
+    const newRoom = { ...room, [field]: value };
 
     if (field === 'room_id') {
-      const selectedRoom = availableRooms.find(room => room.room_id === parseInt(value));
+      const selectedRoom = availableRooms.find(r => r.room_id === parseInt(value));
       if (selectedRoom) {
-        newRooms[index].base_hourly_rate = selectedRoom.base_hourly_rate + "";
+        newRoom.room_price_per_hour = selectedRoom.base_hourly_rate + '';
       }
     }
-    setRooms(newRooms);
+    setRoom(newRoom);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -115,17 +94,14 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
       status: "pending",
       total_price: parseFloat(totalPrice),
       client_comment: clientComment,
-      admin_comment: adminComment,
-      start_time: startTime,
-      end_time: endTime,
-      rooms: rooms.map((room) => ({
-        room_id: parseInt(room.room_id),
-        booked_hours: parseInt(room.booked_hours),
-        booked_date: room.booked_date,
-        booked_time_start: room.booked_time_start,
-        booked_time_end: room.booked_time_end,
-        room_price_per_hour: parseFloat(room.base_hourly_rate),
-      })),
+      admin_comment: adminComment, // Предполагаем, что adminComment не используется в этой форме или будет удален
+      // start_time и end_time больше не отправляются, так как вычисляются на бэкенде
+      room_id: parseInt(room.room_id),
+      booked_hours: parseInt(room.booked_hours),
+      booked_date: room.booked_date,
+      booked_time_start: room.booked_time_start,
+      booked_time_end: room.booked_time_end,
+      room_price_per_hour: parseFloat(room.room_price_per_hour),
     };
 
     try {
@@ -134,22 +110,20 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
       onOrderCreated();
       router.refresh();
       onClose();
+      // Очистка полей формы
       setTotalPrice('');
       setClientComment('');
       setAdminComment('');
-      setStartTime('');
-      setEndTime('');
-      setRooms([
-        {
-          room_id: '',
-          booked_hours: '',
-          booked_date: '',
-          booked_time_start: '',
-          booked_time_end: '',
-          base_hourly_rate: '',
-        },
-      ]);
+      setRoom({
+        room_id: '',
+        booked_hours: '',
+        booked_date: '',
+        booked_time_start: '',
+        booked_time_end: '',
+        room_price_per_hour: '',
+      });
     } catch (error) {
+      console.error('Ошибка при создании заказа:', error);
       setError('Не удалось создать заказ. Пожалуйста, попробуйте еще раз.');
     }
   };
@@ -194,119 +168,92 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
                   multiline
                   rows={2} />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Время начала"
-                  fullWidth
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  margin="normal"
-                  type="datetime-local"
-                  InputLabelProps={{ shrink: true }}
-                  required />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Время окончания"
-                  fullWidth
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  margin="normal"
-                  type="datetime-local"
-                  InputLabelProps={{ shrink: true }}
-                  required />
-              </Grid>
+              {/* Убраны поля startTime и endTime, так как они вычисляются на бэкенде */}
 
               <Grid item xs={12}>
-                <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>Комнаты</Typography>
+                <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>Комната</Typography>
                 {loadingRooms ? (
                   <CircularProgress />
                 ) : (
-                  rooms.map((room, index) => (
-                    <Box key={index} sx={{ border: '1px solid #ccc', p: 2, mb: 2, borderRadius: '4px' }}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                          <FormControl fullWidth margin="normal" required>
-                            <InputLabel id={`room-select-label-${index}`}>Комната</InputLabel>
-                            <Select
-                              labelId={`room-select-label-${index}`}
-                              id={`room-select-${index}`}
-                              value={room.room_id}
-                              label="Комната"
-                              onChange={(e) => handleRoomChange(index, 'room_id', e.target.value as string)}
-                            >
-                              {availableRooms.map((r) => (
-                                <MenuItem key={r.room_id} value={r.room_id}>
-                                  {r.name} (ID: {r.room_id}, Price: {r.base_hourly_rate})
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            label="Забронировано Часов"
-                            fullWidth
-                            value={room.booked_hours}
-                            onChange={(e) => handleRoomChange(index, 'booked_hours', e.target.value)}
-                            margin="normal"
-                            type="number"
-                            required />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            label="Дата Бронирования"
-                            fullWidth
-                            value={room.booked_date}
-                            onChange={(e) => handleRoomChange(index, 'booked_date', e.target.value)}
-                            margin="normal"
-                            type="date"
-                            InputLabelProps={{ shrink: true }}
-                            required />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            label="Время начала бронирования"
-                            fullWidth
-                            value={room.booked_time_start}
-                            onChange={(e) => handleRoomChange(index, 'booked_time_start', e.target.value)}
-                            margin="normal"
-                            type="time"
-                            InputLabelProps={{ shrink: true }}
-                            required />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            label="Время окончания бронирования"
-                            fullWidth
-                            value={room.booked_time_end}
-                            onChange={(e) => handleRoomChange(index, 'booked_time_end', e.target.value)}
-                            margin="normal"
-                            type="time"
-                            InputLabelProps={{ shrink: true }}
-                            required />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            label="Цена за час"
-                            fullWidth
-                            value={room.base_hourly_rate}
-                            onChange={(e) => handleRoomChange(index, 'base_hourly_rate', e.target.value)}
-                            margin="normal"
-                            type="number"
-                            inputProps={{ step: '0.01' }}
-                            required
-                            disabled
-                          />
-                        </Grid>
-                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                          <IconButton color="error" onClick={() => handleRemoveRoom(index)}>
-                            -
-                          </IconButton>
-                        </Grid>
+                  <Box sx={{ border: '1px solid #ccc', p: 2, mb: 2, borderRadius: '4px' }}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <FormControl fullWidth margin="normal" required>
+                          <InputLabel id="room-select-label">Комната</InputLabel>
+                          <Select
+                            labelId="room-select-label"
+                            id="room-select"
+                            value={room.room_id}
+                            label="Комната"
+                            onChange={(e) => handleRoomChange('room_id', e.target.value as string)}
+                          >
+                            {availableRooms.map((r) => (
+                              <MenuItem key={r.room_id} value={r.room_id}>
+                                {r.name} (ID: {r.room_id}, Price: {r.base_hourly_rate})
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </Grid>
-                    </Box>
-                  )))}
+                      <Grid item xs={12}>
+                        <TextField
+                          label="Забронировано Часов"
+                          fullWidth
+                          value={room.booked_hours}
+                          onChange={(e) => handleRoomChange('booked_hours', e.target.value)}
+                          margin="normal"
+                          type="number"
+                          required />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          label="Дата Бронирования"
+                          fullWidth
+                          value={room.booked_date}
+                          onChange={(e) => handleRoomChange('booked_date', e.target.value)}
+                          margin="normal"
+                          type="date"
+                          InputLabelProps={{ shrink: true }}
+                          required />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          label="Время начала бронирования"
+                          fullWidth
+                          value={room.booked_time_start}
+                          onChange={(e) => handleRoomChange('booked_time_start', e.target.value)}
+                          margin="normal"
+                          type="time"
+                          InputLabelProps={{ shrink: true }}
+                          required />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          label="Время окончания бронирования"
+                          fullWidth
+                          value={room.booked_time_end}
+                          onChange={(e) => handleRoomChange('booked_time_end', e.target.value)}
+                          margin="normal"
+                          type="time"
+                          InputLabelProps={{ shrink: true }}
+                          required />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          label="Цена за час"
+                          fullWidth
+                          value={room.room_price_per_hour}
+                          onChange={(e) => handleRoomChange('room_price_per_hour', e.target.value)}
+                          margin="normal"
+                          type="number"
+                          inputProps={{ step: '0.01' }}
+                          required
+                          disabled
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
               </Grid>
             </Grid>
           </form>

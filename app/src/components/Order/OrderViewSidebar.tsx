@@ -26,7 +26,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {
   Order,
   Product,
-  Room
+  OrderRoom
 } from '@/types';
 import {
   getRoomById,
@@ -41,32 +41,36 @@ interface OrderViewSidebarProps {
 }
 
 const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, order }) => {
-  const [room, setRoom] = useState<Room | null>(null);
+  const [orderRoom, setOrderRoom] = useState<OrderRoom | null>(null); // Теперь orderRoom
+  const [roomName, setRoomName] = useState<string | null>(null); // Для хранения названия комнаты
   const [productsMap, setProductsMap] = useState<Map<number, Product>>(new Map());
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [orderDetails, setOrderDetails] = useState<Order | null>(null); // Новое состояние для полных деталей заказа
 
-
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        if (!order || !order.order_id) return;
-        const full = await getOrderById(order?.order_id);
-        console.log(full)
-      } catch (error) {
-        
-      }
-    }
-    fetchOrder()
-  },[])
   useEffect(() => {
     const fetchData = async () => {
       if (!order || !order.order_id) return;
       setLoading(true);
       setError(null);
       try {
-        const fetchedRoom = await getRoomById(order.order_id);
-        setRoom(fetchedRoom || null);
+        const fetchedOrder = await getOrderById(order.order_id);
+        setOrderDetails(fetchedOrder || null);
+        console.log(fetchedOrder)
+        if (fetchedOrder && fetchedOrder.order_rooms && fetchedOrder.order_rooms.length > 0) {
+          const roomData = fetchedOrder.order_rooms[0]; // Получаем данные orderRoom
+          console.log(roomData)
+          setOrderRoom(roomData);
+
+          // Делаем отдельный запрос для получения названия комнаты
+          if (roomData.room_id) {
+            const fetchedRoomDetails = await getRoomById(roomData.room_id);
+            setRoomName(fetchedRoomDetails?.name || null);
+          }
+        } else {
+          setOrderRoom(null);
+          setRoomName(null);
+        }
 
         const allProducts = await getProducts();
         const productsMap = new Map<number, Product>();
@@ -114,37 +118,37 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
           </Box>
         )}
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {!loading && !error && (
+        {!loading && !error && orderDetails && ( // Добавляем orderDetails в условие рендеринга
           <List dense>
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Клиент: ${order.client_name}`} />
+              <ListItemText primary={`Клиент: ${orderDetails.user?.name || 'N/A'}`} />
             </ListItem>
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Телефон: ${order.client_email}`} />
+              <ListItemText primary={`Email: ${orderDetails.user?.email || 'N/A'}`} />
             </ListItem>
-            {order.client_comment && (
+            {orderDetails.client_comment && (
               <ListItem>
                 <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-                <ListItemText primary={`Комментарий: ${order.client_comment}`} />
+                <ListItemText primary={`Комментарий клиента: ${orderDetails.client_comment}`} />
               </ListItem>
             )}
 
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Итоговая цена: ${order.total_price}`} />
+              <ListItemText primary={`Общая цена: ${orderDetails.total_price}`} />
             </ListItem>
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Статус: ${order.status}`} />
+              <ListItemText primary={`Статус: ${orderDetails.status}`} />
             </ListItem>
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
               <ListItemText
-                primary={`Дата начала: ${
-                  order.start_time
-                    ? new Date(order.start_time).toLocaleDateString('ru-RU')
+                primary={`Время начала: ${
+                  orderDetails.start_time
+                    ? new Date(orderDetails.start_time).toLocaleString('ru-RU')
                     : '-'
                 }`}
               />
@@ -152,9 +156,9 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
               <ListItemText
-                primary={`Дата окончания: ${
-                  order.end_time
-                    ? new Date(order.end_time).toLocaleDateString('ru-RU')
+                primary={`Время окончания: ${
+                  orderDetails.end_time
+                    ? new Date(orderDetails.end_time).toLocaleString('ru-RU')
                     : '-'
                 }`}
               />
@@ -162,12 +166,12 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
             <ListItem>
               <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
               <ListItemText
-                primary={`Общее количество часов: ${
+                primary={`Забронировано часов: ${
                   (() => {
-                    if (!order.start_time || !order.end_time) return '-';
+                    if (!orderDetails.start_time || !orderDetails.end_time) return '-';
 
-                    const start = new Date(order.start_time);
-                    const end = new Date(order.end_time);
+                    const start = new Date(orderDetails.start_time);
+                    const end = new Date(orderDetails.end_time);
 
                     if (isNaN(start.getTime()) || isNaN(end.getTime())) return '-';
 
@@ -182,16 +186,17 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
             <Divider sx={{ my: 2, borderColor: '#444' }} />
 
             <Typography variant="subtitle1" gutterBottom>Комната:</Typography>
-            {room ? (
+
+            {orderRoom ? (
               <ListItem>
                 <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-                <ListItemText primary={`${room.name} (${room.type})`} secondary={`Цена за час: ${room.base_hourly_rate} руб.`} />
+                <ListItemText primary={`${roomName || 'N/A'}`} secondary={`Цена за час: ${orderRoom.room_price_per_hour} руб.`} />
               </ListItem>
-            ) : (
+            ) : (orderDetails && orderDetails.order_rooms && orderDetails.order_rooms.length === 0 ? (
               <ListItem>
                 <ListItemText primary="Комната не найдена" />
               </ListItem>
-            )}
+            ) : null)}
 
             <Divider sx={{ my: 2, borderColor: '#444' }} />
   

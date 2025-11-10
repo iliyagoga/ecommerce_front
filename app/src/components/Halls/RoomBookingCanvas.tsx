@@ -5,7 +5,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
 import { Room, HallRoomNew } from '@/types';
-import { getHallRoomsNew, getRooms } from '@/api';
+import { getHallRoomsNew, getRooms, getHallRoomsAvailability } from '@/api';
 
 interface HallData {
   width: number;
@@ -29,9 +29,12 @@ interface RoomData {
 
 interface RoomBookingCanvasProps {
   hallId: number;
+  selectedDate: string;
+  selectedStartTime: string;
+  selectedEndTime: string;
 }
 
-const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId }) => {
+const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedDate, selectedStartTime, selectedEndTime }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hall, setHall] = useState<HallData>({ width: 1000, height: 600 });
   const [rooms, setRooms] = useState<RoomData[]>([]);
@@ -41,19 +44,19 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId }) => {
   useEffect(() => {
     const fetchHallAndDbRooms = async () => {
       try {
-        const [fetchedHallRooms, fetchedDbRooms] = await Promise.all([
-          getHallRoomsNew(hallId),
-          getRooms(),
-        ]);
+        const fetchedHallRoomsWithAvailability = await getHallRoomsAvailability(hallId, selectedDate, selectedStartTime, selectedEndTime);
+        const fetchedDbRooms = await getRooms(); // Still need this to get full Room data for metadata
 
         setAllDbRooms(fetchedDbRooms);
 
-        setRooms(fetchedHallRooms.map(hallRoom => {
+        setRooms(fetchedHallRoomsWithAvailability.map(hallRoom => {
           const correspondingDbRoom = fetchedDbRooms.find(dbRoom => dbRoom.room_id === hallRoom.room_id);
-          const isAvailable: boolean = correspondingDbRoom && correspondingDbRoom.is_available !== undefined ? correspondingDbRoom.is_available : false;
-          let displayColor = hallRoom.color;
+          // is_available_for_booking приходит из бэкенда
+          const isAvailable: boolean = hallRoom.is_available_for_booking ?? false;
+          
+          let displayColor = hallRoom.color; // Используем цвет из HallRoomNew по умолчанию
           if (!isAvailable) {
-            displayColor = 'black'; // Unavailable rooms are black
+            displayColor = 'red'; // Забронированные комнаты красные
           }
 
           return {
@@ -75,7 +78,7 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId }) => {
       }
     };
     fetchHallAndDbRooms();
-  }, [hallId]);
+  }, [hallId, selectedDate, selectedStartTime, selectedEndTime]); // Refetch when hallId, date or time changes
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -111,7 +114,7 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId }) => {
       .attr('width', (d: RoomData) => d.width)
       .attr('height', (d: RoomData) => d.height)
       .attr('fill', (d: RoomData) => d.color)
-      .attr('stroke', '#000')
+      .attr('stroke', (d: RoomData) => d.isAvailable ? '#000' : 'red') // Добавляем красную рамку для недоступных
       .attr('stroke-width', 1);
 
     roomElements.append('text')

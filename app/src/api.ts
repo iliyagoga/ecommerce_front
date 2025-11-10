@@ -221,6 +221,11 @@ export const deleteHallNew = async (id: number): Promise<void> => {
   await api.delete(`/halls_new/${id}`);
 };
 
+// API functions for Orders
+// export const getOrderById = async (id: number): Promise<Order> => {
+//   return (await api.get(`/orders/${id}`)).data;
+// };
+
 // API functions for HallRoomsNew
 export const getHallRoomsNew = async (hallId: number): Promise<HallRoomNew[]> => {
   return (await api.get(`/halls_new/${hallId}/hall_rooms_new`)).data;
@@ -239,5 +244,11 @@ export const updateHallRoomNew = async (hallId: number, roomId: number, room: Pa
 
 export const deleteHallRoomNew = async (hallId: number, roomId: number): Promise<void> => {
   await api.delete(`/halls_new/${hallId}/hall_rooms_new/${roomId}`);
+};
+
+export const getHallRoomsAvailability = async (hallId: number, date: string, startTime: string, endTime: string): Promise<HallRoomNew[]> => {
+  return (await api.get(`/halls_new/${hallId}/hall_rooms_availability`, {
+    params: { date, start_time: startTime, end_time: endTime }
+  })).data;
 };
 

@@ -7,6 +7,7 @@ use App\Models\HallNew;
 use App\Models\HallRoomNew;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon; // Import Carbon
 
 class HallRoomNewController extends Controller
 {
@@ -81,5 +82,54 @@ class HallRoomNewController extends Controller
     {
         $hallRoomNew->delete();
         return response()->json(null, 204);
+    }
+
+    /**
+     * Get hall rooms with availability for a specific period.
+     */
+    public function getHallRoomsAvailability(Request $request, HallNew $hallNew)
+    {
+        $validatedData = $request->validate([
+            'date' => 'required|date',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+        ]);
+
+        $requestedDate = Carbon::parse($validatedData['date'])->toDateString();
+        $requestedStartTime = $validatedData['start_time'];
+        $requestedEndTime = $validatedData['end_time'];
+
+        $hallRooms = $hallNew->hallRoomsNew()->with('room')->get(); // Исправлено на with('room')
+
+        $hallRoomsWithAvailability = $hallRooms->map(function ($hallRoom) use ($requestedDate, $requestedStartTime, $requestedEndTime) {
+            $isBooked = false;
+            if ($hallRoom->room && $hallRoom->room->is_available) {
+                // Проверяем, забронирована ли комната на этот период
+                $bookedRooms = \App\Models\OrderRooms::where('room_id', $hallRoom->room->room_id)
+                    ->where('booked_date', $requestedDate)
+                    ->where(function ($query) use ($requestedStartTime, $requestedEndTime) {
+                        $query->where(function ($q) use ($requestedStartTime, $requestedEndTime) {
+                            $q->where('booked_time_start', '<=', $requestedStartTime)
+                                ->where('booked_time_end', '>', $requestedStartTime);
+                        })
+                        ->orWhere(function ($q) use ($requestedStartTime, $requestedEndTime) {
+                            $q->where('booked_time_start', '>', $requestedStartTime)
+                                ->where('booked_time_start', '<', $requestedEndTime);
+                        });
+                    })
+                    ->count();
+
+                if ($bookedRooms > 0) {
+                    $isBooked = true;
+                }
+            } else {
+                $isBooked = true; // Комната недоступна в принципе
+            }
+
+            $hallRoom->is_available_for_booking = !$isBooked;
+            return $hallRoom;
+        });
+
+        return response()->json($hallRoomsWithAvailability);
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 class OrderController extends Controller
 {
     public function index()
@@ -34,16 +35,14 @@ class OrderController extends Controller
             'status' => ['required', 'string', 'in:pending,confirmed,active,completed,cancelled'],
             'total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'client_comment' => ['nullable', 'string', 'max:1000'],
-            'start_time' => ['required', 'date', 'after_or_equal:now'],
-            'end_time' => ['required', 'date', 'after:start_time'],
 
-            'rooms' => ['array'],
-            'rooms.*.room_id' => ['required', 'integer', 'exists:rooms,room_id'],
-            'rooms.*.booked_hours' => ['required', 'integer', 'min:1', 'max:24'],
-            'rooms.*.booked_date' => ['required', 'date', 'after_or_equal:today'],
-            'rooms.*.booked_time_start' => ['required', 'date_format:H:i'],
-            'rooms.*.booked_time_end' => ['required', 'date_format:H:i', 'after:rooms.*.booked_time_start'],
-            'rooms.*.room_price_per_hour' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            // Валидация для одной комнаты
+            'room_id' => ['required', 'integer', 'exists:rooms,room_id'],
+            'booked_hours' => ['required', 'integer', 'min:1', 'max:24'],
+            'booked_date' => ['required', 'date', 'after_or_equal:today'],
+            'booked_time_start' => ['required', 'date_format:H:i'],
+            'booked_time_end' => ['required', 'date_format:H:i', 'after:booked_time_start'],
+            'room_price_per_hour' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
 
             /*'items' => ['array'],
             'items.*.item_id' => ['required', 'integer', 'exists:menu_items,id'],
@@ -55,18 +54,30 @@ class OrderController extends Controller
         $order = null;
         DB::transaction(function () use ($validatedData, & $order) {
             $validatedData["user_id"] = Auth::id();
+            
+            // Вычисляем start_time и end_time на основе данных комнаты
+            $startDateTime = Carbon::parse($validatedData['booked_date'] . ' ' . $validatedData['booked_time_start']);
+            $endDateTime = Carbon::parse($validatedData['booked_date'] . ' ' . $validatedData['booked_time_end']);
+
+            $validatedData['start_time'] = $startDateTime->toDateTimeString();
+            $validatedData['end_time'] = $endDateTime->toDateTimeString();
+
             $order = Order::create($validatedData);
 
-            if (isset($validatedData['rooms'])) {
-                foreach ($validatedData['rooms'] as $roomData) {
-                    // Проверяем доступность комнаты по is_available
-                    $room = \App\Models\Room::where("room_id",$roomData['room_id']);
-                    if (!$room || !$room->firstOrFail()->is_available) {
-                        throw new \Exception("Одна из выбранных комнат недоступна для бронирования", 422);
-                    }
-                    $order->orderRooms()->create($roomData);
-                }
+            // Создаем одну комнату для заказа
+            // Проверяем доступность комнаты по is_available
+            $room = \App\Models\Room::where("room_id", $validatedData['room_id'])->first();
+            if (!$room || !$room->is_available) {
+                throw new \Exception("Выбранная комната недоступна для бронирования", 422);
             }
+            $order->orderRooms()->create([ 
+                'room_id' => $validatedData['room_id'],
+                'booked_hours' => $validatedData['booked_hours'],
+                'booked_date' => $validatedData['booked_date'],
+                'booked_time_start' => $validatedData['booked_time_start'],
+                'booked_time_end' => $validatedData['booked_time_end'],
+                'room_price_per_hour' => $validatedData['room_price_per_hour'],
+            ]);
 
             /*if (isset($validatedData['items'])) {
                 foreach ($validatedData['items'] as $itemData) {
@@ -83,14 +94,16 @@ class OrderController extends Controller
      */
     public function show(int $id)
     {
-        $order = Order::with(['order_rooms'])->where('order_id', $id);
+        $order = Order::with(["orderRooms", "user"])->where('order_id', $id)->firstOrFail(); // Получаем заказ
+
 
         if (Auth::check() && Auth::user()->role === 'admin') {
-            return response()->json($order);
-        } elseif (Auth::check() && $order->user_id === Auth::id()) {
-            return response()->json($order);
-        }
 
+            return response()->json($order); // Возвращаем одну модель Order
+        } elseif (Auth::check() && $order->user_id === Auth::id()) {
+            return response()->json($order); // Возвращаем одну модель Order
+        }
+        
         return response()->json(['message' => 'Unauthorized'], 403);
     }
 

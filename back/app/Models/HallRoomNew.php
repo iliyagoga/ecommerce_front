@@ -35,4 +35,12 @@ class HallRoomNew extends Model
     {
         return $this->belongsTo(HallNew::class, 'hall_id');
     }
+
+    /**
+     * Get the room that this HallRoomNew belongs to.
+     */
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Room::class, 'room_id', 'room_id'); // Указываем внешний ключ и первичный ключ таблицы rooms
+    }
 }

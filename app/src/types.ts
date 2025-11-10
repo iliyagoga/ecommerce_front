@@ -32,17 +32,38 @@ export interface Category {
   products?: Product[]; // Для получения товаров по категориям
 }
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface OrderRoom {
+  order_room_id?: number;
+  order_id: number;
+  room_id: number;
+  booked_hours: number;
+  booked_date: string;
+  booked_time_start: string;
+  booked_time_end: string;
+  room_price_per_hour: number;
+  type?: 'standard' | 'vip' | 'cinema'; // Добавлено для отображения в сайдбаре
+  base_hourly_rate?: number; // Добавлено для отображения в сайдбаре
+}
+
 export interface Order {
   order_id?: number;
-  client_name: string;
-  client_email: string;
+  user_id: number;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'active';
   total_price: string;
-  room_id: number;
-  products: { productId: number; quantity: number }[];
   client_comment?: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  admin_comment?: string;
   start_time: string;
   end_time: string;
+  created_at?: string;
+  updated_at?: string;
+  order_rooms?: OrderRoom[]; // Добавляем отношение orderRooms
+  user?: User; // Добавляем отношение user
 }
 
 export interface HallNew {
@@ -65,4 +86,5 @@ export interface HallRoomNew {
   color: string;
   metadata?: any;
   room_id?: number | null; // Allow null for room_id
+  is_available_for_booking?: boolean; // New field for booking availability
 }

@@ -10,6 +10,8 @@ class OrderRooms extends Model
 {
     use HasFactory;
 
+    protected $table = 'order_rooms'; // Явно указываем имя таблицы
+
     protected $fillable = [
         'order_id',
         'room_id',
