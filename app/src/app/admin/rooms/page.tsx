@@ -2,10 +2,10 @@
 import React, { useState, useRef } from 'react';
 import Layout from '../../../components/Layout';
 import { Typography, Box, Button } from '@mui/material';
-import RoomsTable from '../../../components/RoomsTable';
-import RoomViewSidebar from '../../../components/RoomViewSidebar';
-import RoomEditSidebar from '../../../components/RoomEditSidebar';
-import AddRoomModal from '../../../components/AddRoomModal'; // Импорт
+import RoomsTable from '../../../components/Room/RoomsTable';
+import RoomViewSidebar from '../../../components/Room/RoomViewSidebar';
+import RoomEditSidebar from '../../../components/Room/RoomEditSidebar';
+import AddRoomModal from '../../../components/Room/AddRoomModal'; // Импорт
 import { Room } from '../../../types';
 
 const RoomsPage: React.FC = () => {

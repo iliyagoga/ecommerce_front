@@ -3,9 +3,9 @@ import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '../../../components/Layout';
 import { Typography, Box, Button } from '@mui/material';
-import CategoriesTable from '../../../components/CategoriesTable';
-import AddCategoryModal from '../../../components/AddCategoryModal';
-import CategoryEditModal from '../../../components/CategoryEditModal'; // Будет создан далее
+import CategoriesTable from '../../../components/Category/CategoriesTable';
+import AddCategoryModal from '../../../components/Category/AddCategoryModal';
+import CategoryEditModal from '../../../components/Category/CategoryEditModal'; // Будет создан далее
 import { Category } from '../../../types';
 import { getCategories } from '@/api';
 

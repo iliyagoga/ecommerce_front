@@ -2,10 +2,10 @@
 import React, { useState, useRef } from 'react';
 import Layout from '../../../components/Layout';
 import { Typography, Box, Button } from '@mui/material';
-import ProductsTable from '../../../components/ProductsTable';
-import ProductViewSidebar from '../../../components/ProductViewSidebar';
-import ProductEditSidebar from '../../../components/ProductEditSidebar';
-import AddProductModal from '../../../components/AddProductModal'; // Импорт
+import ProductsTable from '../../../components/Product/ProductsTable';
+import ProductViewSidebar from '../../../components/Product/ProductViewSidebar';
+import ProductEditSidebar from '../../../components/Product/ProductEditSidebar';
+import AddProductModal from '../../../components/Product/AddProductModal'; // Импорт
 import { Product } from '../../../types';
 
 const ProductsPage: React.FC = () => {
