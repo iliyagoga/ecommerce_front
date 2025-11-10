@@ -17,8 +17,8 @@ import {
   Select, MenuItem, InputLabel, FormControl
 } from '@mui/material';
 /*import AddIcon from '@mui/icons-material/Add';*/
-import { Room } from '../types';
-import { createRoom } from '../api';
+import { Room } from '@/types';
+import { createRoom } from '@/api';
 
 interface AddRoomModalProps {
   open: boolean;

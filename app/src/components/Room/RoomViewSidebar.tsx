@@ -18,7 +18,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PersonIcon from '@mui/icons-material/Person';
 import DescriptionIcon from '@mui/icons-material/Description';
 import InfoIcon from '@mui/icons-material/Info';*/
-import { Room } from '../types';
+import { Room } from '@/types';
 import { HOST_URL } from '@/api';
 
 interface RoomViewSidebarProps {

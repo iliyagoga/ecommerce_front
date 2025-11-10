@@ -15,8 +15,8 @@ import {
   InputAdornment,
   Select, MenuItem, InputLabel, FormControl
 } from '@mui/material';
-import { Product, Category } from '../types';
-import { updateProduct, getCategories, HOST_URL } from '../api';
+import { Product, Category } from '@/types';
+import { updateProduct, getCategories, HOST_URL } from '@/api';
 
 interface ProductEditSidebarProps {
   open: boolean;

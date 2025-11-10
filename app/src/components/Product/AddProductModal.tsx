@@ -15,8 +15,8 @@ import {
   InputAdornment,
   Select, MenuItem, InputLabel, FormControl
 } from '@mui/material';
-import { Product, Category } from '../../types';
-import { createProduct, getCategories } from '../../api';
+import { Product, Category } from '@/types';
+import { createProduct, getCategories } from '@//api';
 
 interface AddProductModalProps {
   open: boolean;

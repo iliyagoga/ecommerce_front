@@ -14,8 +14,8 @@ import {
   Typography,
   IconButton,
 } from '@mui/material';
-import { Category } from '../types';
-import { deleteCategory } from '../api';
+import { Category } from '@/types';
+import { deleteCategory } from '@/api';
 
 interface CategoriesTableProps {
   onEdit: (category: Category) => void;

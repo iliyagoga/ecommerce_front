@@ -18,8 +18,8 @@ import {
 /*import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';*/
-import { Room, RoomImage } from '../types';
-import { HOST_URL, updateRoom } from '../api';
+import { Room, RoomImage } from '@/types';
+import { HOST_URL, updateRoom } from '@/api';
 
 interface RoomEditSidebarProps {
   open: boolean;

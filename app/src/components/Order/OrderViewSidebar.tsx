@@ -27,12 +27,12 @@ import {
   Order,
   Product,
   Room
-} from '../types';
+} from '@/types';
 import {
   getRoomById,
   getProducts,
   getOrderById
-} from '../api';
+} from '@/api';
 
 interface OrderViewSidebarProps {
   open: boolean;

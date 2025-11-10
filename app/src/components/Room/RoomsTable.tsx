@@ -14,8 +14,8 @@ import {
   Typography,
   Switch,
 } from '@mui/material';
-import { Room } from '../types';
-import { getRooms, updateRoom } from '../api';
+import { Room } from '@/types';
+import { getRooms, updateRoom } from '@/api';
 
 interface RoomsTableProps {
   onView: (room: Room) => void;

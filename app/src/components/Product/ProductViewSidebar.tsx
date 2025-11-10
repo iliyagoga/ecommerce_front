@@ -14,7 +14,7 @@ import {
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import DescriptionIcon from '@mui/icons-material/Description';
 import FastfoodIcon from '@mui/icons-material/Fastfood';*/
-import { Product } from '../types';
+import { Product } from '@/types';
 import { HOST_URL } from '@/api';
 
 interface ProductViewSidebarProps {

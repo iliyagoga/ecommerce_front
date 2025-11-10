@@ -14,8 +14,8 @@ import {
   Typography,
   Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
-import { Order } from '../types';
-import { getOrders, updateOrderStatus } from '../api';
+import { Order } from '@/types';
+import { getOrders, updateOrderStatus } from '@/api';
 
 interface OrdersTableProps {
   onView: (order: Order) => void;

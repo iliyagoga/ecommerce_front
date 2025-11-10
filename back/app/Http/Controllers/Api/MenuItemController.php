@@ -21,7 +21,7 @@ class MenuItemController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric',
             'category_id' => 'nullable|exists:categories,category_id',
-            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         if ($request->hasFile('image_url')) {

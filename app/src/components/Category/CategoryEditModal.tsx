@@ -11,8 +11,8 @@ import {
   Alert,
   Divider,
 } from '@mui/material';
-import { Category } from '../types';
-import { updateCategory } from '../api';
+import { Category } from '@/types';
+import { updateCategory } from '@/api';
 
 interface CategoryEditModalProps {
   open: boolean;

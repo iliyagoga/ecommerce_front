@@ -14,8 +14,8 @@ import {
   Typography,
   Switch,
 } from '@mui/material';
-import { Product } from '../types';
-import { getProducts, updateProduct } from '../api';
+import { Product } from '@/types';
+import { getProducts, updateProduct } from '@/api';
 
 interface ProductsTableProps {
   onView: (product: Product) => void;
