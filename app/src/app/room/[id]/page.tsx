@@ -6,7 +6,7 @@ import { getRoomById, HOST_URL } from '@/api';
 import { Room } from '@/types';
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs'; // Импортируем компонент Breadcrumbs
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const PageContainer = styled.div`
   padding: 2rem;
@@ -79,12 +79,36 @@ const DetailItem = styled.p`
   }
 `;
 
+const BookingButton = styled.button`
+  background-color: #FCD25E;
+  color: #202020;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+
+  &:hover {
+    background-color: #FFD700; /* Darker gold on hover */
+  }
+
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    color: #343a40;
+  }
+`;
+
 const RoomDetailPage = () => {
   const pathname = usePathname();
   const id = pathname.split("/")[2]
   const [room, setRoom] = useState<Room | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!id) return;
@@ -164,20 +188,23 @@ const RoomDetailPage = () => {
             </InfoSection>
           )}
 
-          {room.description && (
-            <InfoSection>
-              <SectionTitle>Описание</SectionTitle>
-              <DescriptionText>{room.description}</DescriptionText>
-            </InfoSection>
-          )}
-
           <InfoSection>
-            <SectionTitle>Подробности</SectionTitle>
-            <DetailItem><span>Тип комнаты:</span> {room.type?.toUpperCase()}</DetailItem>
-            <DetailItem><span>Цена за час:</span> {room.base_hourly_rate} руб.</DetailItem>
-            {room.initial_fee !== undefined && <DetailItem><span>Первоначальный взнос:</span> {room.initial_fee} руб.</DetailItem>}
-            <DetailItem><span>Макс. количество человек:</span> {room.max_people}</DetailItem>
-            <DetailItem><span>Доступность:</span> {room.is_available ? 'Да' : 'Нет'}</DetailItem>
+            <SectionTitle>Описание</SectionTitle>
+            <DescriptionText>{room.description}</DescriptionText>
+
+            <SectionTitle>Детали</SectionTitle>
+            <DetailItem>Цена за час: {room.base_hourly_rate}</DetailItem>
+            <DetailItem>Начальный взнос: {room.initial_fee}</DetailItem>
+            <DetailItem>Макс. человек: {room.max_people}</DetailItem>
+            <DetailItem>Тип: {room.type}</DetailItem>
+            <DetailItem>Доступность: {room.is_available ? 'Да' : 'Нет'}</DetailItem>
+
+            <BookingButton
+              disabled={!room.is_available}
+              onClick={() => router.push('/booking')}
+            >
+              Забронировать
+            </BookingButton>
           </InfoSection>
         </RoomDetailsWrapper>
       </PageContainer>
