@@ -104,22 +104,18 @@ class HallRoomNewController extends Controller
         $hallRoomsWithAvailability = $hallRooms->map(function ($hallRoom) use ($requestedDate, $requestedStartTime, $requestedEndTime) {
             $isBooked = false;
             if ($hallRoom->room && $hallRoom->room->is_available) {
-                // Проверяем, забронирована ли комната на этот период
-                $bookedRooms = \App\Models\OrderRooms::where('room_id', $hallRoom->room->room_id)
-                    ->where('booked_date', $requestedDate)
+                // Проверяем, забронирована ли комната на этот период, используя start_time и end_time из таблицы orders
+                $bookedOrdersCount = \App\Models\OrderRooms::where('room_id', $hallRoom->room->room_id)
+                    ->join('orders', 'orders.order_id', '=', 'order_rooms.order_id') // Соединяем с таблицей orders
+                    ->whereDate('orders.start_time', $requestedDate) // Фильтруем заказы на запрошенную дату
                     ->where(function ($query) use ($requestedStartTime, $requestedEndTime) {
-                        $query->where(function ($q) use ($requestedStartTime, $requestedEndTime) {
-                            $q->where('booked_time_start', '<=', $requestedStartTime)
-                                ->where('booked_time_end', '>', $requestedStartTime);
-                        })
-                        ->orWhere(function ($q) use ($requestedStartTime, $requestedEndTime) {
-                            $q->where('booked_time_start', '>', $requestedStartTime)
-                                ->where('booked_time_start', '<', $requestedEndTime);
-                        });
+                        // Проверяем пересечение интервалов времени
+                        $query->whereRaw('TIME(orders.start_time) < ?', [$requestedEndTime])
+                              ->whereRaw('? < TIME(orders.end_time)', [$requestedStartTime]);
                     })
                     ->count();
 
-                if ($bookedRooms > 0) {
+                if ($bookedOrdersCount > 0) {
                     $isBooked = true;
                 }
             } else {
