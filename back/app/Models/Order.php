@@ -49,7 +49,7 @@ class Order extends Model
 
     public function orderRooms(): HasMany
     {
-        return $this->hasMany(OrderRooms::class, 'order_id', 'order_id');
+        return $this->hasMany(OrderRooms::class, 'order_id');
     }
 
     public function rooms(): HasManyThrough

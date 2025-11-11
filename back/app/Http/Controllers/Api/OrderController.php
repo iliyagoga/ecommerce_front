@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -56,21 +57,21 @@ class OrderController extends Controller
             $validatedData["user_id"] = Auth::id();
             
             // Вычисляем start_time и end_time на основе данных комнаты
-            $startDateTime = Carbon::parse($validatedData['booked_date'] . ' ' . $validatedData['booked_time_start']);
-            $endDateTime = Carbon::parse($validatedData['booked_date'] . ' ' . $validatedData['booked_time_end']);
-
-            $validatedData['start_time'] = $startDateTime->toDateTimeString();
-            $validatedData['end_time'] = $endDateTime->toDateTimeString();
+            $startDateTime = Carbon::parse($validatedData['booked_date'])->setTimeFromTimeString($validatedData['booked_time_start']);
+            $endDateTime = Carbon::parse($validatedData['booked_date'])->setTimeFromTimeString($validatedData['booked_time_end']);
+            $validatedData['start_time'] = $startDateTime;
+            $validatedData['end_time'] = $endDateTime;
 
             $order = Order::create($validatedData);
 
-            // Создаем одну комнату для заказа
-            // Проверяем доступность комнаты по is_available
+
             $room = \App\Models\Room::where("room_id", $validatedData['room_id'])->first();
             if (!$room || !$room->is_available) {
                 throw new \Exception("Выбранная комната недоступна для бронирования", 422);
             }
+
             $order->orderRooms()->create([ 
+                'order_id' => $order->order_id,
                 'room_id' => $validatedData['room_id'],
                 'booked_hours' => $validatedData['booked_hours'],
                 'booked_date' => $validatedData['booked_date'],
@@ -78,6 +79,13 @@ class OrderController extends Controller
                 'booked_time_end' => $validatedData['booked_time_end'],
                 'room_price_per_hour' => $validatedData['room_price_per_hour'],
             ]);
+
+            $user = Auth::user();
+            $cart = Cart::where('user_id', $user->id)->first();
+    
+            if ($cart) {
+                $cart->cartRooms()->delete();
+            }
 
             /*if (isset($validatedData['items'])) {
                 foreach ($validatedData['items'] as $itemData) {

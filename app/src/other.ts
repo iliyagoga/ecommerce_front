@@ -5,10 +5,22 @@ export const getTimeDifferenceInHours = (startTime: string, endTime: string): nu
     const startTotalMinutes = startHours * 60 + startMinutes;
     const endTotalMinutes = endHours * 60 + endMinutes;
     
-    // Если endTime меньше startTime, считаем что это следующий день
     const diffMinutes = endTotalMinutes < startTotalMinutes 
       ? (24 * 60 - startTotalMinutes) + endTotalMinutes
       : endTotalMinutes - startTotalMinutes;
     
     return diffMinutes / 60;
+  };
+
+ export const extractTimeFromDateString = (dateString: string): string => {
+    const date = new Date(dateString);
+    
+    if (isNaN(date.getTime())) {
+      throw new Error('Неверный формат даты');
+    }
+    
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+    return `${hours}:${minutes}`;
   };

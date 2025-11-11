@@ -134,9 +134,7 @@ const CartPage: React.FC = () => {
   };
 
   const handleCheckout = () => {
-    // Временно, просто перенаправляем на главную или страницу подтверждения
-    alert('Переход к оформлению заказа...');
-    router.push('/');
+    router.push('/order');
   };
 
   /*if (loading) return <LoadingIndicator />;
@@ -176,7 +174,7 @@ const CartPage: React.FC = () => {
               </ActionsContainer>
             </CartItemContainer>
           ))}
-          <ActionButton onClick={handleCheckout} style={{ marginTop: '20px' }}>Оформить заказ</ActionButton>
+          <ActionButton onClick={handleCheckout} style={{ marginTop: '20px' }}>К оформлению заказа</ActionButton>
         </>
       )}
     </PageContainer>
