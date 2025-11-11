@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
+use App\Models\CartMenuItems;
 use App\Models\CartRoom;
 use App\Models\Room;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class CartController extends Controller
     public function show()
     {
         $user = Auth::user();
-        $cart = Cart::with(['cartRooms.room'])->where('user_id', $user->id)->firstOrCreate(['user_id' => $user->id]);
+        $cart = Cart::with(['cartRooms.room', 'cartMenuItems.menuItem'])->where('user_id', $user->id)->firstOrCreate(['user_id' => $user->id]);
 
         return response()->json($cart);
     }
@@ -76,7 +77,13 @@ class CartController extends Controller
 
     public function removeRoom(CartRoom $cartRoom)
     {
-        $cartRoom->delete();
+        $user = Auth::user();
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        if ($cart) {
+            $cart->cartRooms()->delete();
+            $cart->cartMenuItems()->delete();
+        }
 
         return response()->json(null, 204);
     }
@@ -88,7 +95,66 @@ class CartController extends Controller
 
         if ($cart) {
             $cart->cartRooms()->delete();
+            $cart->cartMenuItems()->delete();
         }
+
+        return response()->json(null, 204);
+    }
+
+    public function checkAddMenuItem() {
+        $user = Auth::user();
+        $hasSpecialRooms = Cart::where('user_id', $user->id)
+        ->with(['cartRooms.room' => function($query) {
+            $query->where('type', '!=', 'standard');
+        }])
+        ->get()
+        ->contains(function ($cart) {
+            return $cart->cartRooms->contains(function ($cartRoom) {
+                return $cartRoom->room && $cartRoom->room->type !== 'standard';
+            });
+        });
+        return response()->json($hasSpecialRooms, 201);
+    }
+
+    public function addMenuItem(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'item_id' => 'required|integer|exists:rooms,room_id',
+            'quantity' => 'required|numeric|min:1|',
+            'unit_price' => 'required|decimal:2|min:0|max:99999999.99',
+            'total_price' => 'required|decimal:2|min:0|max:99999999.99',
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = Auth::user();
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        $cartMenuItem = $cart->cartMenuItems()->create($request->all());
+
+        return response()->json($cartMenuItem, 201);
+    }
+
+    public function removeMenuItem(?int $cartMenuItem)
+    {
+        $menuItem = CartMenuItems::find($cartMenuItem);
+        $menuItem->delete();
+        return response()->json(null, 204);
+    }
+
+    public function updateMenuItem(Request $request, CartMenuItems $cartMenuItem)
+    {
+        $validator = Validator::make($request->all(), [
+            'quantity' => 'required|numeric|min:1|',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $cartMenuItem->update($request->all());
 
         return response()->json(null, 204);
     }

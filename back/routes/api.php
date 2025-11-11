@@ -36,6 +36,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
     Route::post('/orders/{id}/status', [OrderController::class, 'updateStatus']);
 
+    Route::get('/cart', [\App\Http\Controllers\Api\CartController::class, 'show']);
+    Route::post('/cart/room', [\App\Http\Controllers\Api\CartController::class, 'addRoom']);
+
+    Route::post('/cart/menu-item', [\App\Http\Controllers\Api\CartController::class, 'addMenuItem']);
+    Route::delete('/cart/menu-item/{cartMenuItem}', [\App\Http\Controllers\Api\CartController::class, 'removeMenuItem']);
+    Route::put('/cart/menu-item/{cartMenuItem}', [\App\Http\Controllers\Api\CartController::class, 'updateMenuItem']);
+
+    Route::put('/cart/room/{cartRoom}', [\App\Http\Controllers\Api\CartController::class, 'updateRoom']);
+    Route::delete('/cart/room/{cartRoom}', [\App\Http\Controllers\Api\CartController::class, 'removeRoom']);
+    Route::delete('/cart/clear', [\App\Http\Controllers\Api\CartController::class, 'clearCart']);
+    
+    Route::get('/cart/check-room-type', [\App\Http\Controllers\Api\CartController::class, 'checkAddMenuItem']);
     Route::middleware('admin')->group(function () {
         Route::post('/rooms', [RoomController::class, 'store']);
         Route::post('/rooms/{id}', [RoomController::class, 'update']); 
@@ -62,12 +74,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // New route for getting hall room availability
         Route::get('/halls_new/{hallNew}/hall_rooms_availability', [\App\Http\Controllers\Api\HallRoomNewController::class, 'getHallRoomsAvailability']);
 
-        // Cart routes
-        Route::get('/cart', [\App\Http\Controllers\Api\CartController::class, 'show']);
-        Route::post('/cart/room', [\App\Http\Controllers\Api\CartController::class, 'addRoom']);
-        Route::put('/cart/room/{cartRoom}', [\App\Http\Controllers\Api\CartController::class, 'updateRoom']);
-        Route::delete('/cart/room/{cartRoom}', [\App\Http\Controllers\Api\CartController::class, 'removeRoom']);
-        Route::delete('/cart/clear', [\App\Http\Controllers\Api\CartController::class, 'clearCart']);
     });
 
 

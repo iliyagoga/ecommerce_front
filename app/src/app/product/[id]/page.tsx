@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { getProductById, getCategories, HOST_URL } from '@/api';
+import { usePathname, useRouter } from 'next/navigation';
+import { getProductById, getCategories, HOST_URL, checkRoomType, addMenuItemToCart } from '@/api';
 import { Product, Category } from '@/types';
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs';
@@ -74,6 +74,30 @@ const CategoryTag = styled.span`
   margin-left: 1rem;
 `;
 
+const BookingButton = styled.button`
+  background-color: #FCD25E;
+  color: #202020;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+
+  &:hover {
+    background-color: #FFD700; /* Darker gold on hover */
+  }
+
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    color: #343a40;
+  }
+`;
+
+
 const ProductDetailPage = () => {
   const pathname = usePathname();
   const id = pathname.split("/")[2];
@@ -82,7 +106,25 @@ const ProductDetailPage = () => {
   const [categoryName, setCategoryName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAvaliable, setisAvaliable] = useState(false);
 
+  const router = useRouter();
+
+  const addToCart = async () => {
+    if (!product || !product.item_id) return;
+
+    try {
+      const res = await addMenuItemToCart({
+        item_id: product.item_id,
+        quantity: 1,
+        unit_price: product.price,
+        total_price: product.price
+      })
+      if (res) router.push("/cart");
+    } catch (error) {
+      
+    }
+  }
   useEffect(() => {
     if (!id) return;
 
@@ -111,6 +153,21 @@ const ProductDetailPage = () => {
 
     fetchProduct();
   }, [id, pathname]);
+
+  useEffect(() => {
+    const canAddToCart = async () => {
+      try {
+        const isCan = await checkRoomType();
+        if (!isCan) return;
+
+        setisAvaliable(isCan)
+      } catch (error) {
+        setisAvaliable(false);
+      }
+    }
+
+    canAddToCart();
+  }, [id, pathname])
 
   if (loading) {
     return (<>
@@ -170,6 +227,13 @@ const ProductDetailPage = () => {
             <DetailItem><span>Цена:</span> {product.price} руб.</DetailItem>
             <DetailItem><span>Доступность:</span> {product.is_available ? 'Да' : 'Нет'}</DetailItem>
           </InfoSection>
+          
+          <BookingButton
+              disabled={!isAvaliable}
+              onClick={addToCart}
+            >
+              Добавить в корзину
+            </BookingButton>
         </ProductDetailsWrapper>
       </PageContainer>
     </>

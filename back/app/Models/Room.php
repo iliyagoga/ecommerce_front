@@ -51,7 +51,7 @@ class Room extends Model
 
     public function orderRooms(): HasMany
     {
-        return $this->hasMany(OrderRoom::class, 'room_id');
+        return $this->hasMany(OrderRooms::class, 'room_id');
     }
 
     // Scope для активных комнат
@@ -60,7 +60,7 @@ class Room extends Model
         return $query->where('is_active', true);
     }
 
-    // Scope для доступных для бронирования комнат
+
     public function scopeAvailable($query)
     {
         return $query->where('is_active', true)
@@ -71,5 +71,10 @@ class Room extends Model
     public function scopeOfType($query, string $type)
     {
         return $query->where('type', $type);
+    }
+
+    public function cartRooms(): HasMany
+    {
+        return $this->hasMany(CartRoom::class, 'room_id');
     }
 }

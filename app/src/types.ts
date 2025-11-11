@@ -103,12 +103,25 @@ export interface CartRoom {
   room?: Room; // Добавляем отношение room для фронтенда
 }
 
+export interface CartProduct {
+  cart_item_id?: number;
+  cart_id: number;
+  item_id: number;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  created_at?: string;
+  updated_at?: string;
+  menu_item?: Product; 
+}
+
 export interface Cart {
   id?: number;
   user_id: number;
   created_at?: string;
   updated_at?: string;
   cart_rooms?: CartRoom[];
+  cart_menu_items?: CartProduct[];
   user?: User;
 }
 

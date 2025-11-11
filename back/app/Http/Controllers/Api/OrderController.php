@@ -45,11 +45,11 @@ class OrderController extends Controller
             'booked_time_end' => ['required', 'date_format:H:i', 'after:booked_time_start'],
             'room_price_per_hour' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
 
-            /*'items' => ['array'],
+            'items' => ['array'],
             'items.*.item_id' => ['required', 'integer', 'exists:menu_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:1000'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'items.*.total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],*/
+            'items.*.total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
         ]);
 
         $order = null;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Room, Category, Order, HallNew, HallRoomNew, CartRoom } from './types';
+import { Room, Category, Order, HallNew, HallRoomNew, CartRoom, CartProduct } from './types';
 export const HOST_URL = "http://localhost:8000";
 const BASE_URL_API = '/api';
 
@@ -261,6 +261,10 @@ export const addRoomToCart = async (roomData: Omit<CartRoom, "cart_id">): Promis
   return (await api.post('/cart/room', roomData)).data;
 };
 
+export const addMenuItemToCart = async (roomData: Omit<CartProduct, "cart_id">): Promise<any> => {
+  return (await api.post('/cart/menu-item', roomData)).data;
+};
+
 export const updateCartRoom = async (cartRoomId: number, roomData: any): Promise<any> => {
   return (await api.put(`/cart/room/${cartRoomId}`, roomData)).data;
 };
@@ -269,7 +273,19 @@ export const removeCartRoom = async (cartRoomId: number): Promise<void> => {
   await api.delete(`/cart/room/${cartRoomId}`);
 };
 
+export const removeCartMenuItem = async (cartMenuItemId: number): Promise<void> => {
+  await api.delete(`/cart/menu-item/${cartMenuItemId}`);
+};
+
+export const updateCartMenuItem = async (cartMenuItemId: number, quantity: number): Promise<any> => {
+  return (await api.put(`/cart/menu-item/${cartMenuItemId}`, {quantity})).data;
+};
+
 export const clearUserCart = async (): Promise<void> => {
   await api.delete('/cart/clear');
+};
+
+export const checkRoomType = async (): Promise<boolean> => {
+  return (await api.get('/cart/check-room-type')).data;
 };
 
