@@ -3,10 +3,15 @@ import { HeaderStyled} from "./Header.styled";
 import { ItemStyled, LinkStyled, TextStyled } from "./Items/Item.styled";
 import logo from "@/assets/image.png";
 import Link from "next/link";
-import { useEffect, useState } from 'react';
+
 
 const Header = () => {
+    const showProfile = () => {
+        const isAuthToken = localStorage.getItem("authToken");
 
+        if (isAuthToken) return  <LinkStyled>Профиль</LinkStyled>
+        return <LinkStyled href="/auth/login">Войти</LinkStyled>
+    }
     return <HeaderStyled>
         <ItemStyled>
             <Link href={"/"}><Image src={logo} alt={""} height={50} ></Image></Link>
@@ -15,9 +20,10 @@ const Header = () => {
             <TextStyled>+7 937 245 14 06</TextStyled>
         </ItemStyled>
         <ItemStyled>
-            <LinkStyled>Каталог</LinkStyled>
+            <LinkStyled href="/catalog">Каталог</LinkStyled>
             <LinkStyled>Контакты</LinkStyled>
-            <LinkStyled>Корзина</LinkStyled>
+            <LinkStyled href="/cart">Корзина</LinkStyled>
+            {showProfile()}
         </ItemStyled>
     </HeaderStyled>
 }
