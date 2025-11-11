@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Order extends Model
 {
     use HasFactory;
-
+    protected $table = "orders";
+    protected $primaryKey = "order_id";
+    
     protected $fillable = [
         'user_id',
         'status',
@@ -49,7 +51,7 @@ class Order extends Model
 
     public function orderRooms(): HasMany
     {
-        return $this->hasMany(OrderRooms::class, 'order_id');
+        return $this->hasMany(OrderRooms::class, "order_id");
     }
 
     public function rooms(): HasManyThrough
@@ -66,6 +68,6 @@ class Order extends Model
 
     public function orderItems(): HasMany
     {
-        return $this->hasMany(OrderItem::class, 'order_id');
+        return $this->hasMany(OrderItem::class, "order_id");
     }
 }

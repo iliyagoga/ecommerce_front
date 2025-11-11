@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OrderItem extends Model
 {
     use HasFactory;
+    protected $primaryKey = "order_item_id";
 
     protected $fillable = [
         'order_id',
@@ -37,11 +38,11 @@ class OrderItem extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id', 'order_id');
+        return $this->belongsTo(Order::class, "order_id");
     }
 
     public function menuItem(): BelongsTo
     {
-        return $this->belongsTo(MenuItem::class, 'item_id');
+        return $this->belongsTo(MenuItem::class, 'item_id', 'item_id');
     }
 }

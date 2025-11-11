@@ -46,7 +46,7 @@ class OrderController extends Controller
             'room_price_per_hour' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
 
             'items' => ['array'],
-            'items.*.item_id' => ['required', 'integer', 'exists:menu_items,id'],
+            'items.*.item_id' => ['required', 'integer', 'exists:menu_items,item_id'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:1000'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'items.*.total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
@@ -83,15 +83,17 @@ class OrderController extends Controller
             $user = Auth::user();
             $cart = Cart::where('user_id', $user->id)->first();
     
-            if ($cart) {
-                $cart->cartRooms()->delete();
-            }
 
-            /*if (isset($validatedData['items'])) {
+            if (isset($validatedData['items'])) {
                 foreach ($validatedData['items'] as $itemData) {
                     $order->orderItems()->create($itemData);
                 }
-            }*/
+            }
+
+            if ($cart) {
+                $cart->cartRooms()->delete();
+                $cart->cartMenuItems()->delete();
+            }
         });
 
         return response()->json($order, Response::HTTP_CREATED);
@@ -102,7 +104,7 @@ class OrderController extends Controller
      */
     public function show(int $id)
     {
-        $order = Order::with(["orderRooms", "user"])->where('order_id', $id)->firstOrFail(); // Получаем заказ
+        $order = Order::with(["orderRooms", "user", "orderItems"])->where('order_id', $id)->first(); // Получаем заказ
 
 
         if (Auth::check() && Auth::user()->role === 'admin') {

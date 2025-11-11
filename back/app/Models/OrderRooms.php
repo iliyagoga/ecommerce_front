@@ -10,7 +10,9 @@ class OrderRooms extends Model
 {
     use HasFactory;
 
-    protected $table = 'order_rooms'; // Явно указываем имя таблицы
+    protected $table = 'order_rooms';
+    
+    protected $primaryKey = "order_room_id";
 
     protected $fillable = [
         'order_id',
@@ -45,11 +47,11 @@ class OrderRooms extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id');
+        return $this->belongsTo(Order::class, "order_id");
     }
 
     public function room(): BelongsTo
     {
-        return $this->belongsTo(Room::class, 'room_id');
+        return $this->belongsTo(Room::class, 'room_id', 'room_id');
     }
 }

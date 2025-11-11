@@ -1,5 +1,5 @@
 "use client"
-import { Cart, CartRoom } from '@/types';
+import { Cart, CartRoom, CartProduct } from '@/types';
 import { getCart, removeCartRoom, clearUserCart, updateCartRoom, HOST_URL, createOrder } from '@/api';
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs';
@@ -33,12 +33,21 @@ const CartItemContainer = styled.div`
   align-items: flex-start;
 `;
 
-const RoomImage = styled.img`
+const ProductItemContainer = styled.div`
+  display: flex;
+  background-color: #2C2C2C;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  align-items: center;
+  gap: 20px;
+`;
+
+const ItemImage = styled.img`
   width: 120px;
   height: 120px;
   object-fit: cover;
   border-radius: 8px;
-  margin-right: 20px;
 `;
 
 const ItemDetails = styled.div`
@@ -51,9 +60,20 @@ const RoomName = styled.h2`
   color: #FCD25E;
 `;
 
+const ProductName = styled.h3`
+  font-size: 1.3rem;
+  margin: 0 0 10px 0;
+  color: #FCD25E;
+`;
+
 const DetailText = styled.p`
   margin: 5px 0;
   font-size: 1rem;
+`;
+
+const PriceText = styled(DetailText)`
+  font-weight: bold;
+  color: #FCD25E;
 `;
 
 const Section = styled.div`
@@ -197,6 +217,14 @@ const OrderPage: React.FC = () => {
     event.preventDefault();
     if (!cart?.cart_rooms) return;
     const room = cart.cart_rooms[0];
+    
+    const items = cart.cart_menu_items?.map(item => ({
+      item_id: item.item_id,
+      quantity: item.quantity,
+      unit_price: parseFloat(item.unit_price.toString()),
+      total_price: parseFloat(item.total_price.toString())
+    })) || [];
+  
     const orderData = {
       status: "pending",
       total_price: calculateTotalPrice(),
@@ -208,13 +236,13 @@ const OrderPage: React.FC = () => {
       booked_time_start: extractTimeFromDateString(room.booked_time_start),
       booked_time_end: extractTimeFromDateString(room.booked_time_end),
       room_price_per_hour: room.room_price_per_hour,
+      items: items
     };
-
+  
     try {
       setError(null);
       await createOrder(orderData);
-      router.push('/catalog')
-
+      router.push('/catalog');
     } catch (error) {
       console.error('Ошибка при создании заказа:', error);
       setError('Не удалось создать заказ. Пожалуйста, попробуйте еще раз.');
@@ -228,17 +256,35 @@ const OrderPage: React.FC = () => {
     }));
   };
 
+  const calculateProductTotal = (product: CartProduct) => {
+    return product.quantity * parseFloat(product.unit_price.toString());
+  };
+
   const calculateTotalPrice = () => {
-    if (!cart?.cart_rooms) return 0;
-    return cart.cart_rooms.reduce((total, cartRoom) => {
-      return total + (cartRoom.room_price_per_hour * cartRoom.booked_hours);
-    }, 0);
+    let total = 0;
+    
+    // Сумма комнат
+    if (cart?.cart_rooms) {
+      cart.cart_rooms.forEach(room => {
+        total += room.booked_hours * parseFloat(room.room_price_per_hour.toString());
+      });
+    }
+    
+    // Сумма товаров
+    if (cart?.cart_menu_items) {
+      cart.cart_menu_items.forEach(product => {
+        total += calculateProductTotal(product);
+      });
+    }
+    
+    return total;
   };
 
   /*if (loading) return <LoadingIndicator />;
   if (error) return <ErrorMessage message={error} />;*/
 
   const cartRooms = cart?.cart_rooms || [];
+  const cartProducts = cart?.cart_menu_items || [];
 
   return (
     <PageContainer>
@@ -250,12 +296,14 @@ const OrderPage: React.FC = () => {
         <EmptyCartMessage>Вы ничего не заказали</EmptyCartMessage>
       ) : (
         <>
+          {/* Секция с комнатами */}
           <Section>
+            <SectionTitle>Забронированные комнаты</SectionTitle>
             {cartRooms.map((cartRoom) => (
               <CartItemContainer key={cartRoom.id}>
                 {cartRoom.room?.preview_img && (
                   <Link href={`/room/${cartRoom.room_id}`}>
-                    <RoomImage src={HOST_URL + cartRoom.room.preview_img} alt={cartRoom.room.name || 'Комната'} />
+                    <ItemImage src={HOST_URL + cartRoom.room.preview_img} alt={cartRoom.room.name || 'Комната'} />
                   </Link>
                 )}
                 <ItemDetails>
@@ -266,12 +314,42 @@ const OrderPage: React.FC = () => {
                   <DetailText>Время: {cartRoom.booked_time_start} - {cartRoom.booked_time_end}</DetailText>
                   <DetailText>Кол-во часов: {cartRoom.booked_hours}</DetailText>
                   <DetailText>Цена за час: {cartRoom.room_price_per_hour} руб.</DetailText>
-                  <DetailText>
-                    <strong>Стоимость: {cartRoom.room_price_per_hour * cartRoom.booked_hours} руб.</strong>
-                  </DetailText>
+                  <PriceText>
+                    Стоимость комнаты: {cartRoom.booked_hours * parseFloat(cartRoom.room_price_per_hour.toString())} руб.
+                  </PriceText>
                 </ItemDetails>
               </CartItemContainer>
             ))}
+          </Section>
+
+          {/* Секция с товарами */}
+          {cartProducts.length > 0 && (
+            <Section>
+              <SectionTitle>Товары в заказе</SectionTitle>
+              {cartProducts.map((product) => (
+                <ProductItemContainer key={product.cart_item_id}>
+                  {product.menu_item?.image_url && (
+                    <ItemImage 
+                      src={product.menu_item.image_url.startsWith('http') 
+                        ? product.menu_item.image_url 
+                        : HOST_URL + product.menu_item.image_url} 
+                      alt={product.menu_item.name} 
+                    />
+                  )}
+                  <ItemDetails>
+                    <ProductName>{product.menu_item?.name || 'Товар'}</ProductName>
+                    <DetailText>{product.menu_item?.description || 'Описание товара'}</DetailText>
+                    <DetailText>Количество: {product.quantity}</DetailText>
+                    <DetailText>Цена за единицу: {product.unit_price} руб.</DetailText>
+                    <PriceText>Сумма за товар: {calculateProductTotal(product)} руб.</PriceText>
+                  </ItemDetails>
+                </ProductItemContainer>
+              ))}
+            </Section>
+          )}
+
+          {/* Общая сумма */}
+          <Section>
             <TotalPrice>Итого: {calculateTotalPrice()} руб.</TotalPrice>
           </Section>
 
