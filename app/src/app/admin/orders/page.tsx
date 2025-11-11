@@ -21,11 +21,6 @@ const OrdersPage: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleOrderCreated = () => {
-    setIsFormOpen(false);
-    // Здесь можно обновить список заказов, если необходимо
-    // Например, вызвать функцию для перезагрузки данных в OrdersTable
-  };
 
   return (
     <Layout>
@@ -34,14 +29,10 @@ const OrdersPage: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             Управление Заказами
           </Typography>
-          <Button variant="contained" color="primary" onClick={handleCreateOrder}>
-            Создать Заказ
-          </Button>
         </Box>
         <OrdersTable onView={handleViewOrder} />
 
         <OrderViewSidebar open={isViewOpen} onClose={() => setIsViewOpen(false)} order={selectedOrder} />
-        <OrderFormModal open={isFormOpen} onClose={() => setIsFormOpen(false)} onOrderCreated={handleOrderCreated} />
       </Box>
     </Layout>
   );

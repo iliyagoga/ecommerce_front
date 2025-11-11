@@ -47,8 +47,20 @@ export interface OrderRoom {
   booked_time_start: string;
   booked_time_end: string;
   room_price_per_hour: number;
-  type?: 'standard' | 'vip' | 'cinema'; // Добавлено для отображения в сайдбаре
-  base_hourly_rate?: number; // Добавлено для отображения в сайдбаре
+  type?: 'standard' | 'vip' | 'cinema';
+  base_hourly_rate?: number;
+}
+
+export interface OrderItem {
+  order_item_id: number;
+  order_id: number;
+  item_id: number;
+  quantity: number;
+  unit_price: number | string;
+  total_price: number | string;
+  created_at: string;
+  updated_at: string;
+  menu_item?: Product;
 }
 
 export interface Order {
@@ -62,8 +74,9 @@ export interface Order {
   end_time: string;
   created_at?: string;
   updated_at?: string;
-  order_rooms?: OrderRoom[]; // Добавляем отношение orderRooms
-  user?: User; // Добавляем отношение user
+  order_rooms?: OrderRoom[];
+  order_items?: OrderItem[];
+  user?: User;
 }
 
 export interface HallNew {

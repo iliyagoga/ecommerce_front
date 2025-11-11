@@ -11,7 +11,14 @@ import {
   Divider,
   Chip,
   CircularProgress,
-  Alert
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper
 } from '@mui/material';
 /*import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
@@ -26,7 +33,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {
   Order,
   Product,
-  OrderRoom
+  OrderRoom,
+  OrderItem
 } from '@/types';
 import {
   getRoomById,
@@ -41,12 +49,13 @@ interface OrderViewSidebarProps {
 }
 
 const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, order }) => {
-  const [orderRoom, setOrderRoom] = useState<OrderRoom | null>(null); // Теперь orderRoom
-  const [roomName, setRoomName] = useState<string | null>(null); // Для хранения названия комнаты
+  const [orderRoom, setOrderRoom] = useState<OrderRoom | null>(null);
+  const [roomName, setRoomName] = useState<string | null>(null);
   const [productsMap, setProductsMap] = useState<Map<number, Product>>(new Map());
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [orderDetails, setOrderDetails] = useState<Order | null>(null); // Новое состояние для полных деталей заказа
+  const [orderDetails, setOrderDetails] = useState<Order | null>(null);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,13 +65,14 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
       try {
         const fetchedOrder = await getOrderById(order.order_id);
         setOrderDetails(fetchedOrder || null);
-        console.log(fetchedOrder)
+        console.log('Fetched order:', fetchedOrder);
+
+        // Обработка комнат
         if (fetchedOrder && fetchedOrder.order_rooms && fetchedOrder.order_rooms.length > 0) {
-          const roomData = fetchedOrder.order_rooms[0]; // Получаем данные orderRoom
-          console.log(roomData)
+          const roomData = fetchedOrder.order_rooms[0];
+          console.log('Room data:', roomData);
           setOrderRoom(roomData);
 
-          // Делаем отдельный запрос для получения названия комнаты
           if (roomData.room_id) {
             const fetchedRoomDetails = await getRoomById(roomData.room_id);
             setRoomName(fetchedRoomDetails?.name || null);
@@ -72,9 +82,17 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
           setRoomName(null);
         }
 
+        // Обработка товаров
+        if (fetchedOrder && fetchedOrder.order_items) {
+          setOrderItems(fetchedOrder.order_items);
+          console.log('Order items:', fetchedOrder.order_items);
+        } else {
+          setOrderItems([]);
+        }
+
         const allProducts = await getProducts();
         const productsMap = new Map<number, Product>();
-        allProducts.forEach(p => p.id && productsMap.set(p.id, p));
+        allProducts.forEach(p => p.item_id && productsMap.set(p.item_id, p));
         setProductsMap(productsMap);
       } catch (err) {
         setError('Не удалось загрузить данные заказа.');
@@ -86,6 +104,19 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
     fetchData();
   }, [order]);
 
+  const calculateItemsTotal = () => {
+    return orderItems.reduce((total, item) => total + Number(item.total_price), 0);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'success';
+      case 'pending': return 'warning';
+      case 'cancelled': return 'error';
+      default: return 'default';
+    }
+  };
+
   if (!order) return null;
 
   return (
@@ -94,10 +125,10 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
       open={open}
       onClose={onClose}
       sx={{
-        width: 400,
+        width: 500,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: 400,
+          width: 500,
           boxSizing: 'border-box',
           backgroundColor: '#1a1a1a',
           color: '#ffffff',
@@ -111,95 +142,256 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
         </IconButton>
       </Box>
       <Divider sx={{ borderColor: '#444' }} />
-      <Box sx={{ p: 2 }}>
+      
+      <Box sx={{ p: 2, maxHeight: 'calc(100vh - 64px)', overflowY: 'auto' }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
             <CircularProgress />
           </Box>
         )}
+        
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {!loading && !error && orderDetails && ( // Добавляем orderDetails в условие рендеринга
+        
+        {!loading && !error && orderDetails && (
           <List dense>
+            {/* Информация о клиенте */}
             <ListItem>
-              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Клиент: ${orderDetails.user?.name || 'N/A'}`} />
+              <ListItemText 
+                primary="Информация о клиенте" 
+                primaryTypographyProps={{ fontWeight: 'bold', color: '#FCD25E' }}
+              />
             </ListItem>
+            
             <ListItem>
-              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Email: ${orderDetails.user?.email || 'N/A'}`} />
+              <ListItemText 
+                primary={`Имя: ${orderDetails.user?.name || 'N/A'}`}
+                secondary={`Email: ${orderDetails.user?.email || 'N/A'}`}
+              />
             </ListItem>
-            {orderDetails.client_comment && (
-              <ListItem>
-                <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-                <ListItemText primary={`Комментарий клиента: ${orderDetails.client_comment}`} />
-              </ListItem>
+
+            <ListItem>
+              <ListItemText 
+                primary="Основная информация" 
+                primaryTypographyProps={{ fontWeight: 'bold', color: '#FCD25E', mt: 2 }}
+              />
+            </ListItem>
+
+            <ListItem>
+              <ListItemText 
+                primary={`Статус:`}
+                style={{width: "min-content", flex: "none", marginRight: "15px" }}
+                primaryTypographyProps={{width: "max-content"}}
+                
+              />
+                 <Chip 
+                    label={orderDetails.status} 
+                    color={getStatusColor(orderDetails.status) as any}
+                    size="small"/>
+            </ListItem>
+
+            <ListItem>
+              <ListItemText 
+                primary={`Общая цена: ${parseFloat(orderDetails.total_price).toFixed(2)} руб.`}
+              />
+            </ListItem>
+
+            <ListItem>
+              <ListItemText 
+                primary="Время бронирования" 
+                primaryTypographyProps={{ fontWeight: 'bold', color: '#FCD25E', mt: 2 }}
+              />
+            </ListItem>
+
+            <ListItem>
+              <ListItemText 
+                primary={`Начало: ${new Date(orderDetails.start_time).toLocaleString('ru-RU')}`}
+              />
+            </ListItem>
+
+            <ListItem>
+              <ListItemText 
+                primary={`Окончание: ${new Date(orderDetails.end_time).toLocaleString('ru-RU')}`}
+              />
+            </ListItem>
+
+            <ListItem>
+              <ListItemText 
+                primary={`Продолжительность: ${(
+                  (new Date(orderDetails.end_time).getTime() - new Date(orderDetails.start_time).getTime()) / 
+                  (1000 * 60 * 60)
+                ).toFixed(1)} часов`}
+              />
+            </ListItem>
+
+            {/* Комментарии */}
+            {(orderDetails.client_comment || orderDetails.admin_comment) && (
+              <>
+                <ListItem>
+                  <ListItemText 
+                    primary="Комментарии" 
+                    primaryTypographyProps={{ fontWeight: 'bold', color: '#FCD25E', mt: 2 }}
+                  />
+                </ListItem>
+                
+                {orderDetails.client_comment && (
+                  <ListItem>
+                    <ListItemText 
+                      primary="Комментарий клиента:"
+                      secondary={orderDetails.client_comment}
+                    />
+                  </ListItem>
+                )}
+                
+                {orderDetails.admin_comment && (
+                  <ListItem>
+                    <ListItemText 
+                      primary="Комментарий администратора:"
+                      secondary={orderDetails.admin_comment}
+                    />
+                  </ListItem>
+                )}
+              </>
             )}
-
-            <ListItem>
-              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Общая цена: ${orderDetails.total_price}`} />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText primary={`Статус: ${orderDetails.status}`} />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText
-                primary={`Время начала: ${
-                  orderDetails.start_time
-                    ? new Date(orderDetails.start_time).toLocaleString('ru-RU')
-                    : '-'
-                }`}
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText
-                primary={`Время окончания: ${
-                  orderDetails.end_time
-                    ? new Date(orderDetails.end_time).toLocaleString('ru-RU')
-                    : '-'
-                }`}
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-              <ListItemText
-                primary={`Забронировано часов: ${
-                  (() => {
-                    if (!orderDetails.start_time || !orderDetails.end_time) return '-';
-
-                    const start = new Date(orderDetails.start_time);
-                    const end = new Date(orderDetails.end_time);
-
-                    if (isNaN(start.getTime()) || isNaN(end.getTime())) return '-';
-
-                    const diffMs = end.getTime() - start.getTime();
-                    const diffHrs = diffMs / (1000 * 60 * 60);
-                    return diffHrs > 0 ? diffHrs.toFixed(2) : '0';
-                  })()
-                } ч.`}
-              />
-            </ListItem>
 
             <Divider sx={{ my: 2, borderColor: '#444' }} />
 
-            <Typography variant="subtitle1" gutterBottom>Комната:</Typography>
+            {/* Информация о комнате */}
+            <ListItem>
+              <ListItemText 
+                primary="Забронированная комната" 
+                primaryTypographyProps={{ fontWeight: 'bold', color: '#FCD25E' }}
+              />
+            </ListItem>
 
             {orderRoom ? (
-              <ListItem>
-                <ListItemIcon sx={{ color: '#ffffff' }}></ListItemIcon>
-                <ListItemText primary={`${roomName || 'N/A'}`} secondary={`Цена за час: ${orderRoom.room_price_per_hour} руб.`} />
-              </ListItem>
-            ) : (orderDetails && orderDetails.order_rooms && orderDetails.order_rooms.length === 0 ? (
+              <>
+                <ListItem>
+                  <ListItemText 
+                    primary={`Комната: ${roomName || 'N/A'}`}
+                    secondary={`ID комнаты: ${orderRoom.room_id}`}
+                  />
+                </ListItem>
+                
+                <ListItem>
+                  <ListItemText 
+                    primary={`Дата бронирования: ${new Date(orderRoom.booked_date).toLocaleDateString('ru-RU')}`}
+                  />
+                </ListItem>
+                
+                <ListItem>
+                  <ListItemText 
+                    primary={`Время начала: ${orderRoom.booked_time_start ? new Date(orderRoom.booked_time_start).toLocaleTimeString('ru-RU') : 'N/A'}`}
+                    secondary={`Время окончания: ${orderRoom.booked_time_end ? new Date(orderRoom.booked_time_end).toLocaleTimeString('ru-RU') : 'N/A'}`}
+                  />
+                </ListItem>
+                
+                <ListItem>
+                  <ListItemText 
+                    primary={`Забронировано часов: ${orderRoom.booked_hours}`}
+                    secondary={`Цена за час: ${Number(orderRoom.room_price_per_hour).toFixed(2)} руб.`}
+                  />
+                </ListItem>
+                
+                <ListItem>
+                  <ListItemText 
+                    primary={`Стоимость комнаты: ${(orderRoom.booked_hours * Number(orderRoom.room_price_per_hour)).toFixed(2)} руб.`}
+                    primaryTypographyProps={{ fontWeight: 'bold' }}
+                  />
+                </ListItem>
+              </>
+            ) : (
               <ListItem>
                 <ListItemText primary="Комната не найдена" />
               </ListItem>
-            ) : null)}
+            )}
 
             <Divider sx={{ my: 2, borderColor: '#444' }} />
-  
+
+            {/* Товары в заказе */}
+            <ListItem>
+              <ListItemText 
+                primary="Товары в заказе" 
+                primaryTypographyProps={{ fontWeight: 'bold', color: '#FCD25E' }}
+              />
+            </ListItem>
+
+            {orderItems.length > 0 ? (
+              <>
+                <TableContainer component={Paper} sx={{ backgroundColor: '#2a2a2a', mb: 2 }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>Товар</TableCell>
+                        <TableCell align="center" sx={{ color: '#ffffff', fontWeight: 'bold' }}>Кол-во</TableCell>
+                        <TableCell align="right" sx={{ color: '#ffffff', fontWeight: 'bold' }}>Цена</TableCell>
+                        <TableCell align="right" sx={{ color: '#ffffff', fontWeight: 'bold' }}>Сумма</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {orderItems.map((item, index) => {
+                        const product = productsMap.get(item.item_id);
+                        return (
+                          <TableRow key={item.order_item_id || index}>
+                            <TableCell sx={{ color: '#ffffff' }}>
+                              {product?.name || `Товар #${item.item_id}`}
+                            </TableCell>
+                            <TableCell align="center" sx={{ color: '#ffffff' }}>
+                              {item.quantity}
+                            </TableCell>
+                            <TableCell align="right" sx={{ color: '#ffffff' }}>
+                              {Number(item.unit_price).toFixed(2)} руб.
+                            </TableCell>
+                            <TableCell align="right" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
+                              {Number(item.total_price).toFixed(2)} руб.
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                
+                <ListItem>
+                  <ListItemText 
+                    primary={`Общая стоимость товаров: ${calculateItemsTotal().toFixed(2)} руб.`}
+                    primaryTypographyProps={{ fontWeight: 'bold' }}
+                  />
+                </ListItem>
+              </>
+            ) : (
+              <ListItem>
+                <ListItemText primary="Товары не добавлены" />
+              </ListItem>
+            )}
+
+            {/* Итоговая сводка */}
+            <Divider sx={{ my: 2, borderColor: '#444' }} />
+            
+            <ListItem>
+              <ListItemText 
+                primary="Итоговая сводка" 
+                primaryTypographyProps={{ fontWeight: 'bold', color: '#FCD25E' }}
+              />
+            </ListItem>
+            
+            <ListItem>
+              <ListItemText 
+                primary={`Комната: ${orderRoom ? (orderRoom.booked_hours * Number(orderRoom.room_price_per_hour)).toFixed(2) : '0.00'} руб.`}
+              />
+            </ListItem>
+            
+            <ListItem>
+              <ListItemText 
+                primary={`Товары: ${calculateItemsTotal().toFixed(2)} руб.`}
+              />
+            </ListItem>
+            
+            <ListItem>
+              <ListItemText 
+                primary={`Итого: ${Number(orderDetails.total_price).toFixed(2)} руб.`}
+                primaryTypographyProps={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#FCD25E' }}
+              />
+            </ListItem>
           </List>
         )}
       </Box>
