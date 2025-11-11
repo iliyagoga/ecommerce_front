@@ -104,12 +104,11 @@ class HallRoomNewController extends Controller
         $hallRoomsWithAvailability = $hallRooms->map(function ($hallRoom) use ($requestedDate, $requestedStartTime, $requestedEndTime) {
             $isBooked = false;
             if ($hallRoom->room && $hallRoom->room->is_available) {
-                // Проверяем, забронирована ли комната на этот период, используя start_time и end_time из таблицы orders
+
                 $bookedOrdersCount = \App\Models\OrderRooms::where('room_id', $hallRoom->room->room_id)
-                    ->join('orders', 'orders.order_id', '=', 'order_rooms.order_id') // Соединяем с таблицей orders
-                    ->whereDate('orders.start_time', $requestedDate) // Фильтруем заказы на запрошенную дату
+                    ->join('orders', 'orders.order_id', '=', 'order_rooms.order_id')->whereNot("orders.status", "cancelled")
+                    ->whereDate('orders.start_time', $requestedDate)
                     ->where(function ($query) use ($requestedStartTime, $requestedEndTime) {
-                        // Проверяем пересечение интервалов времени
                         $query->whereRaw('TIME(orders.start_time) < ?', [$requestedEndTime])
                               ->whereRaw('? < TIME(orders.end_time)', [$requestedStartTime]);
                     })

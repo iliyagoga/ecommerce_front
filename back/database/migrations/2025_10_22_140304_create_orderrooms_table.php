@@ -25,8 +25,6 @@ return new class extends Migration
             $table->index('booked_date');
             $table->index(['booked_date', 'booked_time_start']);
             
-            // Уникальный индекс чтобы избежать дублирования броней
-            $table->unique(['room_id', 'booked_date', 'booked_time_start'], 'unique_room_booking');
         });
     }
 
