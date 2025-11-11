@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Room, Category, Order, HallNew, HallRoomNew } from './types';
+import { Room, Category, Order, HallNew, HallRoomNew, CartRoom } from './types';
 export const HOST_URL = "http://localhost:8000";
 const BASE_URL_API = '/api';
 
@@ -257,7 +257,7 @@ export const getCart = async (): Promise<any> => {
   return (await api.get('/cart')).data;
 };
 
-export const addRoomToCart = async (roomData: any): Promise<any> => {
+export const addRoomToCart = async (roomData: Omit<CartRoom, "cart_id">): Promise<any> => {
   return (await api.post('/cart/room', roomData)).data;
 };
 

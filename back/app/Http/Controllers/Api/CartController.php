@@ -31,7 +31,7 @@ class CartController extends Controller
             'booked_time_end' => 'required|date_format:H:i|after:booked_time_start',
             'room_price_per_hour' => 'required|numeric|min:0|max:99999999.99',
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }

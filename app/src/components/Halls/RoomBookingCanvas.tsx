@@ -4,8 +4,10 @@ declare module 'd3';
 import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
-import { Room, HallRoomNew } from '@/types';
-import { getHallRoomsNew, getRooms, getHallRoomsAvailability } from '@/api';
+import { Room, HallRoomNew, CartRoom } from '@/types';
+import { getHallRoomsNew, getRooms, getHallRoomsAvailability, addRoomToCart } from '@/api';
+import { useRouter } from 'next/navigation';
+import { getTimeDifferenceInHours } from '@/other';
 
 interface HallData {
   width: number;
@@ -32,13 +34,15 @@ interface RoomBookingCanvasProps {
   selectedDate: string;
   selectedStartTime: string;
   selectedEndTime: string;
+  setSelectedRoom: React.Dispatch<React.SetStateAction<Omit<CartRoom, "cart_id"> | undefined>>
 }
 
-const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedDate, selectedStartTime, selectedEndTime }) => {
+const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedDate, selectedStartTime, selectedEndTime, setSelectedRoom }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hall, setHall] = useState<HallData>({ width: 1000, height: 600 });
   const [rooms, setRooms] = useState<RoomData[]>([]);
   const [allDbRooms, setAllDbRooms] = useState<Room[]>([]); // All rooms from the 'rooms' table
+  const router = useRouter();
 
   // Effect to fetch hall rooms (HallRoomNew) from the backend
   useEffect(() => {
@@ -99,9 +103,18 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
           .attr('class', 'room')
           .attr('transform', (d: RoomData) => `translate(${d.x}, ${d.y})`)
           .on('click', function(event: MouseEvent, d: RoomData) {
-            if (!d.isAvailable) return; // Do nothing if room is not available
-            // Логика клика для бронирования или просмотра деталей комнаты
-            console.log("Clicked on available room:", d.name, d.id);
+            if (!d.isAvailable || !d.dbRoomId || !selectedDate || !selectedEndTime || !selectedEndTime) return; 
+            const roomPricePerHour = d.dbRoomId ? allDbRooms.find(room => room.room_id === d.dbRoomId)?.base_hourly_rate : 0;
+
+            if (!roomPricePerHour) return;
+            setSelectedRoom({
+              room_id: d.dbRoomId,
+              booked_hours: getTimeDifferenceInHours(selectedStartTime, selectedEndTime),
+              booked_date: selectedDate,
+              booked_time_start: selectedStartTime,
+              booked_time_end: selectedEndTime,
+              room_price_per_hour: roomPricePerHour,
+            })
           })
           .style('cursor', (d: RoomData) => d.isAvailable ? 'pointer' : 'not-allowed'),
         update => update,

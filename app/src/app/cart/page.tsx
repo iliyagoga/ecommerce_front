@@ -1,4 +1,5 @@
 
+"use client"
 import { Cart, CartRoom } from '@/types';
 import { getCart, removeCartRoom, clearUserCart, updateCartRoom, HOST_URL } from '@/api';
 import Header from '@/components/Header/Header';
@@ -7,8 +8,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
-import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';
+/*import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
+import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';*/
 
 const PageContainer = styled.div`
   padding: 20px;
@@ -138,10 +139,10 @@ const CartPage: React.FC = () => {
     router.push('/');
   };
 
-  if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
+  /*if (loading) return <LoadingIndicator />;
+  if (error) return <ErrorMessage message={error} />;*/
 
-  const cartRooms = cart?.cartRooms || [];
+  const cartRooms = cart?.cart_rooms || [];
 
   return (
     <PageContainer>

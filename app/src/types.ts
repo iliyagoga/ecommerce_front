@@ -108,7 +108,7 @@ export interface Cart {
   user_id: number;
   created_at?: string;
   updated_at?: string;
-  cartRooms?: CartRoom[];
+  cart_rooms?: CartRoom[];
   user?: User;
 }
 
