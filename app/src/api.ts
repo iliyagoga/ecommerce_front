@@ -10,7 +10,6 @@ const api = axios.create({
   }
 });
 
-  // Добавляем интерцептор для добавления токена авторизации
   api.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem('authToken');
@@ -24,7 +23,6 @@ const api = axios.create({
     }
   );
   
-  // Функции для регистрации и входа
 export const registerUser = async (userData: any): Promise<any> => {
   const response =await api.post('/register', userData);
   if (response.data.token) {
@@ -83,7 +81,7 @@ export const updateRoom = async (
               if (file instanceof File) {
                 formData.append(`gallery[${index}]`, file);
               } else if (typeof file === 'string') {
-                formData.append(`gallery_urls[]`, file); // Отправляем существующие URL
+                formData.append(`gallery_urls[]`, file);
               }
             });
           } else if (key !== 'preview_img' && key !== 'gallery') {
@@ -200,7 +198,6 @@ export const createOrder = async (orderData: any) => {
   return (await api.post('/orders', orderData));
 };
 
-// API functions for HallsNew
 export const getHallsNew = async (): Promise<HallNew[]> => {
   return (await api.get('/halls_new')).data;
 };

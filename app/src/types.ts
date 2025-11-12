@@ -12,8 +12,8 @@ export interface Room {
   name: string;
   preview_img?: string;
   gallery?: RoomImage[];
-  type?: 'standard' | 'vip' | 'cinema'; // Добавлено для создания комнаты
-  is_available?: boolean; // Добавлено для админ-панели
+  type?: 'standard' | 'vip' | 'cinema';
+  is_available?: boolean;
 }
 
 export interface Product {
@@ -22,14 +22,14 @@ export interface Product {
   description?: string;
   price: number;
   image_url?: string;
-  category_id?: number; // Для создания товара
-  is_available?: boolean; // Добавлено для админ-панели
+  category_id?: number;
+  is_available?: boolean;
 }
 
 export interface Category {
   category_id: number;
   name: string;
-  products?: Product[]; // Для получения товаров по категориям
+  products?: Product[];
 }
 
 export interface User {
@@ -86,7 +86,7 @@ export interface HallNew {
   width: number;
   height: number;
   svg_background?: string;
-  hall_rooms_new_count?: number; // Added for hall list view
+  hall_rooms_new_count?: number;
 }
 
 export interface HallRoomNew {
@@ -99,8 +99,8 @@ export interface HallRoomNew {
   height: number;
   color: string;
   metadata?: any;
-  room_id?: number | null; // Allow null for room_id
-  is_available_for_booking?: boolean; // New field for booking availability
+  room_id?: number | null;
+  is_available_for_booking?: boolean;
 }
 
 export interface CartRoom {
@@ -114,7 +114,7 @@ export interface CartRoom {
   room_price_per_hour: number;
   created_at?: string;
   updated_at?: string;
-  room?: Room; // Добавляем отношение room для фронтенда
+  room?: Room;
 }
 
 export interface CartProduct {
@@ -137,20 +137,4 @@ export interface Cart {
   cart_rooms?: CartRoom[];
   cart_menu_items?: CartProduct[];
   user?: User;
-}
-
-// types/loading.ts
-export interface LoadingIndicatorProps {
-  size?: 'small' | 'medium' | 'large';
-  color?: string;
-  text?: string;
-  fullScreen?: boolean;
-  overlay?: boolean;
-}
-
-export interface SkeletonLoadingProps {
-  count?: number;
-  width?: string;
-  height?: string;
-  fullScreen?: boolean;
 }

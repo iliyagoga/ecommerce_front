@@ -9,8 +9,8 @@ const Header = () => {
     const showProfile = () => {
         const isAuthToken = localStorage.getItem("authToken");
 
-        if (isAuthToken) return  <LinkStyled href="/profile">Профиль</LinkStyled>
-        return <LinkStyled href="/auth/login">Войти</LinkStyled>
+        if (isAuthToken) return  <LinkStyled href="/profile" style={{textDecoration: "none"}}>Профиль</LinkStyled>
+        return <LinkStyled href="/auth/login" style={{textDecoration: "none"}}>Войти</LinkStyled>
     }
     return <HeaderStyled>
         <ItemStyled>
@@ -20,9 +20,8 @@ const Header = () => {
             <TextStyled>+7 937 245 14 06</TextStyled>
         </ItemStyled>
         <ItemStyled>
-            <LinkStyled href="/catalog">Каталог</LinkStyled>
-            <LinkStyled>Контакты</LinkStyled>
-            <LinkStyled href="/cart">Корзина</LinkStyled>
+            <LinkStyled href="/catalog" style={{textDecoration: "none"}}>Каталог</LinkStyled>
+            <LinkStyled href="/cart" style={{textDecoration: "none"}}>Корзина</LinkStyled>
             {showProfile()}
         </ItemStyled>
     </HeaderStyled>
