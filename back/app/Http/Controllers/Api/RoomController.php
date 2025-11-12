@@ -76,7 +76,7 @@ class RoomController extends Controller
             $validatedData['preview_img'] = $room->firstOrFail()->preview_img;
         }
 
-        /*// Handle gallery images upload
+        /*
         if ($request->hasFile('gallery')) {
             $galleryPaths = [];
             foreach ($request->file('gallery') as $file) {

@@ -37,7 +37,6 @@ class OrderController extends Controller
             'total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'client_comment' => ['nullable', 'string', 'max:1000'],
 
-            // Валидация для одной комнаты
             'room_id' => ['required', 'integer', 'exists:rooms,room_id'],
             'booked_hours' => ['required', 'integer', 'min:1', 'max:24'],
             'booked_date' => ['required', 'date', 'after_or_equal:today'],
@@ -56,7 +55,6 @@ class OrderController extends Controller
         DB::transaction(function () use ($validatedData, & $order) {
             $validatedData["user_id"] = Auth::id();
             
-            // Вычисляем start_time и end_time на основе данных комнаты
             $startDateTime = Carbon::parse($validatedData['booked_date'])->setTimeFromTimeString($validatedData['booked_time_start']);
             $endDateTime = Carbon::parse($validatedData['booked_date'])->setTimeFromTimeString($validatedData['booked_time_end']);
             $validatedData['start_time'] = $startDateTime;
@@ -104,14 +102,14 @@ class OrderController extends Controller
      */
     public function show(int $id)
     {
-        $order = Order::with(["orderRooms", "user", "orderItems"])->where('order_id', $id)->first(); // Получаем заказ
+        $order = Order::with(["orderRooms", "user", "orderItems"])->where('order_id', $id)->first();
 
 
         if (Auth::check() && Auth::user()->role === 'admin') {
 
-            return response()->json($order); // Возвращаем одну модель Order
+            return response()->json($order);
         } elseif (Auth::check() && $order->user_id === Auth::id()) {
-            return response()->json($order); // Возвращаем одну модель Order
+            return response()->json($order);
         }
         
         return response()->json(['message' => 'Unauthorized'], 403);

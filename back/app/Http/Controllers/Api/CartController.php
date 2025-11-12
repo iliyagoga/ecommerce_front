@@ -40,12 +40,10 @@ class CartController extends Controller
         $user = Auth::user();
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
 
-        // Проверяем, есть ли уже комната в корзине (пользователь запросил 1 комнату на 1 корзину)
         if ($cart->cartRooms()->count() > 0) {
             return response()->json(['message' => 'В корзине уже есть комната. Удалите ее, чтобы добавить новую.'], 409);
         }
 
-        // Проверяем доступность комнаты
         $room = Room::where('room_id', $request->room_id)->first();
         if (!$room || !$room->is_available) {
             return response()->json(['message' => 'Выбранная комната недоступна.'], 422);
@@ -75,7 +73,7 @@ class CartController extends Controller
         return response()->json($cartRoom->load('room'));
     }
 
-    public function removeRoom(CartRoom $cartRoom)
+    public function removeRoom()
     {
         $user = Auth::user();
         $cart = Cart::where('user_id', $user->id)->first();

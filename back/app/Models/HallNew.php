@@ -10,7 +10,7 @@ class HallNew extends Model
 {
     use HasFactory;
 
-    protected $table = 'halls_new'; // Specify the table name
+    protected $table = 'halls_new';
 
     protected $fillable = [
         'name',

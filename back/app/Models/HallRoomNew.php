@@ -10,7 +10,7 @@ class HallRoomNew extends Model
 {
     use HasFactory;
 
-    protected $table = 'hall_rooms_new'; // Specify the table name
+    protected $table = 'hall_rooms_new';
 
     protected $fillable = [
         'hall_id',
@@ -41,6 +41,6 @@ class HallRoomNew extends Model
      */
     public function room(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Room::class, 'room_id', 'room_id'); // Указываем внешний ключ и первичный ключ таблицы rooms
+        return $this->belongsTo(\App\Models\Room::class, 'room_id', 'room_id');
     }
 }

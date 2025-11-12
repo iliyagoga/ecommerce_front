@@ -67,7 +67,6 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
         setOrderDetails(fetchedOrder || null);
         console.log('Fetched order:', fetchedOrder);
 
-        // Обработка комнат
         if (fetchedOrder && fetchedOrder.order_rooms && fetchedOrder.order_rooms.length > 0) {
           const roomData = fetchedOrder.order_rooms[0];
           console.log('Room data:', roomData);
@@ -82,7 +81,6 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
           setRoomName(null);
         }
 
-        // Обработка товаров
         if (fetchedOrder && fetchedOrder.order_items) {
           setOrderItems(fetchedOrder.order_items);
           console.log('Order items:', fetchedOrder.order_items);
@@ -154,7 +152,6 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
         
         {!loading && !error && orderDetails && (
           <List dense>
-            {/* Информация о клиенте */}
             <ListItem>
               <ListItemText 
                 primary="Информация о клиенте" 
@@ -223,7 +220,6 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
               />
             </ListItem>
 
-            {/* Комментарии */}
             {(orderDetails.client_comment || orderDetails.admin_comment) && (
               <>
                 <ListItem>
@@ -255,7 +251,6 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
 
             <Divider sx={{ my: 2, borderColor: '#444' }} />
 
-            {/* Информация о комнате */}
             <ListItem>
               <ListItemText 
                 primary="Забронированная комната" 
@@ -307,7 +302,6 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
 
             <Divider sx={{ my: 2, borderColor: '#444' }} />
 
-            {/* Товары в заказе */}
             <ListItem>
               <ListItemText 
                 primary="Товары в заказе" 
@@ -364,7 +358,6 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
               </ListItem>
             )}
 
-            {/* Итоговая сводка */}
             <Divider sx={{ my: 2, borderColor: '#444' }} />
             
             <ListItem>
