@@ -7,6 +7,7 @@ import { getProductById, getCategories, HOST_URL, checkRoomType, addMenuItemToCa
 import { Product, Category } from '@/types';
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs';
+import Loader from '@/components/Other/Loader';
 
 const PageContainer = styled.div`
   padding: 2rem;
@@ -170,18 +171,9 @@ const ProductDetailPage = () => {
   }, [id, pathname])
 
   if (loading) {
-    return (<>
-      <Header />
-      <PageContainer><ProductTitle>Загрузка информации о продукте...</ProductTitle></PageContainer>
-    </>);
+    return <Loader/>;
   }
 
-  if (error) {
-    return (<>
-      <Header />
-      <PageContainer><ProductTitle style={{ color: '#dc3545' }}>{error}</ProductTitle></PageContainer>
-    </>);
-  }
 
   if (!product) {
     return (<>

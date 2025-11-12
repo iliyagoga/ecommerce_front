@@ -7,6 +7,7 @@ import { getRooms, getProductsByCategory, getCategories, HOST_URL } from '@/api'
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs';
 import { useRouter } from 'next/navigation';
+import Loader from '@/components/Other/Loader';
 
 const PageContainer = styled.div`
   padding: 2rem;
@@ -170,7 +171,7 @@ const CatalogPage = () => {
             }
         };
         getRoomsAndCategories();
-    }, []); // Загружаем комнаты и категории только при первом рендеринге
+    }, []);
 
     useEffect(() => {
         const getProductsData = async () => {
@@ -186,13 +187,13 @@ const CatalogPage = () => {
             }
         };
         getProductsData();
-    }, [selectedCategory]); // Загружаем товары при изменении выбранной категории
+    }, [selectedCategory]);
 
     const overallLoading = loadingRooms || loadingProducts;
     const overallError = errorRooms || errorProducts;
 
     if (overallLoading) {
-        return <PageContainer><Title>Загрузка каталога...</Title></PageContainer>;
+        return <Loader/>;
     }
 
     if (overallError) {

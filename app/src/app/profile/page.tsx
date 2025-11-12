@@ -12,12 +12,12 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
-  Alert,
   Container
 } from '@mui/material';
 import { User, Order } from '@/types';
 import { getOrdersByUser, getCurrentUser } from '@/api';
 import Header from '@/components/Header/Header';
+import Loader from '@/components/Other/Loader';
 
 const PageContainer = styled.div`
   padding: 20px;
@@ -186,17 +186,7 @@ const ProfilePage: React.FC = () => {
     }).format(numPrice) + ' руб.';
   };
 
-  if (loading) {
-    return (
-      <PageContainer>
-        <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-            <CircularProgress sx={{ color: '#FCD25E' }} />
-          </Box>
-        </Container>
-      </PageContainer>
-    );
-  }
+  if (loading) return <Loader/>
 
   return (<>
     <Header/>
@@ -215,12 +205,6 @@ const ProfilePage: React.FC = () => {
             </Box>
           )}
         </Section>
-
-        {/*{error && (
-          <Alert severity="error" sx={{ mb: 3, backgroundColor: '#2C2C2C', color: 'white' }}>
-            {error}
-          </Alert>
-        )}*/}
 
         <Section>
           <SectionTitle>История заказов</SectionTitle>

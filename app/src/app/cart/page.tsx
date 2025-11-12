@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { LinkStyled } from '@/components/Header/Items/Item.styled';
+import Loader from '@/components/Other/Loader';
 /*import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
 import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';*/
 
@@ -298,14 +299,12 @@ const CartPage: React.FC = () => {
   const calculateCartTotal = () => {
     let total = 0;
     
-    // Сумма комнат
     if (cart?.cart_rooms) {
       cart.cart_rooms.forEach(room => {
         total += room.booked_hours * parseFloat(room.room_price_per_hour.toString());
       });
     }
     
-    // Сумма товаров
     if (cart?.cart_menu_items) {
       cart.cart_menu_items.forEach(product => {
         total += calculateProductTotal(product);
@@ -315,12 +314,13 @@ const CartPage: React.FC = () => {
     return total;
   };
 
-  /*if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;*/
-
   const cartRooms = cart?.cart_rooms || [];
   const cartProducts = cart?.cart_menu_items || [];
 
+  if (loading) {
+    return <Loader/>;
+  }
+  
   return (
     <PageContainer>
       <Header />
@@ -331,7 +331,6 @@ const CartPage: React.FC = () => {
         <EmptyCartMessage>Ваша корзина пуста.</EmptyCartMessage>
       ) : (
         <>
-          {/* Блок комнат */}
           {cartRooms.length > 0 && (
             <>
               <SectionTitle>Забронированные комнаты</SectionTitle>
@@ -353,14 +352,12 @@ const CartPage: React.FC = () => {
               </ItemDetails>
               <ActionsContainer>
                 <RemoveButton onClick={() => handleRemoveRoom(cartRoom.id as number)}>Удалить</RemoveButton>
-                {/* Здесь можно добавить функционал изменения, например, через модальное окно */}
               </ActionsContainer>
             </CartItemContainer>
               ))}
             </>
           )}
 
-          {/* Блок товаров */}
           {cartProducts.length > 0 && (
             <>
               <SectionTitle>Товары в корзине</SectionTitle>
@@ -418,7 +415,6 @@ const CartPage: React.FC = () => {
             </>
           )}
 
-          {/* Общая сумма */}
           <TotalSection>
             <TotalText>Общая сумма: {calculateCartTotal()} руб.</TotalText>
           </TotalSection>

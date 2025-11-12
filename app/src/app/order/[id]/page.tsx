@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import Loader from '@/components/Other/Loader';
 /*import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
 import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';*/
 
@@ -133,11 +134,15 @@ interface OrderDetailsPageProps {
 const OrderDetailsPage: React.FC<OrderDetailsPageProps> = () => {
   const orderId = window.location.pathname.split('/')[2];
   const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
   const pathname = usePathname();
 
   const fetchOrderData = async (orderId: string) => {
+    setLoading(true)
     const data = await getOrderById(Number(orderId));
     setOrder(data);
+    setLoading(false)
   };
 
   useEffect(() => {
@@ -153,14 +158,12 @@ const OrderDetailsPage: React.FC<OrderDetailsPageProps> = () => {
     
     let total = 0;
     
-    // Сумма комнат
     if (order.order_rooms) {
       order.order_rooms.forEach(room => {
         total += room.booked_hours * parseFloat(room.room_price_per_hour.toString());
       });
     }
     
-    // Сумма товаров
     if (order.order_items) {
       order.order_items.forEach(product => {
         total += calculateProductTotal(product);
@@ -185,8 +188,9 @@ const OrderDetailsPage: React.FC<OrderDetailsPageProps> = () => {
     });
   };
 
-  /*if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;*/
+  if (loading) {
+    return <Loader/>;
+  }
 
   const orderRooms = order?.order_rooms || [];
   const orderItems = order?.order_items || [];

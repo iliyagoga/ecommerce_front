@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { extractTimeFromDateString } from '@/other';
+import Loader from '@/components/Other/Loader';
 /*import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
 import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';*/
 
@@ -140,12 +141,6 @@ const Label = styled.label`
   color: #FCD25E;
 `;
 
-const ActionsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
 const ActionButton = styled.button`
   background-color: #FCD25E;
   color: black;
@@ -263,14 +258,12 @@ const OrderPage: React.FC = () => {
   const calculateTotalPrice = () => {
     let total = 0;
     
-    // Сумма комнат
     if (cart?.cart_rooms) {
       cart.cart_rooms.forEach(room => {
         total += room.booked_hours * parseFloat(room.room_price_per_hour.toString());
       });
     }
     
-    // Сумма товаров
     if (cart?.cart_menu_items) {
       cart.cart_menu_items.forEach(product => {
         total += calculateProductTotal(product);
@@ -280,8 +273,9 @@ const OrderPage: React.FC = () => {
     return total;
   };
 
-  /*if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;*/
+  if (loading) {
+    return <Loader/>;
+  }
 
   const cartRooms = cart?.cart_rooms || [];
   const cartProducts = cart?.cart_menu_items || [];
@@ -296,7 +290,6 @@ const OrderPage: React.FC = () => {
         <EmptyCartMessage>Вы ничего не заказали</EmptyCartMessage>
       ) : (
         <>
-          {/* Секция с комнатами */}
           <Section>
             <SectionTitle>Забронированные комнаты</SectionTitle>
             {cartRooms.map((cartRoom) => (
@@ -322,7 +315,6 @@ const OrderPage: React.FC = () => {
             ))}
           </Section>
 
-          {/* Секция с товарами */}
           {cartProducts.length > 0 && (
             <Section>
               <SectionTitle>Товары в заказе</SectionTitle>
@@ -348,7 +340,6 @@ const OrderPage: React.FC = () => {
             </Section>
           )}
 
-          {/* Общая сумма */}
           <Section>
             <TotalPrice>Итого: {calculateTotalPrice()} руб.</TotalPrice>
           </Section>

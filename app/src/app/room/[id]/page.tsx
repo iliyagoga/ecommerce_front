@@ -7,6 +7,7 @@ import { Room } from '@/types';
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs'; // Импортируем компонент Breadcrumbs
 import { usePathname, useRouter } from 'next/navigation';
+import Loader from '@/components/Other/Loader';
 
 const PageContainer = styled.div`
   padding: 2rem;
@@ -133,17 +134,7 @@ const RoomDetailPage = () => {
   }, [pathname]);
 
   if (loading) {
-    return (<>
-      <Header />
-      <PageContainer><RoomTitle>Загрузка информации о комнате...</RoomTitle></PageContainer>
-    </>);
-  }
-
-  if (error) {
-    return (<>
-      <Header />
-      <PageContainer><RoomTitle style={{ color: '#dc3545' }}>{error}</RoomTitle></PageContainer>
-    </>);
+    return <Loader/>;
   }
 
   if (!room) {
