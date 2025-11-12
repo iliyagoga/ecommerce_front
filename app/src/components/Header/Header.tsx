@@ -12,6 +12,12 @@ const Header = () => {
         if (isAuthToken) return  <LinkStyled href="/profile" style={{textDecoration: "none"}}>Профиль</LinkStyled>
         return <LinkStyled href="/auth/login" style={{textDecoration: "none"}}>Войти</LinkStyled>
     }
+
+    const showCart = () => {
+        const isAuthToken = localStorage.getItem("authToken");
+
+        if (isAuthToken) return <LinkStyled href="/cart" style={{textDecoration: "none"}}>Корзина</LinkStyled>
+    }
     return <HeaderStyled>
         <ItemStyled>
             <Link href={"/"}><Image src={logo} alt={""} height={50} ></Image></Link>
@@ -21,7 +27,7 @@ const Header = () => {
         </ItemStyled>
         <ItemStyled>
             <LinkStyled href="/catalog" style={{textDecoration: "none"}}>Каталог</LinkStyled>
-            <LinkStyled href="/cart" style={{textDecoration: "none"}}>Корзина</LinkStyled>
+            {showCart()}
             {showProfile()}
         </ItemStyled>
     </HeaderStyled>

@@ -70,4 +70,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class, "order_id");
     }
+
+    public function review(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
 }

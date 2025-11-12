@@ -200,37 +200,29 @@ const TotalText = styled.p`
 const CartPage: React.FC = () => {
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [isAddingProducts, setIsAddingProducts] = useState(false);
   const [quantities, setQuantities] = useState<{[key: number]: number}>({});
 
   const router = useRouter();
 
   const fetchCartData = async () => {
-    try {
-      setLoading(true);
-      const data = await getCart();
-      setCart(data);
-      
-      if (data?.cart_menu_items) {
-        const initialQuantities: {[key: number]: number} = {};
-        data.cart_menu_items.forEach((item: CartProduct) => {
-          if (item.item_id) {
-            initialQuantities[item.item_id] = item.quantity;
-          }
-        });
-        setQuantities(initialQuantities);
-      }
-    } catch (err) {
-      setError('Не удалось загрузить корзину.');
-      console.error(err);
-    } finally {
-      setLoading(false);
+    const data = await getCart();
+    setCart(data);
+    
+    if (data?.cart_menu_items) {
+      const initialQuantities: {[key: number]: number} = {};
+      data.cart_menu_items.forEach((item: CartProduct) => {
+        if (item.item_id) {
+          initialQuantities[item.item_id] = item.quantity;
+        }
+      });
+      setQuantities(initialQuantities);
     }
   };
 
   useEffect(() => {
-    fetchCartData();
+    setLoading(true);
+    fetchCartData().then(() => setLoading(false));
   }, []);
 
   useEffect(() => {

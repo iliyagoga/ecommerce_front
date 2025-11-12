@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ReviewController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,11 @@ Route::get('/halls_new/{hallNew}', [\App\Http\Controllers\Api\HallNewController:
 Route::get('/halls_new/{hallNew}/hall_rooms_new', [\App\Http\Controllers\Api\HallRoomNewController::class, 'index']);
 Route::get('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', [\App\Http\Controllers\Api\HallRoomNewController::class, 'show']);
 
+Route::get('/reviews', [ReviewController::class, 'index']);
+Route::get('/reviews/{review}', [ReviewController::class, 'show']);
+Route::get('/orders/{orderId}/reviews', [ReviewController::class, 'getByOrder']);
+Route::get('/users/{userId}/reviews', [ReviewController::class, 'getByUser']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -52,6 +58,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart/menu-item/{cartMenuItem}', [\App\Http\Controllers\Api\CartController::class, 'removeMenuItem']);
 
     Route::get('/halls_new/{hallNew}/hall_rooms_availability', [\App\Http\Controllers\Api\HallRoomNewController::class, 'getHallRoomsAvailability']);
+   
+    Route::get('/reviews/my', [ReviewController::class, 'myReviews']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
 
     Route::middleware('admin')->group(function () {
         Route::post('/rooms', [RoomController::class, 'store']);

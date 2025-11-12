@@ -222,6 +222,7 @@ const ProfilePage: React.FC = () => {
                     <TableCell>Дата создания</TableCell>
                     <TableCell>Статус</TableCell>
                     <TableCell>Итоговая цена</TableCell>
+                    <TableCell>Оставить отзыв</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -252,6 +253,11 @@ const ProfilePage: React.FC = () => {
                       <TableCell>
                         <ActionButton onClick={() => handleOrderClick(order.order_id)}>
                           Перейти
+                        </ActionButton>
+                      </TableCell>
+                      <TableCell>
+                        <ActionButton onClick={() => router.push(`/order/${order.order_id}/review`)}>
+                          Оставить отзыв
                         </ActionButton>
                       </TableCell>
                     </TableRow>

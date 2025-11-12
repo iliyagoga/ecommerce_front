@@ -7,7 +7,7 @@ use App\Models\HallNew;
 use App\Models\HallRoomNew;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon; // Import Carbon
+use Carbon\Carbon;
 
 class HallRoomNewController extends Controller
 {

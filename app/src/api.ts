@@ -294,3 +294,7 @@ export const getCurrentUser = async (): Promise<any> => {
   return (await api.get('/user')).data;
 }
 
+export const createReview = async (orderId: number, comment: string): Promise<any> => {
+  await api.post('/reviews', {order_id: orderId, review: comment});
+}
+
