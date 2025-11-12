@@ -49,6 +49,7 @@ export interface OrderRoom {
   room_price_per_hour: number;
   type?: 'standard' | 'vip' | 'cinema';
   base_hourly_rate?: number;
+  room?: Room;
 }
 
 export interface OrderItem {

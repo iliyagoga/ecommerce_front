@@ -7,9 +7,16 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    public function index()
+    {
+        $user = Auth::user();
+        return response()->json($user);
+    }
+
     public function register(Request $request)
     {
         $request->validate([

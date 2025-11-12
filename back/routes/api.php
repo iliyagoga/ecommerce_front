@@ -5,9 +5,11 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AuthController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/user', [AuthController::class, 'index']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/users/{id}/role', [AuthController::class, 'updateUserRole']);
@@ -32,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders-user', [OrderController::class, 'ordersForUser']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::put('/orders/{id}', [OrderController::class, 'update']);
     Route::post('/orders/{id}/status', [OrderController::class, 'updateStatus']);

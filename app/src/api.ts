@@ -188,7 +188,7 @@ export const getOrders = async (): Promise<Order[]> => {
   return (await api.get('/orders')).data;
 };
 
-export const getOrderById = async (id: number): Promise<Order | undefined> => {
+export const getOrderById = async (id: number): Promise<Order> => {
   return (await api.get(`/orders/${id}`)).data;
 };
 
@@ -288,4 +288,12 @@ export const clearUserCart = async (): Promise<void> => {
 export const checkRoomType = async (): Promise<boolean> => {
   return (await api.get('/cart/check-room-type')).data;
 };
+
+export const getOrdersByUser = async (): Promise<any> => {
+  return (await api.get('/orders-user')).data;
+}
+
+export const getCurrentUser = async (): Promise<any> => {
+  return (await api.get('/user')).data;
+}
 

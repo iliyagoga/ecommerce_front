@@ -9,7 +9,7 @@ const Header = () => {
     const showProfile = () => {
         const isAuthToken = localStorage.getItem("authToken");
 
-        if (isAuthToken) return  <LinkStyled>Профиль</LinkStyled>
+        if (isAuthToken) return  <LinkStyled href="/profile">Профиль</LinkStyled>
         return <LinkStyled href="/auth/login">Войти</LinkStyled>
     }
     return <HeaderStyled>

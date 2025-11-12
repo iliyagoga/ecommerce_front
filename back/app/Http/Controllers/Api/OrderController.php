@@ -102,7 +102,7 @@ class OrderController extends Controller
      */
     public function show(int $id)
     {
-        $order = Order::with(["orderRooms", "user", "orderItems"])->where('order_id', $id)->first();
+        $order = Order::with(["orderRooms.room", "user", "orderItems.menuItem"])->where('order_id', $id)->first();
 
 
         if (Auth::check() && Auth::user()->role === 'admin') {
@@ -148,5 +148,19 @@ class OrderController extends Controller
         $order->update($validatedData);
 
         return response()->json($order);
+    }
+
+    public function ordersForUser()
+    {
+        $orders = Order::with(['user:id,name,email'])->get()->map(function ($order) {
+            $orderArray = $order->toArray();
+            $orderArray['client_name'] = $order->user ? $order->user->name : null;
+            $orderArray['client_email'] = $order->user ? $order->user->email : null;
+            return $orderArray;
+        });
+
+        if (!Auth::check()) return response()->json(['message' => 'Unauthorized'], 403);
+
+        return response()->json($orders->where("user_id", Auth::id())->values()->all());
     }
 }
