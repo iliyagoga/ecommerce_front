@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('hall_rooms_new', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('hall_id')->constrained('halls_new')->onDelete('cascade'); // Foreign key to halls_new
+            $table->foreignId('hall_id')->constrained('halls_new')->onDelete('cascade');
             $table->string('name');
             $table->integer('x');
             $table->integer('y');
             $table->integer('width');
             $table->integer('height');
             $table->string('color')->default('#e0e0ff');
-            $table->json('metadata')->nullable(); // Доп. данные
-            $table->foreignId('room_id')->nullable()->constrained('rooms', 'room_id')->onDelete('set null'); // Связь с основной таблицей rooms, явно указываем столбец room_id
+            $table->json('metadata')->nullable();
+            $table->foreignId('room_id')->nullable()->constrained('rooms', 'room_id')->onDelete('set null');
             $table->timestamps();
         });
     }

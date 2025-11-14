@@ -30,20 +30,6 @@ class Room extends Model
         'max_people' => 'integer',
     ];
 
-    public static function rules(): array
-    {
-        return [
-            'type' => 'required|in:обычная,вип,кино',
-            'name' => 'required|string|max:255',
-            'base_hourly_rate' => 'required|numeric|min:0',
-            'initial_fee' => 'required|numeric|min:0',
-            'max_people' => 'required|integer|min:1',
-            'description' => 'nullable|string',
-            'preview_img' => 'nullable|string',
-            'is_available' => 'boolean',
-        ];
-    }
-
     public function gallery(): HasMany
     {
         return $this->hasMany(RoomGallery::class, 'room_id');
@@ -54,7 +40,6 @@ class Room extends Model
         return $this->hasMany(OrderRooms::class, 'room_id');
     }
 
-    // Scope для активных комнат
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -67,7 +52,6 @@ class Room extends Model
                     ->where('is_blocked', false);
     }
 
-    // Scope по типу комнаты
     public function scopeOfType($query, string $type)
     {
         return $query->where('type', $type);

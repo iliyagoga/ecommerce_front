@@ -6,83 +6,120 @@ use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\HallNewController;
+use App\Http\Controllers\Api\HallRoomNewController;
+use App\Http\Controllers\Api\CartController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', [AuthController::class, 'index']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/users/{id}/role', [AuthController::class, 'updateUserRole']);
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/user', 'index');
+    Route::post('/register', 'register');
+    Route::post('/login', 'login');
+    Route::post('/users/{id}/role', 'updateUserRole');
+});
 
-Route::get('/rooms', [RoomController::class, 'index']);
-Route::get('/rooms/{id}', [RoomController::class, 'show']);
+Route::controller(RoomController::class)->group(function () {
+    Route::get('/rooms', 'index');
+    Route::get('/rooms/{id}', 'show');
+});
 
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/categories/{id}', [CategoryController::class, 'show']);
+Route::controller(CategoryController::class)->group(function () {
+    Route::get('/categories', 'index');
+    Route::get('/categories/{id}', 'show');
+});
 
-Route::get('/menuitems', [MenuItemController::class, 'index']);
-Route::get('/menuitems/category/{category_id}', [MenuItemController::class, 'getProductsByCategory']);
-Route::get('/menuitems/{id}', [MenuItemController::class, 'show']);
+Route::controller(MenuItemController::class)->group(function () {
+    Route::get('/menuitems', 'index');
+    Route::get('/menuitems/category/{category_id}', 'getProductsByCategory');
+    Route::get('/menuitems/{id}', 'show');
+});
 
-Route::get('/halls_new', [\App\Http\Controllers\Api\HallNewController::class, 'index']);
-Route::get('/halls_new/{hallNew}', [\App\Http\Controllers\Api\HallNewController::class, 'show']);
-Route::get('/halls_new/{hallNew}/hall_rooms_new', [\App\Http\Controllers\Api\HallRoomNewController::class, 'index']);
-Route::get('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', [\App\Http\Controllers\Api\HallRoomNewController::class, 'show']);
+Route::controller(HallNewController::class)->group(function () {
+    Route::get('/halls_new', 'index');
+    Route::get('/halls_new/{hallNew}', 'show');
+});
 
-Route::get('/reviews', [ReviewController::class, 'index']);
-Route::get('/reviews/{review}', [ReviewController::class, 'show']);
-Route::get('/orders/{orderId}/reviews', [ReviewController::class, 'getByOrder']);
-Route::get('/users/{userId}/reviews', [ReviewController::class, 'getByUser']);
+Route::controller(HallRoomNewController::class)->group(function () {
+    Route::get('/halls_new/{hallNew}/hall_rooms_new', 'index');
+    Route::get('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', 'show');
+});
+
+Route::controller(ReviewController::class)->group(function () {
+    Route::get('/reviews', 'index');
+    Route::get('/reviews/{review}', 'show');
+    Route::get('/orders/{orderId}/reviews', 'getByOrder');
+    Route::get('/users/{userId}/reviews', 'getByUser');
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::get('/orders', [OrderController::class, 'index']);
-    Route::get('/orders-user', [OrderController::class, 'ordersForUser']);
-    Route::get('/orders/{id}', [OrderController::class, 'show']);
-    Route::put('/orders/{id}', [OrderController::class, 'update']);
-    Route::post('/orders/{id}/status', [OrderController::class, 'updateStatus']);
-    Route::post('/orders', [OrderController::class, 'store']);
-    Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 
-    Route::get('/cart', [\App\Http\Controllers\Api\CartController::class, 'show']);
-    Route::get('/cart/check-room-type', [\App\Http\Controllers\Api\CartController::class, 'checkAddMenuItem']);
-    Route::put('/cart/menu-item/{cartMenuItem}', [\App\Http\Controllers\Api\CartController::class, 'updateMenuItem']);
-    Route::put('/cart/room/{cartRoom}', [\App\Http\Controllers\Api\CartController::class, 'updateRoom']);
-    Route::post('/cart/room', [\App\Http\Controllers\Api\CartController::class, 'addRoom']);
-    Route::post('/cart/menu-item', [\App\Http\Controllers\Api\CartController::class, 'addMenuItem']);
-    Route::delete('/cart/room/{cartRoom}', [\App\Http\Controllers\Api\CartController::class, 'removeRoom']);
-    Route::delete('/cart/clear', [\App\Http\Controllers\Api\CartController::class, 'clearCart']);
-    Route::delete('/cart/menu-item/{cartMenuItem}', [\App\Http\Controllers\Api\CartController::class, 'removeMenuItem']);
+    Route::controller(OrderController::class)->group(function () {
+        Route::get('/orders', 'index');
+        Route::get('/orders-user', 'ordersForUser');
+        Route::get('/orders/{id}', 'show');
+        Route::put('/orders/{id}', 'update');
+        Route::post('/orders/{id}/status', 'updateStatus');
+        Route::post('/orders', 'store');
+        Route::delete('/orders/{id}', 'destroy');
+    });
 
-    Route::get('/halls_new/{hallNew}/hall_rooms_availability', [\App\Http\Controllers\Api\HallRoomNewController::class, 'getHallRoomsAvailability']);
-   
-    Route::get('/reviews/my', [ReviewController::class, 'myReviews']);
-    Route::post('/reviews', [ReviewController::class, 'store']);
-    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
+    Route::controller(CartController::class)->group(function () {
+        Route::get('/cart', 'show');
+        Route::get('/cart/check-room-type', 'checkAddMenuItem');
+        Route::put('/cart/menu-item/{cartMenuItem}', 'updateMenuItem');
+        Route::put('/cart/room/{cartRoom}', 'updateRoom');
+        Route::post('/cart/room', 'addRoom');
+        Route::post('/cart/menu-item', 'addMenuItem');
+        Route::delete('/cart/room/{cartRoom}', 'removeRoom');
+        Route::delete('/cart/clear', 'clearCart');
+        Route::delete('/cart/menu-item/{cartMenuItem}', 'removeMenuItem');
+    });
+
+    Route::controller(HallRoomNewController::class)->group(function () {
+        Route::get('/halls_new/{hallNew}/hall_rooms_availability', 'getHallRoomsAvailability');
+    });
+
+    Route::controller(ReviewController::class)->group(function () {
+        Route::get('/reviews/my', 'myReviews');
+        Route::post('/reviews', 'store');
+        Route::delete('/reviews/{review}', 'destroy');
+    });
 
     Route::middleware('admin')->group(function () {
-        Route::post('/rooms', [RoomController::class, 'store']);
-        Route::post('/rooms/{id}', [RoomController::class, 'update']); 
-        Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
+        Route::controller(RoomController::class)->group(function () {
+            Route::post('/rooms', 'store');
+            Route::post('/rooms/{id}', 'update');
+            Route::delete('/rooms/{id}', 'destroy');
+        });
 
-        Route::post('/categories', [CategoryController::class, 'store']);
-        Route::put('/categories/{id}', [CategoryController::class, 'update']);
-        Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+        Route::controller(CategoryController::class)->group(function () {
+            Route::post('/categories', 'store');
+            Route::put('/categories/{id}', 'update');
+            Route::delete('/categories/{id}', 'destroy');
+        });
 
-        Route::post('/menuitems', [MenuItemController::class, 'store']);
-        Route::post('/menuitems/{id}', [MenuItemController::class, 'update']); 
-        Route::delete('/menuitems/{id}', [MenuItemController::class, 'destroy']);
+        Route::controller(MenuItemController::class)->group(function () {
+            Route::post('/menuitems', 'store');
+            Route::post('/menuitems/{id}', 'update');
+            Route::delete('/menuitems/{id}', 'destroy');
+        });
 
-        Route::post('/halls_new', [\App\Http\Controllers\Api\HallNewController::class, 'store']);
-        Route::put('/halls_new/{hallNew}', [\App\Http\Controllers\Api\HallNewController::class, 'update']);
-        Route::delete('/halls_new/{hallNew}', [\App\Http\Controllers\Api\HallNewController::class, 'destroy']);
-    
-        Route::post('/halls_new/{hallNew}/hall_rooms_new', [\App\Http\Controllers\Api\HallRoomNewController::class, 'store']);
-        Route::put('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', [\App\Http\Controllers\Api\HallRoomNewController::class, 'update']);
-        Route::delete('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', [\App\Http\Controllers\Api\HallRoomNewController::class, 'destroy']);
+        Route::controller(HallNewController::class)->group(function () {
+            Route::post('/halls_new', 'store');
+            Route::put('/halls_new/{hallNew}', 'update');
+            Route::delete('/halls_new/{hallNew}', 'destroy');
+        });
+
+        Route::controller(HallRoomNewController::class)->group(function () {
+            Route::post('/halls_new/{hallNew}/hall_rooms_new', 'store');
+            Route::put('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', 'update');
+            Route::delete('/halls_new/{hallNew}/hall_rooms_new/{hallRoomNew}', 'destroy');
+        });
     });
 });
 

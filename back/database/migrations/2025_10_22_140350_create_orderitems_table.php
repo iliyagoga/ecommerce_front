@@ -17,7 +17,6 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2);
             $table->timestamps();
             
-            // Индексы
             $table->index('order_id');
             $table->index('item_id');
         });

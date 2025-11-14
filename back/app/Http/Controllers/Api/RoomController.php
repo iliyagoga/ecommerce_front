@@ -42,9 +42,8 @@ class RoomController extends Controller
         
         //$validatedData['gallery'] = json_encode($validatedData['gallery'] ?? []);
         $validatedData['is_available'] = filter_var($request->input('is_available'), FILTER_VALIDATE_BOOLEAN);
-        dump($validatedData);
-        $room = Room::create($validatedData);
-        return response()->json($room, Response::HTTP_CREATED);
+        Room::create($validatedData);
+        return response()->json(null, 201);
     }
 
     public function show(int $id)

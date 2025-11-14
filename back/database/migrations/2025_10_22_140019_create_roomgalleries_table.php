@@ -13,8 +13,7 @@ return new class extends Migration
             $table->foreignId('room_id')->constrained('rooms', 'room_id')->onDelete('cascade');
             $table->string('url', 500);
             $table->timestamps();
-            
-            // Индексы
+        
             $table->index('room_id');
         });
     }

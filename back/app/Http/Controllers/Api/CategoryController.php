@@ -21,18 +21,12 @@ class CategoryController extends Controller
         return response()->json($category, Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(int $id)
     {
         $category = Category::where('category_id', $id)->firstOrFail();
         return response()->json($category);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, int $id)
     {
         $category = Category::where('category_id', "=", $id);
@@ -40,9 +34,6 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(int $id)
     {
         $category = Category::where('category_id', "=", $id);

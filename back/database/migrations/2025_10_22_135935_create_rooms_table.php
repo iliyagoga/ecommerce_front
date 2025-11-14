@@ -21,7 +21,6 @@ return new class extends Migration
             $table->boolean('is_available')->default(true);
             $table->timestamps();
             
-            // Индексы
             $table->index(['type', 'is_active']);
             $table->index('is_active');
         });

@@ -144,11 +144,11 @@ const CatalogPage = () => {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null); // Изменяем тип на number | null
-    const [loadingRooms, setLoadingRooms] = useState(true); // Отдельное состояние загрузки для комнат
-    const [loadingProducts, setLoadingProducts] = useState(true); // Отдельное состояние загрузки для продуктов
-    const [errorRooms, setErrorRooms] = useState<string | null>(null); // Отдельное состояние ошибки для комнат
-    const [errorProducts, setErrorProducts] = useState<string | null>(null); // Отдельное состояние ошибки для продуктов
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    const [loadingRooms, setLoadingRooms] = useState(true);
+    const [loadingProducts, setLoadingProducts] = useState(true);
+    const [errorRooms, setErrorRooms] = useState<string | null>(null);
+    const [errorProducts, setErrorProducts] = useState<string | null>(null);
 
     useEffect(() => {
         const getRoomsAndCategories = async () => {
@@ -176,14 +176,11 @@ const CatalogPage = () => {
     useEffect(() => {
         const getProductsData = async () => {
             try {
-                setLoadingProducts(true);
                 const productsData = await getProductsByCategory(selectedCategory ? String(selectedCategory) : undefined);
                 setProducts(productsData.flat());
             } catch (err) {
                 setErrorProducts('Не удалось загрузить товары.');
                 console.error(err);
-            } finally {
-                setLoadingProducts(false);
             }
         };
         getProductsData();

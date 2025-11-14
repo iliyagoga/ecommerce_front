@@ -31,7 +31,7 @@ class MenuItemController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric|min:1',
             'category_id' => 'nullable|exists:categories,category_id',
             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);

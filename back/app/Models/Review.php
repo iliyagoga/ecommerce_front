@@ -20,15 +20,6 @@ class Review extends Model
         'review' => 'string',
     ];
 
-    public static function rules(): array
-    {
-        return [
-            'order_id' => 'required|integer|exists:orders,order_id',
-            'user_id' => 'required|integer|exists:users,id',
-            'review' => 'required|string',
-        ];
-    }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, "order_id");

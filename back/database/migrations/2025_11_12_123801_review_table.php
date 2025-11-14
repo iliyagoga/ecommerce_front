@@ -15,7 +15,6 @@ return new class extends Migration
             $table->text('review');
             $table->timestamps();
             
-            // Индексы
             $table->index('order_id');
             $table->index('user_id');
         });

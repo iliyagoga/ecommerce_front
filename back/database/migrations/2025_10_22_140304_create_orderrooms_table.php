@@ -19,7 +19,6 @@ return new class extends Migration
             $table->decimal('room_price_per_hour', 10, 2);
             $table->timestamps();
             
-            // Индексы
             $table->index('order_id');
             $table->index('room_id');
             $table->index('booked_date');

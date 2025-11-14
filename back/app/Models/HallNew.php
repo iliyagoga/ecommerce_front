@@ -19,9 +19,6 @@ class HallNew extends Model
         'svg_background',
     ];
 
-    /**
-     * Get the hall_rooms_new for the HallNew.
-     */
     public function hallRoomsNew(): HasMany
     {
         return $this->hasMany(HallRoomNew::class, 'hall_id');

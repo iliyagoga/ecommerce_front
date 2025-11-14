@@ -19,7 +19,6 @@ return new class extends Migration
             $table->timestamp('end_time');
             $table->timestamps();
             
-            // Индексы
             $table->index('user_id');
             $table->index('status');
             $table->index('start_time');

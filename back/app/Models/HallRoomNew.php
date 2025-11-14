@@ -28,17 +28,11 @@ class HallRoomNew extends Model
         'metadata' => 'array',
     ];
 
-    /**
-     * Get the hallNew that owns the HallRoomNew.
-     */
     public function hallNew(): BelongsTo
     {
         return $this->belongsTo(HallNew::class, 'hall_id');
     }
 
-    /**
-     * Get the room that this HallRoomNew belongs to.
-     */
     public function room(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Room::class, 'room_id', 'room_id');

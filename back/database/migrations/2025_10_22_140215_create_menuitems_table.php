@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('image_url', 500)->nullable();
             $table->timestamps();
             
-            // Индексы
             $table->index('category_id');
             $table->index('is_available');
             $table->index('price');

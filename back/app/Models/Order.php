@@ -31,19 +31,6 @@ class Order extends Model
         'end_time' => 'datetime',
     ];
 
-    public static function rules(): array
-    {
-        return [
-            'user_id' => 'required|integer|exists:users,user_id',
-            'status' => 'required|in:pending,confirmed,active,completed,cancelled',
-            'total_price' => 'required|numeric|min:0|max:99999999.99',
-            'client_comment' => 'nullable|string|max:1000',
-            'admin_comment' => 'nullable|string|max:1000',
-            'start_time' => 'required|date|after_or_equal:now',
-            'end_time' => 'required|date|after:start_time'
-        ];
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->integer('width');
             $table->integer('height');
-            $table->text('svg_background')->nullable(); // SVG план зала
+            $table->text('svg_background')->nullable();
             $table->timestamps();
         });
     }

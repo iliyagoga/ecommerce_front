@@ -33,8 +33,8 @@ const initialNewRoomState: Omit<Room, 'type_id'> = {
   initial_fee: 0,
   max_people: 1,
   description: '',
-  preview_img: "", // Изменено на null для файла
-  gallery: [], // Изменено на пустой массив для файлов
+  preview_img: "",
+  gallery: [],
   is_available: true,
 };
 
@@ -93,15 +93,13 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
     setNewRoom(prev => ({ ...prev, [name]: checked }));
   };
 
-
-  // Функции для обработки галереи изображений (удалены или изменены)
-
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
       const formData = new FormData();
+
       for (const key in newRoom) {
         if (Object.prototype.hasOwnProperty.call(newRoom, key)) {
           if (key === 'preview_img' && selectedPreviewImage) {
