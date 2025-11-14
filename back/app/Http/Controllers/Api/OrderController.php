@@ -97,9 +97,6 @@ class OrderController extends Controller
         return response()->json($order, Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(int $id)
     {
         $order = Order::with(["orderRooms.room", "user", "orderItems.menuItem"])->where('order_id', $id)->first();
@@ -115,9 +112,6 @@ class OrderController extends Controller
         return response()->json(['message' => 'Unauthorized'], 403);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, int $id)
     {
         $order = Order::where('order_id', $id)->firstOrFail();
@@ -125,9 +119,6 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(int $id)
     {
         $order = Order::where('order_id', $id)->firstOrFail();
@@ -135,9 +126,6 @@ class OrderController extends Controller
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 
-    /**
-     * Update the status of the specified order.
-     */
     public function updateStatus(Request $request, int $id)
     {
         $validatedData = $request->validate([

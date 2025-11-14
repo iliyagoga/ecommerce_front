@@ -14,6 +14,7 @@ const CategoriesPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const categoryTableRef = useRef<{ fetchCategories: () => void }>(null);
 
   const handleAddCategory = () => {
     setIsAddModalOpen(true);
@@ -23,7 +24,11 @@ const CategoriesPage: React.FC = () => {
     setSelectedCategory(category);
     setIsEditModalOpen(true);
   };
-
+  const handleSaveSuccess = () => {
+    if (categoryTableRef.current) {
+      categoryTableRef.current.fetchCategories();
+    }
+  };
   return (
     <Layout>
       <Box sx={{ p: 3 }}>
@@ -37,20 +42,19 @@ const CategoriesPage: React.FC = () => {
         </Box>
         <CategoriesTable
           onEdit={handleEditCategory}
-          onDeleteSuccess={() => router.refresh()}
-          onSuccess={() => getCategories()}
+          ref={categoryTableRef}
         />
 
         <AddCategoryModal
           open={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onSaveSuccess={() => router.refresh()}
+          onSaveSuccess={handleSaveSuccess}
         />
         <CategoryEditModal
           open={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           category={selectedCategory}
-          onSaveSuccess={() => router.refresh()}
+          onSaveSuccess={handleSaveSuccess}
           />
       </Box>
     </Layout>

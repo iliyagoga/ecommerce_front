@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -22,7 +22,7 @@ interface RoomsTableProps {
   onEdit: (room: Room) => void;
 }
 
-const RoomsTable: React.FC<RoomsTableProps> = ({ onView, onEdit }) => {
+const RoomsTable = forwardRef<{ fetchRooms: () => void }, RoomsTableProps>(({ onView, onEdit }, ref) => {
   const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -46,6 +46,10 @@ const RoomsTable: React.FC<RoomsTableProps> = ({ onView, onEdit }) => {
     fetchRooms();
   }, []);
 
+  useImperativeHandle(ref, () => ({
+    fetchRooms,
+  }));
+  
   const handleAvailabilityChange = async (room: Room) => {
     if (room.room_id === undefined) return;
     try {
@@ -125,6 +129,6 @@ const RoomsTable: React.FC<RoomsTableProps> = ({ onView, onEdit }) => {
       </Table>
     </TableContainer>
   );
-};
+});
 
 export default RoomsTable;

@@ -4,13 +4,13 @@ import Layout from '../../../components/Layout';
 import { Typography, Box, Button } from '@mui/material';
 import OrdersTable from '../../../components/Order/OrdersTable';
 import OrderViewSidebar from '../../../components/Order/OrderViewSidebar';
-import OrderFormModal from '../../../components/Order/OrderFormModal'; // Импорт нового компонента
+import OrderFormModal from '../../../components/Order/OrderFormModal';
 import { Order } from '../../../types';
 
 const OrdersPage: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isViewOpen, setIsViewOpen] = useState<boolean>(false);
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(false); // Стейт для сайдбара формы
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
 
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order);

@@ -25,18 +25,6 @@ class MenuItem extends Model
         'is_available' => 'boolean',
     ];
 
-    public static function rules(): array
-    {
-        return [
-            'category_id' => 'required|integer|exists:categories,category_id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0|max:99999999.99',
-            'is_available' => 'boolean',
-            'image_url' => 'nullable|string|max:500|url'
-        ];
-    }
-
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');

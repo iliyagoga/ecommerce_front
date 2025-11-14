@@ -4,13 +4,12 @@ declare module 'd3';
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
-import { Room, HallRoomNew } from '@/types'; // Import HallRoomNew, and Room
-import { getHallRoomsNew, createHallRoomNew, updateHallRoomNew, deleteHallRoomNew, getRooms } from '@/api'; // Import new API functions and getRooms
+import { Room, HallRoomNew } from '@/types';
+import { getHallRoomsNew, createHallRoomNew, updateHallRoomNew, deleteHallRoomNew, getRooms } from '@/api';
 
 interface HallData {
   width: number;
   height: number;
-  svg_background?: string;
 }
 
 interface RoomData {
@@ -21,9 +20,9 @@ interface RoomData {
   height: number;
   color: string;
   name: string;
-  type: 'vip' | 'standard' | 'cinema' | null; // Allow null for initially undefined type
-  hall_room_id?: number; // Make hall_room_id optional
-  dbRoomId?: number | null; // Allow null for dbRoomId
+  type: 'vip' | 'standard' | 'cinema' | null;
+  hall_room_id?: number;
+  dbRoomId?: number | null;
 }
 
 interface HallsAdminProps {
@@ -88,18 +87,17 @@ const JsonPre = styled.pre`
 
 const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [hall, setHall] = useState<HallData>({ width: 1000, height: 600 });
+  const hall: HallData = { width: 1000, height: 600 };
   const [rooms, setRooms] = useState<RoomData[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [exportedJson, setExportedJson] = useState<string | null>(null);
-  const [availableDbRooms, setAvailableDbRooms] = useState<Room[]>([]); // New state for full Room objects from DB
-  const [selectedAssignedDbRoomId, setSelectedAssignedDbRoomId] = useState<number | null | undefined>(null); // State for selected DB room ID to assign
+  const [availableDbRooms, setAvailableDbRooms] = useState<Room[]>([]);
+  const [selectedAssignedDbRoomId, setSelectedAssignedDbRoomId] = useState<number | null | undefined>(null);
 
   const usedRoomIds = useMemo(() => {
     return rooms.filter(room => room.dbRoomId !== undefined).map(room => room.dbRoomId as number);
   }, [rooms]);
 
-  // Effect to fetch hall rooms (HallRoomNew) from the backend
+
   useEffect(() => {
     const fetchHallRooms = async () => {
       try {
@@ -114,7 +112,7 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
           name: room.name,
           type: JSON.parse(room.metadata) !== null ? JSON.parse(room.metadata).type : null,
           hall_room_id: room.id,
-          dbRoomId: room.room_id, // Map the room_id from HallRoomNew to dbRoomId
+          dbRoomId: room.room_id,
         })));
        
       } catch (error) {
@@ -122,9 +120,8 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
       }
     };
     fetchHallRooms();
-  }, [hallId]); // Refetch when hallId changes
+  }, [hallId]);
 
-  // Effect to fetch all available rooms (Room) from the database
   useEffect(() => {
     const fetchAvailableDbRooms = async () => {
       try {
@@ -146,7 +143,7 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
     svg.append('rect')
       .attr('width', hall.width)
       .attr('height', hall.height)
-      .attr('fill', '#333') // Фон холста
+      .attr('fill', '#333')
       .attr('stroke', '#FCD25E');
 
     const roomElements = svg.selectAll<SVGGElement, RoomData>('.room')
@@ -159,7 +156,7 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
             d3.selectAll<SVGRectElement, RoomData>('.room rect').attr('stroke', '#000').attr('stroke-width', 1);
             d3.select(this).select('rect').attr('stroke', '#FCD25E').attr('stroke-width', 3);
             setSelectedRoomId(d.id);
-            setSelectedAssignedDbRoomId(d.dbRoomId); // Set selected DB room ID when square is selected
+            setSelectedAssignedDbRoomId(d.dbRoomId);
           })
           .call(d3.drag<SVGGElement, RoomData>()
             .on('start', function(event, d) {
@@ -197,23 +194,22 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
       .attr('x', 10)
       .attr('y', 20)
       .attr('fill', 'white')
-      .style('pointer-events', 'none'); // Чтобы клики проходили на rect
+      .style('pointer-events', 'none');
 
   }, [hall, rooms, selectedRoomId]);
 
   const addSquare = () => {
-    // Создаем временный квадрат только на фронтенде
     const newRoom: RoomData = {
       id: `temp-room-${Date.now()}`,
       x: 50,
       y: 50,
       width: 100,
       height: 100,
-      color: '#888', // Default grey color
+      color: '#888',
       name: 'Новый квадрат',
       type: null,
       dbRoomId: null,
-      hall_room_id: undefined, // Нет hall_room_id, пока не будет назначена комната
+      hall_room_id: undefined,
     };
     setRooms(prevRooms => [...prevRooms, newRoom]);
   };
@@ -225,9 +221,9 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
     if (!roomToAssign) return;
 
     const currentRoom = rooms.find(room => room.id === selectedRoomId);
-    if (!currentRoom) return; // Should not happen, but for safety
+    if (!currentRoom) return;
 
-    let color = '#888'; // standard (серый)
+    let color = '#888';
     if (roomToAssign.type === 'vip') { color = 'orange'; }
     else if (roomToAssign.type === 'cinema') { color = 'blue'; }
 
@@ -240,7 +236,6 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
     };
 
     if (!currentRoom.hall_room_id) {
-      // Это временный квадрат, отправляем на сервер для создания
       const newHallRoom: Omit<HallRoomNew, 'id' | 'hall_id'> & { room_id?: number | null } = {
         name: updatedRoomData.name,
         x: updatedRoomData.x,
@@ -249,7 +244,7 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
         height: updatedRoomData.height,
         color: updatedRoomData.color,
         metadata: { type: updatedRoomData.type },
-        room_id: updatedRoomData.dbRoomId, // Теперь это room_id из основной таблицы rooms
+        room_id: updatedRoomData.dbRoomId,
       };
       try {
         const createdRoom = await createHallRoomNew(hallId, newHallRoom);
@@ -259,16 +254,15 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
                 ...updatedRoomData,
                 id: `room-${createdRoom.id}`,
                 hall_room_id: createdRoom.id,
-                dbRoomId: createdRoom.room_id, // Убеждаемся, что dbRoomId обновляется из ответа сервера
+                dbRoomId: createdRoom.room_id,
               }
             : room
         ));
-        setSelectedAssignedDbRoomId(createdRoom.room_id); // Обновляем выбранную комнату в селекте
+        setSelectedAssignedDbRoomId(createdRoom.room_id);
       } catch (error) {
         console.error("Ошибка при создании комнаты зала:", error);
       }
     } else {
-      // Это уже существующий квадрат, обновляем на сервере
       const updatedProps: Partial<HallRoomNew> = {
         name: updatedRoomData.name,
         color: updatedRoomData.color,
@@ -286,11 +280,11 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
                 id: `room-${updatedRoomFromDb.id}`,
                 type: updatedRoomFromDb.metadata?.type || null,
                 hall_room_id: updatedRoomFromDb.id,
-                dbRoomId: updatedRoomFromDb.room_id, // Убеждаемся, что dbRoomId обновляется из ответа сервера
+                dbRoomId: updatedRoomFromDb.room_id,
               }
             : room
         ));
-        setSelectedAssignedDbRoomId(updatedRoomFromDb.room_id); // Обновляем выбранную комнату в селекте
+        setSelectedAssignedDbRoomId(updatedRoomFromDb.room_id);
       } catch (error) {
         console.error("Ошибка при обновлении комнаты зала:", error);
       }
@@ -304,7 +298,6 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
     if (!roomToDelete) return;
 
     if (roomToDelete.hall_room_id) {
-      // Комната существует на сервере, удаляем
       try {
         await deleteHallRoomNew(hallId, roomToDelete.hall_room_id);
         setRooms(prevRooms => prevRooms.filter(room => room.id !== selectedRoomId));
@@ -314,29 +307,10 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
         console.error("Ошибка при удалении комнаты зала:", error);
       }
     } else {
-      // Это временная комната, просто удаляем с фронтенда
       setRooms(prevRooms => prevRooms.filter(room => room.id !== selectedRoomId));
       setSelectedRoomId(null);
       setSelectedAssignedDbRoomId(null);
     }
-  };
-
-  const exportToJson = () => {
-    const dataToExport = {
-      hallId: hallId,
-      rooms: rooms.filter(room => room.hall_room_id !== undefined).map(room => ({
-        id: room.hall_room_id,
-        name: room.name,
-        x: room.x,
-        y: room.y,
-        width: room.width,
-        height: room.height,
-        color: room.color,
-        metadata: { type: room.type },
-        room_id: room.dbRoomId,
-      })),
-    };
-    setExportedJson(JSON.stringify(dataToExport, null, 2));
   };
 
   return (
@@ -363,15 +337,8 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
         </select>
         
         <ToolbarButton onClick={deleteSelected} $color="#dc3545">Удалить</ToolbarButton>
-        <ToolbarButton onClick={exportToJson} $color="#FCD25E">Выгрузить JSON</ToolbarButton>
       </ToolbarContainer>
       <svg ref={svgRef} width={hall.width} height={hall.height}></svg>
-      {exportedJson && (
-        <JsonOutputContainer>
-          <JsonOutputTitle>JSON Зала:</JsonOutputTitle>
-          <JsonPre>{exportedJson}</JsonPre>
-        </JsonOutputContainer>
-      )}
     </div>
   );
 };

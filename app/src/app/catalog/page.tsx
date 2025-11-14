@@ -146,7 +146,7 @@ const CatalogPage = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [loadingRooms, setLoadingRooms] = useState(true);
-    const [loadingProducts, setLoadingProducts] = useState(true);
+    const [loadingProducts, setLoadingProducts] = useState(false);
     const [errorRooms, setErrorRooms] = useState<string | null>(null);
     const [errorProducts, setErrorProducts] = useState<string | null>(null);
 
@@ -162,6 +162,7 @@ const CatalogPage = () => {
                 setCategories(categoriesData);
 
                 const productsData = await getProductsByCategory(selectedCategory ? String(selectedCategory) : undefined);
+
                 setProducts(productsData.flat());
             } catch (err) {
                 setErrorRooms('Не удалось загрузить комнаты или категории.');

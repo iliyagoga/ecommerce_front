@@ -14,9 +14,6 @@ return new class extends Migration
         Schema::create('halls_new', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('width');
-            $table->integer('height');
-            $table->text('svg_background')->nullable();
             $table->timestamps();
         });
     }

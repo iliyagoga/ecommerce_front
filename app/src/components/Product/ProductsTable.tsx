@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState,  } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -21,8 +21,7 @@ interface ProductsTableProps {
   onView: (product: Product) => void;
   onEdit: (product: Product) => void;
 }
-
-const ProductsTable: React.FC<ProductsTableProps> = ({ onView, onEdit }) => {
+const ProductsTable = forwardRef<{ fetchProducts: () => void }, ProductsTableProps>(({ onEdit, onView }, ref) => {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -45,14 +44,18 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ onView, onEdit }) => {
   useEffect(() => {
     fetchProducts();
   }, []);
+  
+  useImperativeHandle(ref, () => ({
+    fetchProducts,
+  }));
 
   const handleAvailabilityChange = async (product: Product) => {
-    if (product.id === undefined) return;
+    if (product.item_id === undefined) return;
     try {
       const updatedProduct = { ...product, available: !product.is_available };
-      await updateProduct(product.id, updatedProduct);
+      await updateProduct(product.item_id, updatedProduct);
       setProducts(prevProducts =>
-        prevProducts.map(p => (p.id === product.id ? updatedProduct : p))
+        prevProducts.map(p => (p.item_id === product.item_id ? updatedProduct : p))
       );
       router.refresh();
     } catch (err) {
@@ -95,7 +98,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ onView, onEdit }) => {
         <TableBody>
           {products.map((product) => (
             <TableRow
-              key={product.id}
+              key={product.item_id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
@@ -123,6 +126,6 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ onView, onEdit }) => {
       </Table>
     </TableContainer>
   );
-};
+});
 
 export default ProductsTable;

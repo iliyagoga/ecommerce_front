@@ -6,7 +6,7 @@ import { Typography, Box } from '@mui/material';
 import RoomBookingCanvas from '@/components/Halls/RoomBookingCanvas';
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs';
-import { TextField } from '@mui/material'; // Импорт TextField
+import { TextField } from '@mui/material';
 import { CartRoom } from '@/types';
 import { styled } from 'styled-components';
 import { addRoomToCart } from '@/api';

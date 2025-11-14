@@ -83,9 +83,6 @@ export interface Order {
 export interface HallNew {
   id?: number;
   name: string;
-  width: number;
-  height: number;
-  svg_background?: string;
   hall_rooms_new_count?: number;
 }
 

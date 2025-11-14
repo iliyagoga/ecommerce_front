@@ -12,9 +12,6 @@ interface HallAddModalProps {
 const HallAddModal: React.FC<HallAddModalProps> = ({ open, onClose, onSaveSuccess }) => {
   const [hallData, setHallData] = useState<Omit<HallNew, 'id' | 'hall_rooms_new_count'>>({
     name: '',
-    width: 0,
-    height: 0,
-    svg_background: '',
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,9 +20,6 @@ const HallAddModal: React.FC<HallAddModalProps> = ({ open, onClose, onSaveSucces
     if (!open) {
       setHallData({
         name: '',
-        width: 0,
-        height: 0,
-        svg_background: '',
       });
       setError(null);
     }
@@ -71,38 +65,7 @@ const HallAddModal: React.FC<HallAddModalProps> = ({ open, onClose, onSaveSucces
           onChange={handleChange}
           sx={{ mb: 2 }}
         />
-        <TextField
-          margin="dense"
-          name="width"
-          label="Ширина (px)"
-          type="number"
-          fullWidth
-          value={hallData.width}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          margin="dense"
-          name="height"
-          label="Высота (px)"
-          type="number"
-          fullWidth
-          value={hallData.height}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          margin="dense"
-          name="svg_background"
-          label="SVG Фон (необязательно)"
-          type="text"
-          fullWidth
-          multiline
-          rows={4}
-          value={hallData.svg_background}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
+
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <CircularProgress />

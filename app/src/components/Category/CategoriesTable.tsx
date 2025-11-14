@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -15,15 +15,13 @@ import {
   IconButton,
 } from '@mui/material';
 import { Category } from '@/types';
-import { deleteCategory } from '@/api';
+import { deleteCategory, getCategories } from '@/api';
 
 interface CategoriesTableProps {
   onEdit: (category: Category) => void;
-  onDeleteSuccess: () => void;
-  onSuccess: () => Promise<Category[]>;
 }
 
-const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSuccess, onSuccess }) => {
+const CategoriesTable = forwardRef<{ fetchCategories: () => void }, CategoriesTableProps>(({ onEdit }, ref) => {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,7 +31,7 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSucce
     setLoading(true);
     setError(null);
     try {
-      const data = await onSuccess();
+      const data = await getCategories();
       setCategories(data);
     } catch (err) {
       setError('Не удалось загрузить категории.');
@@ -47,11 +45,14 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSucce
     fetchCategories();
   }, []);
 
+  useImperativeHandle(ref, () => ({
+    fetchCategories,
+  }));
+
   const handleDelete = async (id: number) => {
       setLoading(true);
       try {
         await deleteCategory(id);
-        onDeleteSuccess();
         router.refresh();
       } catch (err) {
         setError('Не удалось удалить категорию.');
@@ -113,6 +114,6 @@ const CategoriesTable: React.FC<CategoriesTableProps> = ({ onEdit, onDeleteSucce
       </Table>
     </TableContainer>
   );
-};
+});
 
 export default CategoriesTable;

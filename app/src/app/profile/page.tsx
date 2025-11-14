@@ -219,9 +219,9 @@ const ProfilePage: React.FC = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Номер заказа</TableCell>
-                    <TableCell>Дата создания</TableCell>
                     <TableCell>Статус</TableCell>
                     <TableCell>Итоговая цена</TableCell>
+                    <TableCell>Подробнее о заказе</TableCell>
                     <TableCell>Оставить отзыв</TableCell>
                   </TableRow>
                 </TableHead>

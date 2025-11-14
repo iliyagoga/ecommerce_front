@@ -59,8 +59,6 @@ const HallsTableNew = forwardRef<{ fetchHalls: () => void }, HallsTableNewProps>
           <TableRow>
             <TableCell>ID</TableCell>
             <TableCell>Название</TableCell>
-            <TableCell>Ширина</TableCell>
-            <TableCell>Высота</TableCell>
             <TableCell>Количество комнат</TableCell>
             <TableCell>Действия</TableCell>
           </TableRow>
@@ -70,8 +68,6 @@ const HallsTableNew = forwardRef<{ fetchHalls: () => void }, HallsTableNewProps>
             <TableRow key={hall.id}>
               <TableCell>{hall.id}</TableCell>
               <TableCell>{hall.name}</TableCell>
-              <TableCell>{hall.width}</TableCell>
-              <TableCell>{hall.height}</TableCell>
               <TableCell>{hall.hall_rooms_new_count}</TableCell>
               <TableCell>
                 <IconButton onClick={() => onOpenEditor(hall.id as number)} color="primary">

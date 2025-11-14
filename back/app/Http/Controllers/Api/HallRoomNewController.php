@@ -11,17 +11,11 @@ use Carbon\Carbon;
 
 class HallRoomNewController extends Controller
 {
-    /**
-     * Display a listing of the resource for a specific hall.
-     */
     public function index(HallNew $hallNew)
     {
         return response()->json($hallNew->hallRoomsNew);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request, HallNew $hallNew)
     {
         $validator = Validator::make($request->all(), [
@@ -43,17 +37,11 @@ class HallRoomNewController extends Controller
         return response()->json($room, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(HallNew $hallNew, HallRoomNew $hallRoomNew)
     {
         return response()->json($hallRoomNew);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, HallNew $hallNew, HallRoomNew $hallRoomNew)
     {
         $validator = Validator::make($request->all(), [
@@ -75,18 +63,12 @@ class HallRoomNewController extends Controller
         return response()->json($hallRoomNew);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(HallNew $hallNew, HallRoomNew $hallRoomNew)
     {
         $hallRoomNew->delete();
         return response()->json(null, 204);
     }
 
-    /**
-     * Get hall rooms with availability for a specific period.
-     */
     public function getHallRoomsAvailability(Request $request, HallNew $hallNew)
     {
         $validatedData = $request->validate([

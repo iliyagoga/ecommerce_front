@@ -14,9 +14,6 @@ class HallNew extends Model
 
     protected $fillable = [
         'name',
-        'width',
-        'height',
-        'svg_background',
     ];
 
     public function hallRoomsNew(): HasMany
