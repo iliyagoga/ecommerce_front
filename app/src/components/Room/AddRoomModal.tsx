@@ -34,7 +34,6 @@ const initialNewRoomState: Omit<Room, 'type_id'> = {
   max_people: 1,
   description: '',
   preview_img: "",
-  gallery: [],
   is_available: true,
 };
 
@@ -43,11 +42,9 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
   const [newRoom, setNewRoom] = useState<Omit<Room, 'type_id'> & {type?: Room['type']}>(initialNewRoomState);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [selectedPreviewImage, setSelectedPreviewImage] = useState<File | null>(null);
   const [previewImageURL, setPreviewImageURL] = useState<string | null>(null);
-  const [selectedGalleryImages, setSelectedGalleryImages] = useState<File[]>([]);
-  const [galleryImageURLs, setGalleryImageURLs] = useState<string[]>([]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -68,21 +65,6 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
     }
   };
 
-  const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { files } = e.target;
-    if (files && files.length > 0) {
-      const newFiles = Array.from(files);
-      setSelectedGalleryImages(newFiles);
-      const newURLs = newFiles.map(file => URL.createObjectURL(file));
-      setGalleryImageURLs(newURLs);
-      setNewRoom(prev => ({ ...prev, gallery: newFiles as any }));
-    } else {
-      setSelectedGalleryImages([]);
-      setGalleryImageURLs([]);
-      setNewRoom(prev => ({ ...prev, gallery: [] }));
-    }
-  };
-
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewRoom(prev => ({ ...prev, [name]: Number(value) }));
@@ -96,34 +78,24 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
-    setSuccess(null);
     try {
       const formData = new FormData();
-
+      console.log(newRoom)
       for (const key in newRoom) {
         if (Object.prototype.hasOwnProperty.call(newRoom, key)) {
           if (key === 'preview_img' && selectedPreviewImage) {
             formData.append('preview_img', selectedPreviewImage);
-          } else if (key === 'gallery' && selectedGalleryImages.length > 0) {
-            selectedGalleryImages.forEach((file, index) => {
-              formData.append(`gallery[${index}]`, file);
-            });
-          } else if (key !== 'gallery' && key !== 'preview_img') {
-            formData.append(key, (newRoom as any)[key]);
-          }
+          } else formData.append(key, newRoom[key]);
         }
       }
 
       await createRoom(formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setSuccess('Комната успешно добавлена!');
       onSaveSuccess();
       router.refresh();
       onClose();
       setNewRoom(initialNewRoomState);
       setSelectedPreviewImage(null);
       setPreviewImageURL(null);
-      setSelectedGalleryImages([]);
-      setGalleryImageURLs([]);
     } catch (err) {
       setError('Не удалось добавить комнату.');
       console.error(err);

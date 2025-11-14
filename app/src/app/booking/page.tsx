@@ -36,8 +36,8 @@ const BookingButton = styled.button`
 `;
 
 const BookingPage: React.FC = () => {
-  const hallIdToDisplay = 1; // Временно используем фиксированный ID зала
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]); // Сегодняшняя дата
+  const hallIdToDisplay = 1;
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [selectedStartTime, setSelectedStartTime] = useState<string>('09:00');
   const [selectedEndTime, setSelectedEndTime] = useState<string>('18:00');
   const [selectedRoom, setSelectedRoom] = useState<Omit<CartRoom, "cart_id">>();

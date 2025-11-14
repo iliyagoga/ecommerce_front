@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Cart;
+use App\Models\OrderRooms;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -54,19 +55,37 @@ class OrderController extends Controller
         $order = null;
         DB::transaction(function () use ($validatedData, & $order) {
             $validatedData["user_id"] = Auth::id();
-            
+
             $startDateTime = Carbon::parse($validatedData['booked_date'])->setTimeFromTimeString($validatedData['booked_time_start']);
             $endDateTime = Carbon::parse($validatedData['booked_date'])->setTimeFromTimeString($validatedData['booked_time_end']);
             $validatedData['start_time'] = $startDateTime;
             $validatedData['end_time'] = $endDateTime;
 
-            $order = Order::create($validatedData);
-
 
             $room = \App\Models\Room::where("room_id", $validatedData['room_id'])->first();
+
+            $preparedStartTime = $validatedData['booked_time_start'];
+            $preparedEndTime = $validatedData['booked_time_end'];
+
+            $bookedOrdersCount = \App\Models\OrderRooms::where('room_id', $validatedData['room_id'])
+            ->join('orders', 'orders.order_id', '=', 'order_rooms.order_id')->whereNot("orders.status", "cancelled")
+            ->whereDate('orders.start_time', $startDateTime)
+            ->where(function ($query) use ($preparedStartTime, $preparedEndTime) {
+                $query->whereRaw('TIME(orders.start_time) < ?', [$preparedEndTime])
+              ->whereRaw('? < TIME(orders.end_time)', [$preparedStartTime]);
+            })
+            ->count();
+
+            if ($bookedOrdersCount > 0) throw new \Exception("Такая комната уже забронирована", 422);
             if (!$room || !$room->is_available) {
                 throw new \Exception("Выбранная комната недоступна для бронирования", 422);
             }
+            if (!$room || $room->initial_fee > $validatedData['total_price']) {
+                throw new \Exception("Сумма меньше минимального взноса", 422);
+            }
+
+            $order = Order::create($validatedData);
+
 
             $order->orderRooms()->create([ 
                 'order_id' => $order->order_id,

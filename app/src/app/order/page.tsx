@@ -9,6 +9,8 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { extractTimeFromDateString } from '@/other';
 import Loader from '@/components/Other/Loader';
+import { Alert } from '@mui/material';
+import { AxiosError } from 'axios';
 /*import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
 import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';*/
 
@@ -238,9 +240,8 @@ const OrderPage: React.FC = () => {
       setError(null);
       await createOrder(orderData);
       router.push('/catalog');
-    } catch (error) {
-      console.error('Ошибка при создании заказа:', error);
-      setError('Не удалось создать заказ. Пожалуйста, попробуйте еще раз.');
+    } catch (error: any) {
+      setError(error?.response?.data?.message ?? "Не удалось создать заказ, попробуйте позже");
     }
   };
 
@@ -276,7 +277,6 @@ const OrderPage: React.FC = () => {
   if (loading) {
     return <Loader/>;
   }
-
   const cartRooms = cart?.cart_rooms || [];
   const cartProducts = cart?.cart_menu_items || [];
 
@@ -406,7 +406,7 @@ const OrderPage: React.FC = () => {
               />
             </FormGroup>
           </Section>
-
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           <ActionButton onClick={handleSubmit}>
             Подтвердить заказ • {calculateTotalPrice()} руб.
           </ActionButton>

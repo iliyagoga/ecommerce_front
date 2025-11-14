@@ -61,7 +61,7 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
       setEditedRoom(prev => (prev ? { ...prev, preview_img: file as any } : null));
     } else {
       setSelectedPreviewImage(null);
-      setPreviewImageURL(editedRoom?.preview_img || null); // Revert to original image if no new file selected
+      setPreviewImageURL(editedRoom?.preview_img || null);
       setEditedRoom(prev => (prev ? { ...prev, preview_img: editedRoom?.preview_img || "" } : null));
     }
   };
@@ -74,29 +74,6 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
   const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setEditedRoom(prev => (prev ? { ...prev, [name]: checked } : null));
-  };
-
-  const handleGalleryImageChange = (index: number, value: string) => {
-    setEditedRoom(prev => {
-      if (!prev) return null;
-      const newGallery = [...(prev.gallery || [])];
-      newGallery[index] = { ...newGallery[index], url: value };
-      return { ...prev, gallery: newGallery };
-    });
-  };
-
-  const handleAddGalleryImage = () => {
-    setEditedRoom(prev => (
-      prev ? { ...prev, gallery: [...(prev.gallery || []), { url: '' }] } : null
-    ));
-  };
-
-  const handleDeleteGalleryImage = (index: number) => {
-    setEditedRoom(prev => {
-      if (!prev) return null;
-      const newGallery = (prev.gallery || []).filter((_, i) => i !== index);
-      return { ...prev, gallery: newGallery };
-    });
   };
 
   const handleSave = async () => {
@@ -253,26 +230,6 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
               style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
             />
           )}
-        </Box>
-
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="subtitle1" gutterBottom>Галерея изображений:</Typography>
-          {(editedRoom.gallery || []).map((img, index) => (
-            <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <TextField
-                label={`URL изображения ${index + 1}`}
-                value={img.url}
-                onChange={(e) => handleGalleryImageChange(index, e.target.value)}
-                fullWidth
-                margin="dense"
-                InputLabelProps={{ shrink: true }}
-              />
-              <IconButton onClick={() => handleDeleteGalleryImage(index)} color="error">
-                -
-              </IconButton>
-            </Box>
-          ))}
-          <Button onClick={handleAddGalleryImage}>Добавить изображение</Button>
         </Box>
 
         <FormControlLabel

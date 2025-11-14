@@ -14,13 +14,13 @@ export const getTimeDifferenceInHours = (startTime: string, endTime: string): nu
 
  export const extractTimeFromDateString = (dateString: string): string => {
     const date = new Date(dateString);
-    
+
     if (isNaN(date.getTime())) {
       throw new Error('Неверный формат даты');
     }
     
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    
+    const hours = date.getUTCHours().toString().padStart(2, '0');
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+
     return `${hours}:${minutes}`;
   };

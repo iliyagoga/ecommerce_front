@@ -122,9 +122,9 @@ const OrderFormModal: React.FC<OrderFormModalProps> = ({ open, onClose, onOrderC
         booked_time_end: '',
         room_price_per_hour: '',
       });
-    } catch (error) {
+    } catch (error: ant) {
       console.error('Ошибка при создании заказа:', error);
-      setError('Не удалось создать заказ. Пожалуйста, попробуйте еще раз.');
+      setError(error['message'] ?? "Не удалось создать заказ, попробуйте позже");
     }
   };
 
