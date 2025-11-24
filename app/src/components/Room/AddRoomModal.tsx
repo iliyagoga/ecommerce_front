@@ -97,7 +97,7 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ open, onClose, onSaveSucces
       setSelectedPreviewImage(null);
       setPreviewImageURL(null);
     } catch (err) {
-      setError('Не удалось добавить комнату.');
+      setError(err.response.data.message);
       console.error(err);
     } finally {
       setLoading(false);

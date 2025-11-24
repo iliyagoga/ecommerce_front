@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, Alert } from '@mui/material';
 
 import RoomBookingCanvas from '@/components/Halls/RoomBookingCanvas';
 import Header from '@/components/Header/Header';
@@ -41,22 +41,24 @@ const BookingPage: React.FC = () => {
   const [selectedStartTime, setSelectedStartTime] = useState<string>('09:00');
   const [selectedEndTime, setSelectedEndTime] = useState<string>('18:00');
   const [selectedRoom, setSelectedRoom] = useState<Omit<CartRoom, "cart_id">>();
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const addToCart = async (selectedRoom: Omit<CartRoom, "cart_id"> | undefined) => {
     if (!selectedRoom) return;
-  
+    setError(null);
       try {
         const fetchCart = await addRoomToCart(selectedRoom);
         if (fetchCart) router.push("/cart")
       } catch (error) {
-        
+        setError(error.response.data.message)
       }
   }
   return (<>
     <Header></Header>
     <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Бронь', href: '/booking' }]} />
     <Box sx={{ p: 3, backgroundColor: '#202020', minHeight: '100vh', color: 'white' }}>
+      {error && <Alert style={{margin: "16px 0"}} severity='error'>{error}</Alert>}
       <Typography variant="h4" gutterBottom>
         Бронирование Комнат
       </Typography>
@@ -125,6 +127,7 @@ const BookingPage: React.FC = () => {
         selectedStartTime={selectedStartTime}
         selectedEndTime={selectedEndTime}
         setSelectedRoom={setSelectedRoom}
+        setError={setError}
       />
     
       <BookingButton disabled={!selectedRoom} onClick={() => addToCart(selectedRoom)}>

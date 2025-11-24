@@ -103,7 +103,7 @@ const RoomEditSidebar: React.FC<RoomEditSidebarProps> = ({ open, onClose, room, 
       router.refresh();
       onClose();
     } catch (err) {
-      setError('Не удалось обновить комнату.');
+      setError(err.response.data.message);
       console.error(err);
     } finally {
       setLoading(false);

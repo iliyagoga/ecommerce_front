@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Carbon\Carbon;
 
 class RoomAvailability extends FormRequest
 {
@@ -23,8 +24,34 @@ class RoomAvailability extends FormRequest
     {
         return [
             'date' => 'required|date',
-            'start_time' => 'required|date_format:H:i',
+            'start_time' => [
+                'required',
+                'date_format:H:i',
+                function ($attribute, $value, $fail) {
+                    $bookedDate = $this->input('booked_date');
+                    $bookedDateTime = Carbon::parse($bookedDate . ' ' . $value);
+                    
+                    if ($bookedDateTime->lt(now())) {
+                        $fail('Время начала бронирования должно быть не раньше текущего момента.');
+                    }
+                },
+            ],
             'end_time' => 'required|date_format:H:i|after:start_time',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'date.required' => 'Укажите дату бронирования.',
+            'date.date' => 'Неверный формат даты.',
+            
+            'start_time.required' => 'Укажите время начала.',
+            'start_time.date_format' => 'Неверный формат времени начала.',
+            
+            'end_time.required' => 'Укажите время окончания.',
+            'end_time.date_format' => 'Неверный формат времени окончания.',
+            'end_time.after' => 'Время окончания должно быть позже времени начала.',
         ];
     }
 }

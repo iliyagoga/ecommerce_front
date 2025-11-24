@@ -26,7 +26,7 @@ interface RoomData {
   type: 'vip' | 'standard' | 'cinema' | null; 
   hall_room_id?: number;
   dbRoomId?: number | null;
-  isAvailable: boolean; // Ensure isAvailable is always boolean
+  isAvailable: boolean;
 }
 
 interface RoomBookingCanvasProps {
@@ -35,34 +35,35 @@ interface RoomBookingCanvasProps {
   selectedStartTime: string;
   selectedEndTime: string;
   setSelectedRoom: React.Dispatch<React.SetStateAction<Omit<CartRoom, "cart_id"> | undefined>>
+  setError: React.Dispatch<React.SetStateAction<string | null>>
 }
 
-const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedDate, selectedStartTime, selectedEndTime, setSelectedRoom }) => {
+const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedDate, selectedStartTime, selectedEndTime, setSelectedRoom, setError }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hall, setHall] = useState<HallData>({ width: 1000, height: 600 });
   const [rooms, setRooms] = useState<RoomData[]>([]);
-  const [allDbRooms, setAllDbRooms] = useState<Room[]>([]); // All rooms from the 'rooms' table
+  const [allDbRooms, setAllDbRooms] = useState<Room[]>([]);
   const router = useRouter();
 
-  // Effect to fetch hall rooms (HallRoomNew) from the backend
   useEffect(() => {
+    setError(null)
     const fetchHallAndDbRooms = async () => {
       try {
         const fetchedHallRoomsWithAvailability = await getHallRoomsAvailability(hallId, selectedDate, selectedStartTime, selectedEndTime);
-        const fetchedDbRooms = await getRooms(); // Still need this to get full Room data for metadata
+        const fetchedDbRooms = await getRooms();
 
         setAllDbRooms(fetchedDbRooms);
 
         setRooms(fetchedHallRoomsWithAvailability.map(hallRoom => {
           const correspondingDbRoom = fetchedDbRooms.find(dbRoom => dbRoom.room_id === hallRoom.room_id);
-          // is_available_for_booking приходит из бэкенда
+
           const isAvailable: boolean = hallRoom.is_available_for_booking ?? false;
           
-          let displayColor = hallRoom.color; // Используем цвет из HallRoomNew по умолчанию
+          let displayColor = hallRoom.color;
           if (!isAvailable) {
-            displayColor = 'red'; // Забронированные комнаты красные
+            displayColor = 'red';
           }
-
+          setError(null)
           return {
             id: `room-${hallRoom.id}`,
             x: hallRoom.x,
@@ -78,11 +79,11 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
           };
         }));
       } catch (error) {
-        console.error("Ошибка при загрузке комнат зала или доступных комнат:", error);
+        setError(error.response.data.message)
       }
     };
     fetchHallAndDbRooms();
-  }, [hallId, selectedDate, selectedStartTime, selectedEndTime]); // Refetch when hallId, date or time changes
+  }, [hallId, selectedDate, selectedStartTime, selectedEndTime]);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -93,7 +94,7 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
     svg.append('rect')
       .attr('width', hall.width)
       .attr('height', hall.height)
-      .attr('fill', '#333') // Фон холста
+      .attr('fill', '#333')
       .attr('stroke', '#FFFFFF');
 
     const roomElements = svg.selectAll<SVGGElement, RoomData>('.room')
@@ -127,7 +128,7 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
       .attr('width', (d: RoomData) => d.width)
       .attr('height', (d: RoomData) => d.height)
       .attr('fill', (d: RoomData) => d.color)
-      .attr('stroke', (d: RoomData) => d.isAvailable ? '#000' : 'red') // Добавляем красную рамку для недоступных
+      .attr('stroke', (d: RoomData) => d.isAvailable ? '#000' : 'red')
       .attr('stroke-width', 1);
 
     roomElements.append('text')
@@ -135,13 +136,12 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
       .attr('x', 10)
       .attr('y', 20)
       .attr('fill', 'white')
-      .style('pointer-events', 'none'); // Чтобы клики проходили на rect
+      .style('pointer-events', 'none');
 
   }, [hall, rooms]);
 
   return (
     <div>
-      {/* No toolbar for booking canvas */}
       <svg ref={svgRef} width={hall.width} height={hall.height}></svg>
     </div>
   );
