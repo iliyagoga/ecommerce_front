@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreRoomRequest;
+use App\Http\Requests\UpdateRoomRequest;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -14,17 +16,9 @@ class RoomController extends Controller
         return response()->json(Room::all());
     }
 
-    public function store(Request $request)
+    public function store(StoreRoomRequest $request)
     {  
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:standard,vip,cinema',
-            'base_hourly_rate' => 'required|numeric|min:0',
-            'initial_fee' => 'required|numeric|min:0',
-            'max_people' => 'required|integer|min:1',
-            'description' => 'nullable|string',
-            'preview_img' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        $validatedData = $request->validated();
 
         if ($request->hasFile('preview_img')) {
             $previewImagePath = $request->file('preview_img')->store('rooms/previews', 'public');
@@ -52,19 +46,11 @@ class RoomController extends Controller
         return response()->json($room);
     }
 
-    public function update(Request $request, int $id)
+    public function update(UpdateRoomRequest $request, int $id)
     {
         $room = Room::where('room_id', "=", $id);
 
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:standard,vip,cinema',
-            'base_hourly_rate' => 'required|numeric|min:0',
-            'initial_fee' => 'required|numeric|min:0',
-            'max_people' => 'required|integer|min:1',
-            'description' => 'nullable|string',
-
-        ]);
+        $validatedData = $request->validated();
 
         if ($request->hasFile('preview_img')) {
             $previewImagePath = $request->file('preview_img')->store('rooms/previews', 'public');

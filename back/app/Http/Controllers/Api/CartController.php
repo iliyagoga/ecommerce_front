@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddMenuitemInCart;
+use App\Http\Requests\AddRoomInCartRequest;
+use App\Http\Requests\UpdateRoomInCart;
 use App\Models\Cart;
 use App\Models\CartMenuItems;
 use App\Models\CartRoom;
@@ -21,20 +24,9 @@ class CartController extends Controller
         return response()->json($cart);
     }
 
-    public function addRoom(Request $request)
+    public function addRoom(AddRoomInCartRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'room_id' => 'required|integer|exists:rooms,room_id',
-            'booked_hours' => 'required|integer|min:1|max:24',
-            'booked_date' => 'required|date|after_or_equal:today',
-            'booked_time_start' => 'required|date_format:H:i',
-            'booked_time_end' => 'required|date_format:H:i|after:booked_time_start',
-            'room_price_per_hour' => 'required|numeric|min:0|max:99999999.99',
-        ]);
-        
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        $validated = $request->validated();
 
         $user = Auth::user();
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
@@ -48,26 +40,16 @@ class CartController extends Controller
             return response()->json(['message' => 'Выбранная комната недоступна.'], 422);
         }
 
-        $cartRoom = $cart->cartRooms()->create($request->all());
+        $cartRoom = $cart->cartRooms()->create($validated);
 
         return response()->json($cartRoom->load('room'), 201);
     }
 
-    public function updateRoom(Request $request, CartRoom $cartRoom)
+    public function updateRoom(UpdateRoomInCart $request, CartRoom $cartRoom)
     {
-        $validator = Validator::make($request->all(), [
-            'booked_hours' => 'integer|min:1|max:24',
-            'booked_date' => 'date|after_or_equal:today',
-            'booked_time_start' => 'date_format:H:i',
-            'booked_time_end' => 'date_format:H:i|after:booked_time_start',
-            'room_price_per_hour' => 'numeric|min:0|max:99999999.99',
-        ]);
+        $validated = $request->validated();
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $cartRoom->update($request->all());
+        $cartRoom->update($validated);
 
         return response()->json($cartRoom->load('room'));
     }
@@ -113,23 +95,14 @@ class CartController extends Controller
         return response()->json($hasSpecialRooms, 201);
     }
 
-    public function addMenuItem(Request $request)
+    public function addMenuItem(AddMenuitemInCart $request)
     {
-        $validator = Validator::make($request->all(), [
-            'item_id' => 'required|integer|exists:rooms,room_id',
-            'quantity' => 'required|numeric|min:1|',
-            'unit_price' => 'required|decimal:2|min:0|max:99999999.99',
-            'total_price' => 'required|decimal:2|min:0|max:99999999.99',
-        ]);
-        
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        $validated = $request->validated();
 
         $user = Auth::user();
         $cart = Cart::where('user_id', $user->id)->first();
 
-        $cartMenuItem = $cart->cartMenuItems()->create($request->all());
+        $cartMenuItem = $cart->cartMenuItems()->create($validated);
 
         return response()->json($cartMenuItem, 201);
     }

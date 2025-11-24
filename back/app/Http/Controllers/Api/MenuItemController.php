@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMenuItemRequest;
+use App\Http\Requests\UpdateMenuItemRequest;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -26,15 +28,9 @@ class MenuItemController extends Controller
         return response()->json($menuItems);
     }
 
-    public function store(Request $request)
+    public function store(StoreMenuItemRequest $request)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:1',
-            'category_id' => 'nullable|exists:categories,category_id',
-            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-        ]);
+        $validatedData = $request->validated();
 
         if ($request->hasFile('image_url')) {
             $imagePath = $request->file('image_url')->store('images', 'public');
@@ -46,30 +42,18 @@ class MenuItemController extends Controller
         return response()->json($menuItem, Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(int $id)
     {
         $menuItem = MenuItem::where('item_id', $id)->firstOrFail();
         return response()->json($menuItem);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, int $id)
+    public function update(UpdateMenuItemRequest $request, int $id)
     {
+
+        $validatedData = $request->validated();
+
         $menuItem = MenuItem::where('item_id', "=", $id);
-
-
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric',
-            'category_id' => 'nullable|exists:categories,category_id',
-        ]);
-        
         $imageUrl = $menuItem->firstOrFail()->image_url;
 
         if ($request->hasFile('image_url')) {
@@ -89,9 +73,7 @@ class MenuItemController extends Controller
         return response()->json($menuItem);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(int $id)
     {
         $menuItem = MenuItem::where('item_id', $id)->firstOrFail();

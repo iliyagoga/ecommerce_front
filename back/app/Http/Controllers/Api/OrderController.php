@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreOrderRequest;
+use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\OrderRooms;
@@ -31,26 +33,9 @@ class OrderController extends Controller
         return response()->json(['message' => 'Unauthorized'], 403);
     }
 
-    public function store(Request $request)
+    public function store(StoreOrderRequest $request)
     {
-        $validatedData = $request->validate([
-            'status' => ['required', 'string', 'in:pending,confirmed,active,completed,cancelled'],
-            'total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'client_comment' => ['nullable', 'string', 'max:1000'],
-
-            'room_id' => ['required', 'integer', 'exists:rooms,room_id'],
-            'booked_hours' => ['required', 'integer', 'min:1', 'max:24'],
-            'booked_date' => ['required', 'date', 'after_or_equal:today'],
-            'booked_time_start' => ['required', 'date_format:H:i'],
-            'booked_time_end' => ['required', 'date_format:H:i', 'after:booked_time_start'],
-            'room_price_per_hour' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-
-            'items' => ['array'],
-            'items.*.item_id' => ['required', 'integer', 'exists:menu_items,item_id'],
-            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:1000'],
-            'items.*.unit_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'items.*.total_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-        ]);
+        $validatedData = $request->validated();
 
         $order = null;
         DB::transaction(function () use ($validatedData, & $order) {
@@ -145,11 +130,9 @@ class OrderController extends Controller
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 
-    public function updateStatus(Request $request, int $id)
+    public function updateStatus(UpdateOrderStatusRequest $request, int $id)
     {
-        $validatedData = $request->validate([
-            'status' => 'required|in:pending,confirmed,active,completed,cancelled',
-        ]);
+        $validatedData = $request->validated();
 
         $order = Order::where('order_id', $id);
         $order->update($validatedData);

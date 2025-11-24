@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RoomAvailability;
+use App\Http\Requests\StoreRoomInHall;
 use App\Models\HallNew;
 use App\Models\HallRoomNew;
 use Illuminate\Http\Request;
@@ -16,24 +18,11 @@ class HallRoomNewController extends Controller
         return response()->json($hallNew->hallRoomsNew);
     }
 
-    public function store(Request $request, HallNew $hallNew)
+    public function store(StoreRoomInHall $request, HallNew $hallNew)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'x' => 'required|integer',
-            'y' => 'required|integer',
-            'width' => 'required|integer',
-            'height' => 'required|integer',
-            'color' => 'required|string|max:7',
-            'metadata' => 'nullable|json',
-            'room_id' => 'nullable|exists:rooms,room_id',
-        ]);
+        $validated = $request->validated();
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $room = $hallNew->hallRoomsNew()->create($request->all());
+        $room = $hallNew->hallRoomsNew()->create($validated);
         return response()->json($room, 201);
     }
 
@@ -42,24 +31,11 @@ class HallRoomNewController extends Controller
         return response()->json($hallRoomNew);
     }
 
-    public function update(Request $request, HallNew $hallNew, HallRoomNew $hallRoomNew)
+    public function update(StoreRoomInHall $request, HallNew $hallNew, HallRoomNew $hallRoomNew)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'string|max:255',
-            'x' => 'integer',
-            'y' => 'integer',
-            'width' => 'integer',
-            'height' => 'integer',
-            'color' => 'string|max:7',
-            'metadata' => 'nullable|json',
-            'room_id' => 'nullable|exists:rooms,room_id',
-        ]);
+        $validated = $request->validated();
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $hallRoomNew->update($request->all());
+        $hallRoomNew->update($validated);
         return response()->json($hallRoomNew);
     }
 
@@ -69,17 +45,13 @@ class HallRoomNewController extends Controller
         return response()->json(null, 204);
     }
 
-    public function getHallRoomsAvailability(Request $request, HallNew $hallNew)
+    public function getHallRoomsAvailability(RoomAvailability $request, HallNew $hallNew)
     {
-        $validatedData = $request->validate([
-            'date' => 'required|date',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-        ]);
+        $validated = $request->validated();
 
-        $requestedDate = Carbon::parse($validatedData['date'])->toDateString();
-        $requestedStartTime = $validatedData['start_time'];
-        $requestedEndTime = $validatedData['end_time'];
+        $requestedDate = Carbon::parse($validated['date'])->toDateString();
+        $requestedStartTime = $validated['start_time'];
+        $requestedEndTime = $validated['end_time'];
 
         $hallRooms = $hallNew->hallRoomsNew()->with('room')->get();
 

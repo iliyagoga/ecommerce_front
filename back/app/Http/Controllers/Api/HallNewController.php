@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreHall;
 use App\Models\HallNew;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -15,19 +16,14 @@ class HallNewController extends Controller
         return response()->json($halls);
     }
 
-    public function store(Request $request)
+    public function store(StoreHall $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
         $allCount = HallNew::get()->count();
 
         if ($allCount > 0) return response()->json(['message' => "Вы не можете создать более 1 зала в данной системе"], 422);
-        $hall = HallNew::create($request->all());
+        $hall = HallNew::create($validated);
         return response()->json($hall, 201);
     }
 
@@ -36,20 +32,11 @@ class HallNewController extends Controller
         return response()->json($hallNew->load('hallRoomsNew'));
     }
 
-    public function update(Request $request, HallNew $hallNew)
+    public function update(StoreHall $request, HallNew $hallNew)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'string|max:255',
-            'width' => 'integer',
-            'height' => 'integer',
-            'svg_background' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $hallNew->update($request->all());
+        $hallNew->update($validated);
         return response()->json($hallNew);
     }
 
