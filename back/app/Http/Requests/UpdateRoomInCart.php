@@ -23,9 +23,8 @@ class UpdateRoomInCart extends FormRequest
     {
         return [
             'booked_hours' => 'integer|min:1|max:24',
-            'booked_date' => 'date|after_or_equal:today',
-            'booked_time_start' => 'date_format:H:i',
-            'booked_time_end' => 'date_format:H:i|after:booked_time_start',
+            'booked_time_start' => 'date_format:Y-m-d\TH:i',
+            'booked_time_end' => 'date_format:Y-m-d\TH:i|after:booked_time_start',
             'room_price_per_hour' => 'numeric|min:0|max:99999999.99',
         ];
     }

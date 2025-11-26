@@ -40,27 +40,19 @@ class OrderController extends Controller
         $order = null;
         DB::transaction(function () use ($validatedData, & $order) {
             $validatedData["user_id"] = Auth::id();
-
-            $startDateTime = Carbon::parse($validatedData['booked_date'])->setTimeFromTimeString($validatedData['booked_time_start']);
-            $endDateTime = Carbon::parse($validatedData['booked_date'])->setTimeFromTimeString($validatedData['booked_time_end']);
-            $validatedData['start_time'] = $startDateTime;
-            $validatedData['end_time'] = $endDateTime;
-
-
             $room = \App\Models\Room::where("room_id", $validatedData['room_id'])->first();
 
-            $preparedStartTime = $validatedData['booked_time_start'];
-            $preparedEndTime = $validatedData['booked_time_end'];
+            $preparedStartTime = Carbon::parse($validatedData['booked_time_start'])->addUTCHours((4));
+            $preparedEndTime = Carbon::parse($validatedData['booked_time_end'])->addUTCHours(4);
 
             $bookedOrdersCount = \App\Models\OrderRooms::where('room_id', $validatedData['room_id'])
             ->join('orders', 'orders.order_id', '=', 'order_rooms.order_id')->whereNot("orders.status", "cancelled")
-            ->whereDate('orders.start_time', $startDateTime)
-            ->where(function ($query) use ($preparedStartTime, $preparedEndTime) {
-                $query->whereRaw('TIME(orders.start_time) < ?', [$preparedEndTime])
-              ->whereRaw('? < TIME(orders.end_time)', [$preparedStartTime]);
+            ->where(function ($query) use ($preparedStartTime,$preparedEndTime) {
+                $query->whereRaw('booked_time_start < ?', [$preparedEndTime])
+                        ->whereRaw('? < booked_time_end', [$preparedStartTime]);
             })
             ->count();
-
+            
             if ($bookedOrdersCount > 0) throw new \Exception("Такая комната уже забронирована", 422);
             if (!$room || !$room->is_available) {
                 throw new \Exception("Выбранная комната недоступна для бронирования", 422);
@@ -76,9 +68,8 @@ class OrderController extends Controller
                 'order_id' => $order->order_id,
                 'room_id' => $validatedData['room_id'],
                 'booked_hours' => $validatedData['booked_hours'],
-                'booked_date' => $validatedData['booked_date'],
-                'booked_time_start' => $validatedData['booked_time_start'],
-                'booked_time_end' => $validatedData['booked_time_end'],
+                'booked_time_start' => $preparedStartTime,
+                'booked_time_end' => $preparedEndTime,
                 'room_price_per_hour' => $validatedData['room_price_per_hour'],
             ]);
 

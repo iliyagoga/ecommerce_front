@@ -13,6 +13,7 @@ use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class CartController extends Controller
 {
@@ -20,7 +21,6 @@ class CartController extends Controller
     {
         $user = Auth::user();
         $cart = Cart::with(['cartRooms.room', 'cartMenuItems.menuItem'])->where('user_id', $user->id)->firstOrCreate(['user_id' => $user->id]);
-
         return response()->json($cart);
     }
 
@@ -40,6 +40,12 @@ class CartController extends Controller
             return response()->json(['message' => 'Выбранная комната недоступна.'], 422);
         }
 
+        $bookingTimeStart = Carbon::parse($validated['booked_time_start'])->addUTCHours(4);
+        $bookingTimeEnd = Carbon::parse($validated['booked_time_end'])->addUTCHours(4);
+
+        $validated['booked_time_start'] = $bookingTimeStart;
+        $validated['booked_time_end'] = $bookingTimeEnd;
+        
         $cartRoom = $cart->cartRooms()->create($validated);
 
         return response()->json($cartRoom->load('room'), 201);

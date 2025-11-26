@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Loader from '@/components/Other/Loader';
+import { extractTimeFromDateString } from '@/other';
 /*import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
 import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';*/
 
@@ -215,7 +216,6 @@ const OrderDetailsPage: React.FC<OrderDetailsPageProps> = () => {
             <StatusBadge status={order.status}>
               {order.status}
             </StatusBadge>
-            <DetailText>Дата создания: {formatDateTime(order.created_at ?? "")}</DetailText>
             <DetailText>Общая стоимость: {parseFloat(order.total_price.toString()).toFixed(2)} руб.</DetailText>
             {order.client_comment && (
               <DetailText>Комментарий клиента: {order.client_comment}</DetailText>
@@ -223,18 +223,6 @@ const OrderDetailsPage: React.FC<OrderDetailsPageProps> = () => {
             {order.admin_comment && (
               <DetailText>Комментарий администратора: {order.admin_comment}</DetailText>
             )}
-          </Section>
-
-          <Section>
-            <SectionTitle>Время бронирования</SectionTitle>
-            <DetailText>Начало: {formatDateTime(order.start_time)}</DetailText>
-            <DetailText>Окончание: {formatDateTime(order.end_time)}</DetailText>
-            <DetailText>
-              Продолжительность: {(
-                (new Date(order.end_time).getTime() - new Date(order.start_time).getTime()) / 
-                (1000 * 60 * 60)
-              ).toFixed(1)} часов
-            </DetailText>
           </Section>
 
           {orderRooms.length > 0 && (
@@ -254,9 +242,9 @@ const OrderDetailsPage: React.FC<OrderDetailsPageProps> = () => {
                     <Link href={`/room/${orderRoom.room_id}`} style={{ textDecoration: 'none' }}>
                       <RoomName>{orderRoom.room?.name || 'Комната'}</RoomName>
                     </Link>
-                    <DetailText>Дата бронирования: {formatDate(orderRoom.booked_date)}</DetailText>
-                    <DetailText>Время начала: {formatTime(orderRoom.booked_time_start)}</DetailText>
-                    <DetailText>Время окончания: {formatTime(orderRoom.booked_time_end)}</DetailText>
+                    <DetailText>Дата бронирования: {extractTimeFromDateString(orderRoom.booked_time_start).date}</DetailText>
+                    <DetailText>Время начала: {extractTimeFromDateString(orderRoom.booked_time_start).time}</DetailText>
+                    <DetailText>Время окончания: {extractTimeFromDateString(orderRoom.booked_time_end).time}</DetailText>
                     <DetailText>Кол-во часов: {orderRoom.booked_hours}</DetailText>
                     <DetailText>Цена за час: {orderRoom.room_price_per_hour} руб.</DetailText>
                     <PriceText>

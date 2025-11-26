@@ -23,35 +23,21 @@ class RoomAvailability extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => 'required|date',
-            'start_time' => [
-                'required',
-                'date_format:H:i',
-                function ($attribute, $value, $fail) {
-                    $bookedDate = $this->input('booked_date');
-                    $bookedDateTime = Carbon::parse($bookedDate . ' ' . $value);
-                    
-                    if ($bookedDateTime->lt(now())) {
-                        $fail('Время начала бронирования должно быть не раньше текущего момента.');
-                    }
-                },
-            ],
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'booked_time_start' => 'required|date_format:Y-m-d\TH:i|after_or_equal:today',
+            'booked_time_end' => 'required|date_format:Y-m-d\TH:i|after:booked_time_start',
         ];
     }
 
     public function messages()
     {
         return [
-            'date.required' => 'Укажите дату бронирования.',
-            'date.date' => 'Неверный формат даты.',
-            
-            'start_time.required' => 'Укажите время начала.',
-            'start_time.date_format' => 'Неверный формат времени начала.',
-            
-            'end_time.required' => 'Укажите время окончания.',
-            'end_time.date_format' => 'Неверный формат времени окончания.',
-            'end_time.after' => 'Время окончания должно быть позже времени начала.',
+        'booked_time_start.required' => 'Укажите время начала бронирования.',
+        'booked_time_start.date_format' => 'Неверный формат времени начала.',
+        'booked_time_start.after_or_equal' => 'Дата бронирования не может быть в прошлом.',
+        
+        'booked_time_end.required' => 'Укажите время окончания бронирования.',
+        'booked_time_end.date_format' => 'Неверный формат времени окончания.',
+        'booked_time_end.after' => 'Время окончания должно быть позже времени начала.',
         ];
     }
 }

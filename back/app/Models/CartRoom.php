@@ -14,14 +14,12 @@ class CartRoom extends Model
         'cart_id',
         'room_id',
         'booked_hours',
-        'booked_date',
         'booked_time_start',
         'booked_time_end',
         'room_price_per_hour',
     ];
 
     protected $casts = [
-        'booked_date' => 'date',
         'booked_time_start' => 'datetime',
         'booked_time_end' => 'datetime',
         'room_price_per_hour' => 'decimal:2',

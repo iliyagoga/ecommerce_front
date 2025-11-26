@@ -43,7 +43,6 @@ export interface OrderRoom {
   order_id: number;
   room_id: number;
   booked_hours: number;
-  booked_date: string;
   booked_time_start: string;
   booked_time_end: string;
   room_price_per_hour: number;
@@ -105,7 +104,6 @@ export interface CartRoom {
   cart_id: number;
   room_id: number;
   booked_hours: number;
-  booked_date: string;
   booked_time_start: string;
   booked_time_end: string;
   room_price_per_hour: number;

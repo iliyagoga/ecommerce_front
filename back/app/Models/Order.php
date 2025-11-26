@@ -20,15 +20,11 @@ class Order extends Model
         'total_price',
         'client_comment',
         'admin_comment',
-        'start_time',
-        'end_time'
     ];
 
     protected $casts = [
         'total_price' => 'decimal:2',
         'created_at' => 'datetime',
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
     ];
 
     public function user(): BelongsTo

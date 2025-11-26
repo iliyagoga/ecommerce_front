@@ -41,6 +41,7 @@ import {
   getProducts,
   getOrderById
 } from '@/api';
+import { extractTimeFromDateString } from '@/other';
 
 interface OrderViewSidebarProps {
   open: boolean;
@@ -192,34 +193,6 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
               />
             </ListItem>
 
-            <ListItem>
-              <ListItemText 
-                primary="Время бронирования" 
-                primaryTypographyProps={{ fontWeight: 'bold', color: '#FCD25E', mt: 2 }}
-              />
-            </ListItem>
-
-            <ListItem>
-              <ListItemText 
-                primary={`Начало: ${new Date(orderDetails.start_time).toLocaleString('ru-RU')}`}
-              />
-            </ListItem>
-
-            <ListItem>
-              <ListItemText 
-                primary={`Окончание: ${new Date(orderDetails.end_time).toLocaleString('ru-RU')}`}
-              />
-            </ListItem>
-
-            <ListItem>
-              <ListItemText 
-                primary={`Продолжительность: ${(
-                  (new Date(orderDetails.end_time).getTime() - new Date(orderDetails.start_time).getTime()) / 
-                  (1000 * 60 * 60)
-                ).toFixed(1)} часов`}
-              />
-            </ListItem>
-
             {(orderDetails.client_comment || orderDetails.admin_comment) && (
               <>
                 <ListItem>
@@ -269,7 +242,7 @@ const OrderViewSidebar: React.FC<OrderViewSidebarProps> = ({ open, onClose, orde
                 
                 <ListItem>
                   <ListItemText 
-                    primary={`Дата бронирования: ${new Date(orderRoom.booked_date).toLocaleDateString('ru-RU')}`}
+                    primary={`Дата бронирования: ${extractTimeFromDateString(orderRoom.booked_time_start).date}`}
                   />
                 </ListItem>
                 

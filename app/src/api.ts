@@ -243,9 +243,9 @@ export const deleteHallRoomNew = async (hallId: number, roomId: number): Promise
   await api.delete(`/halls_new/${hallId}/hall_rooms_new/${roomId}`);
 };
 
-export const getHallRoomsAvailability = async (hallId: number, date: string, startTime: string, endTime: string): Promise<HallRoomNew[]> => {
+export const getHallRoomsAvailability = async (hallId: number, startDate: string, endDate: string): Promise<HallRoomNew[]> => {
   return (await api.get(`/halls_new/${hallId}/hall_rooms_availability`, {
-    params: { date, start_time: startTime, end_time: endTime }
+    params: { booked_time_start: startDate, booked_time_end: endDate }
   })).data;
 };
 

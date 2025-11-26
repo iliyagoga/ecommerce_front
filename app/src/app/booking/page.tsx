@@ -37,9 +37,8 @@ const BookingButton = styled.button`
 
 const BookingPage: React.FC = () => {
   const hallIdToDisplay = 1;
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [selectedStartTime, setSelectedStartTime] = useState<string>('09:00');
-  const [selectedEndTime, setSelectedEndTime] = useState<string>('18:00');
+  const [selectedStartTime, setSelectedStartTime] = useState<string>();
+  const [selectedEndTime, setSelectedEndTime] = useState<string>();
   const [selectedRoom, setSelectedRoom] = useState<Omit<CartRoom, "cart_id">>();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -64,27 +63,8 @@ const BookingPage: React.FC = () => {
       </Typography>
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
         <TextField
-          label="Дата"
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          InputLabelProps={{
-            shrink: true,
-            sx: { color: 'white' }
-          }}
-          sx={{
-            '& .MuiInputBase-input': { color: 'white' },
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: 'white' },
-              '&:hover fieldset': { borderColor: 'white' },
-              '&.Mui-focused fieldset': { borderColor: 'white' },
-              backgroundColor: '#333',
-            },
-          }}
-        />
-        <TextField
           label="Время начала"
-          type="time"
+          type="datetime-local"
           value={selectedStartTime}
           onChange={(e) => setSelectedStartTime(e.target.value)}
           InputLabelProps={{
@@ -103,7 +83,7 @@ const BookingPage: React.FC = () => {
         />
         <TextField
           label="Время окончания"
-          type="time"
+          type="datetime-local"
           value={selectedEndTime}
           onChange={(e) => setSelectedEndTime(e.target.value)}
           InputLabelProps={{
@@ -123,9 +103,8 @@ const BookingPage: React.FC = () => {
       </Box>
       <RoomBookingCanvas 
         hallId={hallIdToDisplay} 
-        selectedDate={selectedDate}
-        selectedStartTime={selectedStartTime}
-        selectedEndTime={selectedEndTime}
+        selectedStartDate={selectedStartTime}
+        selectedEndDate={selectedEndTime}
         setSelectedRoom={setSelectedRoom}
         setError={setError}
       />

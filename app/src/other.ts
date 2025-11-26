@@ -1,10 +1,10 @@
 export const getTimeDifferenceInHours = (startTime: string, endTime: string): number => {
-    const [startHours, startMinutes] = startTime.split(':').map(Number);
-    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    const [startHours, startMinutes] = startTime.split('T')[1].split(":").map(Number);
+    const [endHours, endMinutes] = endTime.split('T')[1].split(":").map(Number);
     
     const startTotalMinutes = startHours * 60 + startMinutes;
     const endTotalMinutes = endHours * 60 + endMinutes;
-    
+
     const diffMinutes = endTotalMinutes < startTotalMinutes 
       ? (24 * 60 - startTotalMinutes) + endTotalMinutes
       : endTotalMinutes - startTotalMinutes;
@@ -12,7 +12,7 @@ export const getTimeDifferenceInHours = (startTime: string, endTime: string): nu
     return diffMinutes / 60;
   };
 
- export const extractTimeFromDateString = (dateString: string): string => {
+ export const extractTimeFromDateString = (dateString: string): any => {
     const date = new Date(dateString);
 
     if (isNaN(date.getTime())) {
@@ -22,5 +22,5 @@ export const getTimeDifferenceInHours = (startTime: string, endTime: string): nu
     const hours = date.getUTCHours().toString().padStart(2, '0');
     const minutes = date.getUTCMinutes().toString().padStart(2, '0');
 
-    return `${hours}:${minutes}`;
+    return {date: `${date.getUTCDate()}-${date.getUTCMonth()+1}-${date.getUTCFullYear()}`, time: `${hours}:${minutes}`};
   };

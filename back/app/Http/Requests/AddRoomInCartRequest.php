@@ -24,9 +24,8 @@ class AddRoomInCartRequest extends FormRequest
         return [
             'room_id' => 'required|integer|exists:rooms,room_id',
             'booked_hours' => 'required|integer|min:0|max:24',
-            'booked_date' => 'required|date|after_or_equal:today',
-            'booked_time_start' => 'required|date_format:H:i',
-            'booked_time_end' => 'required|date_format:H:i|after:booked_time_start',
+            'booked_time_start' => 'required|date_format:Y-m-d\TH:i|after_or_equal:today',
+            'booked_time_end' => 'required|date_format:Y-m-d\TH:i|after:booked_time_start',
             'room_price_per_hour' => 'required|numeric|min:0|max:99999999.99',
         ];
     }
@@ -40,13 +39,10 @@ class AddRoomInCartRequest extends FormRequest
         'booked_hours.integer' => 'Количество часов должно быть целым числом.',
         'booked_hours.max' => 'Максимальное время бронирования - 24 часа.',
         
-        'booked_date.required' => 'Укажите дату бронирования.',
-        'booked_date.date' => 'Неверный формат даты.',
-        'booked_date.after_or_equal' => 'Дата бронирования не может быть в прошлом.',
-        
         'booked_time_start.required' => 'Укажите время начала бронирования.',
         'booked_time_start.date_format' => 'Неверный формат времени начала.',
-        
+        'booked_time_start.after_or_equal' => 'Дата бронирования не может быть в прошлом.',
+
         'booked_time_end.required' => 'Укажите время окончания бронирования.',
         'booked_time_end.date_format' => 'Неверный формат времени окончания.',
         'booked_time_end.after' => 'Время окончания должно быть позже времени начала.',

@@ -49,23 +49,20 @@ class HallRoomNewController extends Controller
     {
         $validated = $request->validated();
 
-        $requestedDate = Carbon::parse($validated['date'])->toDateString();
-        $requestedStartTime = $validated['start_time'];
-        $requestedEndTime = $validated['end_time'];
-
+        $requestedStartTime = Carbon::parse($validated['booked_time_start'])->addUTCHours(4);
+        $requestedEndTime = Carbon::parse($validated['booked_time_end'])->addUTCHours(4);
         $hallRooms = $hallNew->hallRoomsNew()->with('room')->get();
 
-        $hallRoomsWithAvailability = $hallRooms->map(function ($hallRoom) use ($requestedDate, $requestedStartTime, $requestedEndTime) {
+        $hallRoomsWithAvailability = $hallRooms->map(function ($hallRoom) use ($requestedStartTime, $requestedEndTime) {
             $isBooked = false;
             if ($hallRoom->room && $hallRoom->room->is_available) {
 
                 $bookedOrdersCount = \App\Models\OrderRooms::where('room_id', $hallRoom->room->room_id)
-                    ->join('orders', 'orders.order_id', '=', 'order_rooms.order_id')->whereNot("orders.status", "cancelled")
-                    ->whereDate('orders.start_time', $requestedDate)
                     ->where(function ($query) use ($requestedStartTime, $requestedEndTime) {
-                        $query->whereRaw('TIME(orders.start_time) < ?', [$requestedEndTime])
-                              ->whereRaw('? < TIME(orders.end_time)', [$requestedStartTime]);
+                    $query->whereRaw('booked_time_start < ?', [$requestedEndTime])
+                    ->whereRaw('? < booked_time_end', [$requestedStartTime]);
                     })
+                    ->join('orders', 'orders.order_id', '=', 'order_rooms.order_id')->whereNot("orders.status", "cancelled")
                     ->count();
 
                 if ($bookedOrdersCount > 0) {

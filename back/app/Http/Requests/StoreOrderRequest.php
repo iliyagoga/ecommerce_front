@@ -28,9 +28,8 @@ class StoreOrderRequest extends FormRequest
 
             'room_id' => ['required', 'integer', 'exists:rooms,room_id'],
             'booked_hours' => ['required', 'integer', 'min:1', 'max:24'],
-            'booked_date' => ['required', 'date', 'after_or_equal:today'],
-            'booked_time_start' => ['required', 'date_format:H:i'],
-            'booked_time_end' => ['required', 'date_format:H:i', 'after:booked_time_start'],
+            'booked_time_start' => ['required', 'date_format:Y-m-d\TH:i,Y-m-d\TH:i:s'],
+            'booked_time_end' => ['required', 'date_format:Y-m-d\TH:i,Y-m-d\TH:i:s', 'after:booked_time_start'],
             'room_price_per_hour' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
 
             'items' => ['array'],

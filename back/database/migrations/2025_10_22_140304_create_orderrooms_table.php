@@ -13,17 +13,13 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained('orders', 'order_id')->onDelete('cascade');
             $table->foreignId('room_id')->constrained('rooms', 'room_id')->onDelete('cascade');
             $table->integer('booked_hours');
-            $table->date('booked_date');
-            $table->time('booked_time_start');
-            $table->time('booked_time_end');
+            $table->dateTime('booked_time_start');
+            $table->dateTime('booked_time_end');
             $table->decimal('room_price_per_hour', 10, 2);
             $table->timestamps();
             
             $table->index('order_id');
             $table->index('room_id');
-            $table->index('booked_date');
-            $table->index(['booked_date', 'booked_time_start']);
-            
         });
     }
 

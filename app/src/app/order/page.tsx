@@ -229,9 +229,8 @@ const OrderPage: React.FC = () => {
       admin_comment: "",
       room_id: room.room_id,
       booked_hours: room.booked_hours,
-      booked_date: room.booked_date,
-      booked_time_start: extractTimeFromDateString(room.booked_time_start),
-      booked_time_end: extractTimeFromDateString(room.booked_time_end),
+      booked_time_start: room.booked_time_start.replace(/\.\d+Z$/, ''),
+      booked_time_end: room.booked_time_end.replace(/\.\d+Z$/, ''),
       room_price_per_hour: room.room_price_per_hour,
       items: items
     };
@@ -303,8 +302,8 @@ const OrderPage: React.FC = () => {
                   <Link href={`/room/${cartRoom.room_id}`} style={{ textDecoration: 'none' }}>
                     <RoomName>{cartRoom.room?.name || 'Комната'}</RoomName>
                   </Link>
-                  <DetailText>Дата: {new Date(cartRoom.booked_date).toLocaleDateString('ru-RU')}</DetailText>
-                  <DetailText>Время: {cartRoom.booked_time_start} - {cartRoom.booked_time_end}</DetailText>
+                  <DetailText>Дата: {extractTimeFromDateString(cartRoom.booked_time_start).date}</DetailText>
+                  <DetailText>Время: {extractTimeFromDateString(cartRoom.booked_time_start).time} - {extractTimeFromDateString(cartRoom.booked_time_end).time}</DetailText>
                   <DetailText>Кол-во часов: {cartRoom.booked_hours}</DetailText>
                   <DetailText>Цена за час: {cartRoom.room_price_per_hour} руб.</DetailText>
                   <PriceText>

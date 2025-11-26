@@ -31,14 +31,13 @@ interface RoomData {
 
 interface RoomBookingCanvasProps {
   hallId: number;
-  selectedDate: string;
-  selectedStartTime: string;
-  selectedEndTime: string;
+  selectedStartDate: string;
+  selectedEndDate: string;
   setSelectedRoom: React.Dispatch<React.SetStateAction<Omit<CartRoom, "cart_id"> | undefined>>
   setError: React.Dispatch<React.SetStateAction<string | null>>
 }
 
-const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedDate, selectedStartTime, selectedEndTime, setSelectedRoom, setError }) => {
+const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedStartDate, selectedEndDate, setSelectedRoom, setError }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hall, setHall] = useState<HallData>({ width: 1000, height: 600 });
   const [rooms, setRooms] = useState<RoomData[]>([]);
@@ -49,14 +48,12 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
     setError(null)
     const fetchHallAndDbRooms = async () => {
       try {
-        const fetchedHallRoomsWithAvailability = await getHallRoomsAvailability(hallId, selectedDate, selectedStartTime, selectedEndTime);
+        const fetchedHallRoomsWithAvailability = await getHallRoomsAvailability(hallId, selectedStartDate, selectedEndDate);
         const fetchedDbRooms = await getRooms();
 
         setAllDbRooms(fetchedDbRooms);
 
         setRooms(fetchedHallRoomsWithAvailability.map(hallRoom => {
-          const correspondingDbRoom = fetchedDbRooms.find(dbRoom => dbRoom.room_id === hallRoom.room_id);
-
           const isAvailable: boolean = hallRoom.is_available_for_booking ?? false;
           
           let displayColor = hallRoom.color;
@@ -83,7 +80,7 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
       }
     };
     fetchHallAndDbRooms();
-  }, [hallId, selectedDate, selectedStartTime, selectedEndTime]);
+  }, [hallId, selectedStartDate, selectedEndDate]);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -104,16 +101,16 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedD
           .attr('class', 'room')
           .attr('transform', (d: RoomData) => `translate(${d.x}, ${d.y})`)
           .on('click', function(event: MouseEvent, d: RoomData) {
-            if (!d.isAvailable || !d.dbRoomId || !selectedDate || !selectedEndTime || !selectedEndTime) return; 
+            if (!d.isAvailable || !d.dbRoomId || !selectedEndDate || !selectedEndDate) return; 
             const roomPricePerHour = d.dbRoomId ? allDbRooms.find(room => room.room_id === d.dbRoomId)?.base_hourly_rate : 0;
 
             if (!roomPricePerHour) return;
+
             setSelectedRoom({
               room_id: d.dbRoomId,
-              booked_hours: getTimeDifferenceInHours(selectedStartTime, selectedEndTime),
-              booked_date: selectedDate,
-              booked_time_start: selectedStartTime,
-              booked_time_end: selectedEndTime,
+              booked_hours: getTimeDifferenceInHours(selectedStartDate, selectedEndDate),
+              booked_time_start: selectedStartDate,
+              booked_time_end: selectedEndDate,
               room_price_per_hour: roomPricePerHour,
             })
           })

@@ -15,14 +15,10 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2)->default(0);
             $table->text('client_comment')->nullable();
             $table->text('admin_comment')->nullable();
-            $table->timestamp('start_time');
-            $table->timestamp('end_time');
             $table->timestamps();
             
             $table->index('user_id');
             $table->index('status');
-            $table->index('start_time');
-            $table->index('end_time');
             $table->index('created_at');
         });
     }
