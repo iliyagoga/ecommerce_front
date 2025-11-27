@@ -32,6 +32,12 @@ export interface Category {
   products?: Product[];
 }
 
+export interface Review {
+  id: number;
+  review: string;
+  user: User;
+}
+
 export interface User {
   id: number;
   name: string;

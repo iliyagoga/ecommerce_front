@@ -112,6 +112,9 @@ const RoomBookingCanvas: React.FC<RoomBookingCanvasProps> = ({ hallId, selectedS
               booked_time_start: selectedStartDate,
               booked_time_end: selectedEndDate,
               room_price_per_hour: roomPricePerHour,
+              room: {
+                name: d.name,
+              },
             })
           })
           .style('cursor', (d: RoomData) => d.isAvailable ? 'pointer' : 'not-allowed'),

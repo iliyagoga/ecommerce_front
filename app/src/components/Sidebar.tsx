@@ -16,6 +16,7 @@ const Sidebar: React.FC = () => {
     { text: 'Категории', path: '/admin/categories' },
     { text: 'Заказы',  path: '/admin/orders' },
     { text: 'Залы',  path: '/admin/halls-management' },
+    { text: 'Отзывы',  path: '/admin/reviews' },
   ];
 
   return (

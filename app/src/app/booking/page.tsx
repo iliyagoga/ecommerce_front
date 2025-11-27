@@ -22,7 +22,6 @@ const BookingButton = styled.button`
   font-size: 1rem;
   font-weight: bold;
   transition: background-color 0.3s ease;
-  margin-top: 1rem;
 
   &:hover {
     background-color: #FFD700; /* Darker gold on hover */
@@ -108,10 +107,14 @@ const BookingPage: React.FC = () => {
         setSelectedRoom={setSelectedRoom}
         setError={setError}
       />
-    
-      <BookingButton disabled={!selectedRoom} onClick={() => addToCart(selectedRoom)}>
+      <Box sx={{display: "flex", gap: "10px", alignItems: "center", marginTop: "1rem"}}>
+        <BookingButton disabled={!selectedRoom} onClick={() => addToCart(selectedRoom)}>
               Забронировать
       </BookingButton>
+
+      <Typography variant='h5'>{selectedRoom?.room?.name ?? "Комната не выбрана"}</Typography>
+      </Box>
+     
     </Box>
     </>
   );

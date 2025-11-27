@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { createReview } from '@/api';
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs';
+import { Alert } from '@mui/material';
 
 const PageContainer = styled.div`
   padding: 20px;
@@ -105,7 +106,6 @@ const SuccessMessage = styled.div`
 
 const CreateReviewPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const [value, setValue] = useState("");
 
@@ -114,9 +114,13 @@ const CreateReviewPage: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const orderId = window.location.pathname.split("/")[2]
-
-    await createReview(parseInt(orderId), value.trim());
-    router.push('/profile');
+    setError(null);
+    try {
+        await createReview(parseInt(orderId), value.trim());
+        router.push('/profile');
+    } catch (error) {
+      setError(error.response.data.message)
+    }
   };
 
   return (
@@ -129,8 +133,7 @@ const CreateReviewPage: React.FC = () => {
       
       <Title>Оставить отзыв</Title>
 
-      {error && <ErrorMessage>{error}</ErrorMessage>}
-      {success && <SuccessMessage>{success}</SuccessMessage>}
+      {error && <Alert severity='error'>{error}</Alert>}
 
         <Section>
           <SectionTitle>Ваш отзыв</SectionTitle>

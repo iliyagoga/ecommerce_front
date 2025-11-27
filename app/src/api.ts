@@ -298,3 +298,7 @@ export const createReview = async (orderId: number, comment: string): Promise<an
   await api.post('/reviews', {order_id: orderId, review: comment});
 }
 
+export const getReviews = async (): Promise<any> => {
+  return (await api.get('/reviews')).data;
+}
+

@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Review;
 use App\Models\Order;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreReviewRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class ReviewController extends Controller
 {
     public function index()
     {
-        $reviews = Review::with(['order', 'user'])
+        $reviews = Review::with(['user'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -31,21 +32,29 @@ class ReviewController extends Controller
         return response()->json($reviews);
     }
 
-    public function store(Request $request)
+    public function store(StoreReviewRequest $request)
     {
-        $validated = $request->validate([
-            'order_id' => 'required|integer|exists:orders,order_id',
-            'review' => 'required|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         $order = Order::where('order_id', $validated['order_id'])
             ->where('user_id', Auth::id())
+            ->where("status", "completed")
             ->first();
+        $review = Review::where('order_id', $validated['order_id'])
+        ->where('user_id', Auth::id())
+        ->first();
 
-        if (!$order) {
-            return response()->json(null, 404);
+        if ($review) {
+            throw ValidationException::withMessages([
+                'order' => ['Вы уже оставляли отзыв на этот заказ']
+            ]);
         }
-
+        if (!$order) {
+            throw ValidationException::withMessages([
+                'order' => ['Заказ не найден или не завершен']
+            ]);
+        }
+        
         Review::create([
             'order_id' => $validated['order_id'],
             'user_id' => Auth::id(),
