@@ -164,7 +164,7 @@ const RoomDetailPage = () => {
         <RoomDetailsWrapper>
           {allImages.length > 0 && (
             <InfoSection>
-              <SectionTitle>Галерея</SectionTitle>
+              <SectionTitle>Превью</SectionTitle>
               <ImageCarousel>
                 {allImages.map((imgUrl, index) => (
                   <CarouselImage
@@ -181,7 +181,7 @@ const RoomDetailPage = () => {
 
           <InfoSection>
             <SectionTitle>Описание</SectionTitle>
-            <DescriptionText>{room.description}</DescriptionText>
+            <DescriptionText>{room.description && room.description != "null" ? room.description : "Тут пока пусто..."}</DescriptionText>
 
             <SectionTitle>Детали</SectionTitle>
             <DetailItem>Цена за час: {room.base_hourly_rate}</DetailItem>

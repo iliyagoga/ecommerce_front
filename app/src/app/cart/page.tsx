@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { LinkStyled } from '@/components/Header/Items/Item.styled';
 import Loader from '@/components/Other/Loader';
+import { extractTimeFromDateString } from '@/other';
 /*import LoadingIndicator from '@/components/LoadingIndicator/LoadingIndicator';
 import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';*/
 
@@ -337,8 +338,8 @@ const CartPage: React.FC = () => {
                 <Link href={`/room/${cartRoom.room_id}`} style={{ textDecoration: 'none' }}>
                   <RoomName>{cartRoom.room?.name || 'Комната'}</RoomName>
                 </Link>
-                <DetailText>Дата: {new Date(cartRoom.booked_date).toLocaleDateString('ru-RU')}</DetailText>
-                <DetailText>Время: {cartRoom.booked_time_start} - {cartRoom.booked_time_end}</DetailText>
+                <DetailText>Дата: {extractTimeFromDateString(cartRoom.booked_time_start).date}</DetailText>
+                <DetailText>Время: {extractTimeFromDateString(cartRoom.booked_time_start).time} - {extractTimeFromDateString(cartRoom.booked_time_end).time}</DetailText>
                 <DetailText>Кол-во часов: {cartRoom.booked_hours}</DetailText>
                 <DetailText>Цена за час: {cartRoom.room_price_per_hour} руб.</DetailText>
               </ItemDetails>

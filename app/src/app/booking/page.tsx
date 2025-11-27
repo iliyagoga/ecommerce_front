@@ -36,8 +36,11 @@ const BookingButton = styled.button`
 
 const BookingPage: React.FC = () => {
   const hallIdToDisplay = 1;
-  const [selectedStartTime, setSelectedStartTime] = useState<string>();
-  const [selectedEndTime, setSelectedEndTime] = useState<string>();
+  const dateObj = new Date();
+  const nowDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}T${String(dateObj.getHours()).padStart(2, '0')}:00`;
+
+  const [selectedStartTime, setSelectedStartTime] = useState<string>(nowDate);
+  const [selectedEndTime, setSelectedEndTime] = useState<string>(nowDate);
   const [selectedRoom, setSelectedRoom] = useState<Omit<CartRoom, "cart_id">>();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
