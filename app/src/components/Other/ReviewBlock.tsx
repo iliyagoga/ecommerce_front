@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 const Block = styled.div`
-    padding: 0 10rem;
+    padding: 0 7rem;
 `;
 
 const Wrapper = styled.div`
