@@ -55,36 +55,6 @@ const ToolbarButton = styled.button<{ $color?: string }>`
   }
 `;
 
-const JsonOutputContainer = styled.div`
-  background-color: #2C2C2C;
-  border: 1px solid #FCD25E;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 20px;
-  max-height: 300px;
-  overflow-y: auto;
-  width: 100%;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-`;
-
-const JsonOutputTitle = styled.h3`
-  color: #FCD25E;
-  margin-top: 0;
-  margin-bottom: 1rem;
-`;
-
-const JsonPre = styled.pre`
-  background-color: #333;
-  color: #eee;
-  padding: 1rem;
-  border-radius: 4px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-size: 0.85rem;
-`;
-
 const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const hall: HallData = { width: 1000, height: 600 };
@@ -171,7 +141,17 @@ const HallsAdmin: React.FC<HallsAdminProps> = ({ hallId }) => {
               d3.select(this).attr("stroke", null);
               if (d.hall_room_id) {
                 try {
-                  await updateHallRoomNew(hallId, d.hall_room_id, { x: d.x, y: d.y });
+                    const updatedProps: Partial<HallRoomNew> = {
+                      name: d.name,
+                      color: d.color,
+                      metadata: { type: d.type },
+                      room_id: d.dbRoomId,
+                      width: d.width,
+                      height: d.height,
+                      x: Math.floor(d.x),
+                      y: Math.floor(d.y),
+                    };
+                  await updateHallRoomNew(hallId, d.hall_room_id, updatedProps);
                 } catch (error) {
                   console.error("Ошибка при обновлении координат комнаты зала:", error);
                 }

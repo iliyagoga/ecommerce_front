@@ -20,9 +20,6 @@ class HallNewController extends Controller
     {
         $validated = $request->validated();
 
-        $allCount = HallNew::get()->count();
-
-        if ($allCount > 0) return response()->json(['message' => "Вы не можете создать более 1 зала в данной системе"], 422);
         $hall = HallNew::create($validated);
         return response()->json($hall, 201);
     }

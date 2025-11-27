@@ -1,15 +1,15 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { Typography, Box, Alert } from '@mui/material';
+import { Typography, Box, Alert, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 
 import RoomBookingCanvas from '@/components/Halls/RoomBookingCanvas';
 import Header from '@/components/Header/Header';
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs';
 import { TextField } from '@mui/material';
-import { CartRoom } from '@/types';
+import { CartRoom, HallNew } from '@/types';
 import { styled } from 'styled-components';
-import { addRoomToCart } from '@/api';
+import { addRoomToCart, getHallsNew } from '@/api';
 import { useRouter } from 'next/navigation';
 
 const BookingButton = styled.button`
@@ -35,13 +35,13 @@ const BookingButton = styled.button`
 `;
 
 const BookingPage: React.FC = () => {
-  const hallIdToDisplay = 1;
   const dateObj = new Date();
   const nowDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}T${String(dateObj.getHours()).padStart(2, '0')}:00`;
-
+  const [halls, setHalls] = useState<HallNew[]>([]);
   const [selectedStartTime, setSelectedStartTime] = useState<string>(nowDate);
   const [selectedEndTime, setSelectedEndTime] = useState<string>(nowDate);
   const [selectedRoom, setSelectedRoom] = useState<Omit<CartRoom, "cart_id">>();
+  const [hallIdToDisplay, setHallIdToDisplay] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -55,6 +55,15 @@ const BookingPage: React.FC = () => {
         setError(error.response.data.message)
       }
   }
+  const handleChangeHall = (event: any) => {
+    setHallIdToDisplay(event.target.value);
+  };
+
+  useEffect(() => {
+    getHallsNew().then((res) => {
+      setHalls(res)
+    })
+  },[])
   return (<>
     <Header></Header>
     <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Бронь', href: '/booking' }]} />
@@ -102,6 +111,42 @@ const BookingPage: React.FC = () => {
             },
           }}
         />
+      <FormControl>
+        <InputLabel
+          id="hall-label"
+           sx={{
+              color: 'white !important',
+              '&.Mui-focused': {
+                color: 'white !important',
+              },
+            }}
+          >Залы</InputLabel>
+        <Select
+          labelId="hall-label"
+          label="Залы"
+          value={hallIdToDisplay}
+          onChange={handleChangeHall}
+          sx={{
+            '& .MuiInputBase-input': { color: 'white' },
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'white',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'white',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'white',
+            },
+            backgroundColor: '#333',
+          }}
+        >
+          {halls.map((hall) => (
+            <MenuItem key={hall.id} value={hall.id}>
+              {hall.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       </Box>
       <RoomBookingCanvas 
         hallId={hallIdToDisplay} 
