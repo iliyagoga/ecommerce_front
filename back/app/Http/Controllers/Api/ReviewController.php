@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Review;
 use App\Models\Order;
 use App\Http\Requests\StoreReviewRequest;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -51,7 +52,7 @@ class ReviewController extends Controller
         }
         if (!$order) {
             throw ValidationException::withMessages([
-                'order' => ['Заказ не найден или не завершен']
+                'order' => ['Заказ не завершен']
             ]);
         }
         
@@ -70,6 +71,16 @@ class ReviewController extends Controller
         $review->load(['order', 'user']);
         
         return response()->json($review);
+    }
+
+    public function showByCount($count)
+    {
+        $reviews = Review::with(['user'])
+            ->orderBy('created_at', 'desc')
+            ->limit($count)
+            ->get();
+
+        return response()->json($reviews);
     }
 
     public function destroy(Review $review)

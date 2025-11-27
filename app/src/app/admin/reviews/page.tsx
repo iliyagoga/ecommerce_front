@@ -2,7 +2,6 @@
 import React, { useRef } from 'react';
 import Layout from '../../../components/Layout';
 import { Typography, Box } from '@mui/material';
-import { Category } from '../../../types';
 import ReviewsTable from '@/components/Reviews/ReviewTable';
 
 const ReviewsPage: React.FC = () => {

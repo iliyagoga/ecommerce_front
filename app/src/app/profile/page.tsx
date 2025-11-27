@@ -129,6 +129,7 @@ const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [showReview, setShowReview] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -227,6 +228,7 @@ const ProfilePage: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {orders.map((order) => (
+                    <>
                     <TableRow
                       key={order.order_id}
                       sx={{
@@ -256,11 +258,28 @@ const ProfilePage: React.FC = () => {
                         </ActionButton>
                       </TableCell>
                       <TableCell>
-                        <ActionButton onClick={() => router.push(`/order/${order.order_id}/review`)}>
+                        {!order.review?.length && <ActionButton onClick={() => router.push(`/order/${order.order_id}/review`)}>
                           Оставить отзыв
                         </ActionButton>
+                        }
+                        {!!order.review?.length && <ActionButton onClick={() => {
+                          if (showReview == order.order_id) setShowReview(null);
+                          else setShowReview(order.order_id ?? null)}}>
+                          {showReview == order.order_id ? "Скрыть подробности" : "Посмотреть отзыв"}
+                        </ActionButton>
+                        }
                       </TableCell>
                     </TableRow>
+                    {showReview == order.order_id ? (
+                      <TableRow>
+                       <TableCell colSpan={5} style={{ padding: "16px" }}>
+                          <Typography style={{ width: "100%" }}>
+                            {order.review && order.review[0].review}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ): null}
+                    </>
                   ))}
                 </TableBody>
               </Table>

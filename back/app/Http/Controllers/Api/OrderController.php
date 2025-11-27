@@ -133,7 +133,7 @@ class OrderController extends Controller
 
     public function ordersForUser()
     {
-        $orders = Order::with(['user:id,name,email'])->get()->map(function ($order) {
+        $orders = Order::with(['user:id,name,email', 'review'])->get()->map(function ($order) {
             $orderArray = $order->toArray();
             $orderArray['client_name'] = $order->user ? $order->user->name : null;
             $orderArray['client_email'] = $order->user ? $order->user->email : null;

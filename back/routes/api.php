@@ -48,7 +48,8 @@ Route::controller(HallRoomNewController::class)->group(function () {
 
 Route::controller(ReviewController::class)->group(function () {
     Route::get('/reviews', 'index');
-    Route::get('/reviews/{review}', 'show');
+    Route::get('/reviews/{count}', 'showByCount');
+    Route::get('/review/{review}', 'show');
     Route::get('/orders/{orderId}/reviews', 'getByOrder');
     Route::get('/users/{userId}/reviews', 'getByUser');
 });

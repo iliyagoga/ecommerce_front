@@ -83,6 +83,7 @@ export interface Order {
   order_rooms?: OrderRoom[];
   order_items?: OrderItem[];
   user?: User;
+  review? : Review[];
 }
 
 export interface HallNew {

@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import FeaturesSection from "@/components/Other/FeatureSection";
 import ContactSection from "@/components/Other/ContactSection";
 import Map from "@/components/Other/Map";
+import ReviewBlock from "@/components/Other/ReviewBlock";
 
 const PageContainer = styled.div`
   padding: 2rem;
@@ -171,7 +172,10 @@ const Home = () => {
                     ))}
                 </RoomsGrid>
             </DivContainer>
-
+            <DivContainer>
+                <Title>Отзывы</Title>
+                <ReviewBlock/>
+            </DivContainer>
             <DivContainer>
                 <FeaturesSection/>
             </DivContainer>

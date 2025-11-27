@@ -302,3 +302,6 @@ export const getReviews = async (): Promise<any> => {
   return (await api.get('/reviews')).data;
 }
 
+export const getReviewsByCount = async (count?: number): Promise<any> => {
+  return (await api.get(`/reviews/${count ?? 10}`)).data;
+};
